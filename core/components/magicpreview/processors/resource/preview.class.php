@@ -35,9 +35,10 @@ class MagicPreviewPreviewProcessor extends modResourceUpdateProcessor {
 
         return false;
     }
+
     public function failure($msg = '',$object = null) {
         if ($this->failedSuccessfully) {
-            return $this->success('Failed successfully', [
+            return $this->success('', [
                 'preview_hash' => $this->previewHash,
             ]);
         }

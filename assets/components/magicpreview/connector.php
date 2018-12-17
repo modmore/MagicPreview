@@ -9,7 +9,7 @@ $modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicprevie
 
 
 /* handle request */
-$path = $modx->getOption('processorsPath',$modx->magicpreview->config,$corePath.'processors/');
+$path = $modx->getOption('processorsPath', $modx->magicpreview->config,$corePath  .'processors/');
 $modx->request->handleRequest(array(
     'processors_path' => $path,
     'location' => '',
