@@ -2,7 +2,7 @@
 
 require MODX_PROCESSORS_PATH . 'resource/update.class.php';
 
-class PreviewResourcePreviewProcessor extends modResourceUpdateProcessor {
+class MagicPreviewPreviewProcessor extends modResourceUpdateProcessor {
     private $previewUrl;
     private $failedSuccessfully = false;
 
@@ -25,7 +25,7 @@ class PreviewResourcePreviewProcessor extends modResourceUpdateProcessor {
 
         $key = bin2hex(random_bytes(12));
         $this->modx->cacheManager->set($this->object->get('id') . '/' . $key, $data, 3600, [
-            xPDO::OPT_CACHE_KEY => 'previewresource'
+            xPDO::OPT_CACHE_KEY => 'magicpreview'
         ]);
         $this->previewUrl = $this->modx->makeUrl($this->object->get('id'), '', ['show_preview' => $key]);
 
@@ -50,4 +50,4 @@ class PreviewResourcePreviewProcessor extends modResourceUpdateProcessor {
     }
 }
 
-return 'PreviewResourcePreviewProcessor';
+return 'MagicPreviewPreviewProcessor';

@@ -5,7 +5,7 @@
 
 switch ($modx->event->name) {
     case 'OnDocFormRender':
-        $modx->controller->addJavascript('/PreviewResource/assets/components/previewresource/js/preview.js');
+        $modx->controller->addJavascript('/MagicPreview/assets/components/magicpreview/js/preview.js');
         break;
 
     case 'OnLoadWebDocument':
@@ -18,7 +18,7 @@ switch ($modx->event->name) {
         }
         $key = $_GET['show_preview'];
         $data = $modx->cacheManager->get($modx->resource->get('id') . '/' . $key, [
-            xPDO::OPT_CACHE_KEY => 'previewresource'
+            xPDO::OPT_CACHE_KEY => 'magicpreview'
         ]);
         if (is_array($data)) {
             $modx->resource->fromArray($data, '', true, true);

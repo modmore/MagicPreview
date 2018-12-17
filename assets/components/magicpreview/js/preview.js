@@ -25,7 +25,7 @@
                 if (!o.form) return false;
 
                 if (!o.previewWindow) {
-                    o.previewWindow = window.open('/PreviewResource/assets/components/previewresource/preview.html#loading', 'PreviewResource')
+                    o.previewWindow = window.open('/MagicPreview/assets/components/magicpreview/preview.html#loading', 'MagicPreview')
                 }
 
                 var f = o.form.getForm ? o.form.getForm() : o.form;
@@ -49,7 +49,7 @@
                     var originalAction = o.form.baseParams['action'],
                         originalUrl = o.form.url;
                     f.baseParams['action'] = 'resource/preview';
-                    f.url = '/PreviewResource/assets/components/previewresource/connector.php';
+                    f.url = '/MagicPreview/assets/components/magicpreview/connector.php';
 
                     o.form.on('success', function (r) {
                         f.baseParams['action'] = originalAction;

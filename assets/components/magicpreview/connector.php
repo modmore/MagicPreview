@@ -9,7 +9,7 @@ require_once MODX_CONNECTORS_PATH . 'index.php';
 
 
 /* handle request */
-$path = '/Users/mhamstra/Sites/premium.local/PreviewResource/core/components/previewresource/processors/'; //$modx->getOption('processorsPath',$modx->contentblocks->config,$corePath.'processors/');
+$path = '/Users/mhamstra/Sites/premium.local/MagicPreview/core/components/magicpreview/processors/'; //$modx->getOption('processorsPath',$modx->contentblocks->config,$corePath.'processors/');
 $modx->request->handleRequest(array(
     'processors_path' => $path,
     'location' => '',
