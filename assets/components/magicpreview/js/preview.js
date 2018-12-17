@@ -50,7 +50,7 @@
                     var originalAction = o.form.baseParams['action'],
                         originalUrl = o.form.url;
                     f.baseParams['action'] = 'resource/preview';
-                    f.url = MagicPreviewConfig.assetsUrl + '/connector.php';
+                    f.url = MagicPreviewConfig.assetsUrl + 'connector.php';
 
                     o.form.on('success', function (r) {
                         f.baseParams['action'] = originalAction;
