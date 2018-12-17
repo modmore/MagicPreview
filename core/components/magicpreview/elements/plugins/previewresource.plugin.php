@@ -12,8 +12,13 @@ if (!($service instanceof MagicPreview)) {
 
 switch ($modx->event->name) {
     case 'OnDocFormRender':
-        $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/preview.js');
-        $modx->controller->addHtml('<script>MagicPreviewConfig = ' . json_encode($service->config) . '</script>');
+        if ($resource->get('id') > 0) {
+            $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/preview.js');
+            $modx->controller->addHtml('<script>
+    MagicPreviewConfig = ' . json_encode($service->config) . ';
+    MagicPreviewResource = ' . $resource->get('id') . ';
+    </script>');
+        }
         break;
 
     case 'OnLoadWebDocument':
@@ -24,7 +29,7 @@ switch ($modx->event->name) {
             $modx->log(modX::LOG_LEVEL_WARN, 'User without mgr session tried to access preview for resource ' . $modx->resource->get('id'));
             return;
         }
-        $key = $_GET['show_preview'];
+        $key = (string)$_GET['show_preview'];
         $data = $modx->cacheManager->get($modx->resource->get('id') . '/' . $key, [
             xPDO::OPT_CACHE_KEY => 'magicpreview'
         ]);

@@ -3,7 +3,7 @@
 require MODX_PROCESSORS_PATH . 'resource/update.class.php';
 
 class MagicPreviewPreviewProcessor extends modResourceUpdateProcessor {
-    private $previewUrl;
+    private $previewHash;
     private $failedSuccessfully = false;
 
     public function fireBeforeSaveEvent() {
@@ -27,14 +27,14 @@ class MagicPreviewPreviewProcessor extends modResourceUpdateProcessor {
         $this->modx->cacheManager->set($this->object->get('id') . '/' . $key, $data, 3600, [
             xPDO::OPT_CACHE_KEY => 'magicpreview'
         ]);
-        $this->previewUrl = $this->modx->makeUrl($this->object->get('id'), '', ['show_preview' => $key]);
+        $this->previewHash = $key;
 
         return false;
     }
     public function failure($msg = '',$object = null) {
         if ($this->failedSuccessfully) {
             return $this->success('Failed successfully', [
-                'preview_url' => $this->previewUrl,
+                'preview_hash' => $this->previewHash,
             ]);
         }
         return parent::failure($msg, $object);

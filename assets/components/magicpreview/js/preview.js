@@ -1,5 +1,7 @@
 (function() {
     Ext.onReady(function() {
+        var previewUrl = MODx.config.manager_url
+            + '?namespace=magicpreview&a=preview&resource=' + MagicPreviewResource;
         Ext.override(MODx.page.UpdateResource, {
             _originals: {
                 getButtons: MODx.page.UpdateResource.prototype.getButtons
@@ -24,7 +26,7 @@
                 if (!o.form) return false;
 
                 if (!o.previewWindow) {
-                    o.previewWindow = window.open(MagicPreviewConfig.assetsUrl + '/preview.html#loading', 'MagicPreview')
+                    o.previewWindow = window.open(previewUrl + '#loading', 'MagicPreview')
                 }
 
                 var f = o.form.getForm ? o.form.getForm() : o.form;
@@ -43,7 +45,7 @@
 
                 if (isv) {
                     o.previewWindow.location.hash = 'loading';
-                    o.previewWindow = window.open(o.previewWindow.location.href, o.previewWindow.name);
+                    o.previewWindow = window.open(previewUrl + '#loading', o.previewWindow.name);
 
                     var originalAction = o.form.baseParams['action'],
                         originalUrl = o.form.url;
@@ -54,8 +56,8 @@
                         f.baseParams['action'] = originalAction;
                         f.url = originalUrl;
 
-                        if (r.result && r.result.object && r.result.object.preview_url) {
-                            o.previewWindow.location.hash = r.result.object.preview_url;
+                        if (r.result && r.result.object && r.result.object.preview_hash) {
+                            o.previewWindow.location.hash = r.result.object.preview_hash;
                         }
 
                     }, this);
