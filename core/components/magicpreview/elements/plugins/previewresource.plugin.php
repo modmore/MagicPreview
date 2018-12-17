@@ -3,9 +3,17 @@
  * @var modX $modx
  */
 
+$path = $modx->getOption('magicpreview.core_path', null, $modx->getOption('core_path') . 'components/magicpreview/');
+$service =& $modx->getService('magicpreview', 'MagicPreview', $path . '/model/magicpreview/');
+
+if (!($service instanceof MagicPreview)) {
+    return 'Could not load MagicPreview service.';
+}
+
 switch ($modx->event->name) {
     case 'OnDocFormRender':
-        $modx->controller->addJavascript('/MagicPreview/assets/components/magicpreview/js/preview.js');
+        $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/preview.js');
+        $modx->controller->addHtml('<script>MagicPreviewConfig = ' . json_encode($service->config) . '</script>');
         break;
 
     case 'OnLoadWebDocument':

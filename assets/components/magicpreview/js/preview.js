@@ -5,18 +5,17 @@
                 getButtons: MODx.page.UpdateResource.prototype.getButtons
             },
             getButtons: function(config) {
-                console.log('gotcha');
                 var btns = this._originals.getButtons.call(this, config);
                 btns.splice(2, 0, {
                     text: 'Preview',
                     id: 'modx-abtn-real-preview',
-                    handler: this.prPreview,
+                    handler: this.mpPreview,
                     scope: this
                 });
                 return btns;
             },
 
-            prPreview: function() {
+            mpPreview: function() {
                 var o = this.config;
                 if (!o.formpanel) return false;
 
@@ -25,7 +24,7 @@
                 if (!o.form) return false;
 
                 if (!o.previewWindow) {
-                    o.previewWindow = window.open('/MagicPreview/assets/components/magicpreview/preview.html#loading', 'MagicPreview')
+                    o.previewWindow = window.open(MagicPreviewConfig.assetsUrl + '/preview.html#loading', 'MagicPreview')
                 }
 
                 var f = o.form.getForm ? o.form.getForm() : o.form;
@@ -49,7 +48,7 @@
                     var originalAction = o.form.baseParams['action'],
                         originalUrl = o.form.url;
                     f.baseParams['action'] = 'resource/preview';
-                    f.url = '/MagicPreview/assets/components/magicpreview/connector.php';
+                    f.url = MagicPreviewConfig.assetsUrl + '/connector.php';
 
                     o.form.on('success', function (r) {
                         f.baseParams['action'] = originalAction;
@@ -70,12 +69,6 @@
             }
 
         });
-        console.log('Overridden MODx.page.UpdateResource with custom getButtons')
     });
-
-    // MODx.on('ready', function() {
-    //     console.log('MODX Ready!');
-    // });
-
 })();
 
