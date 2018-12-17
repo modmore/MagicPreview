@@ -6,6 +6,10 @@ class MagicPreviewPreviewProcessor extends modResourceUpdateProcessor {
     private $previewHash;
     private $failedSuccessfully = false;
 
+    public static function getInstance(modX &$modx,$className,$properties = array()) {
+        return new self($modx,$properties);
+    }
+
     public function fireBeforeSaveEvent() {
         $this->failedSuccessfully = true;
 
