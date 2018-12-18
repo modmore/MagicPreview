@@ -45,6 +45,9 @@
             <iframe class="mmmp-c-frame__inner" id="mmmp-js-frame-inner"></iframe>
         </div>
         <div class="mmmp-c-loading" id="mmmp-js-loading">
+            <div class="mmmp-c-animation">
+                <div></div><div></div><div></div><div></div>
+            </div>
             <p class="mmmp-c-loading__text">{$_lang['magicpreview.preparing_preview']}</p>
         </div>
     </div>
