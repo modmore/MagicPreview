@@ -24,6 +24,7 @@ body.mmmp {
   color: hsla(213, 66%, 95%, 1);
   font-weight: lighter;
   margin: 1rem;
+  font-size: 1rem;
 }
 .mmmp-c-title__span {
   color: hsla(213, 66%, 85%, 1);
@@ -49,13 +50,13 @@ body.mmmp {
   opacity: 0;
 }
 
-.mmmp-c-breakpoints__input[type=radio]:focus + .mmmp-c-breakpoints__item-label,
+.mmmp-c-breakpoints__input[type=radio]:focus + .mmmp-c-breakpoints__item > .mmmp-c-breakpoints__item-label,
 .mmmp-c-breakpoints__item-label:hover {
   background: hsla(213, 66%, 45%, 1);
   color: hsla(213, 66%, 95%, 1);
 }
 
-.mmmp-c-breakpoints__input[type=radio]:checked + .mmmp-c-breakpoints__item-label {
+.mmmp-c-breakpoints__input[type=radio]:checked + .mmmp-c-breakpoints__item > .mmmp-c-breakpoints__item-label {
   background: hsla(213, 66%, 55%, 1);
   color: hsla(213, 66%, 95%, 1);
 }
@@ -69,6 +70,7 @@ body.mmmp {
   margin-right: -1px;
   cursor: pointer;
   box-shadow: inset 0 2px 2px hsla(0, 0%, 0%, 0.1), inset 0 -2px 0 hsla(0, 0%, 100%, 0.15);
+  font-size: 1rem;
 }
 
 .mmmp-c-breakpoints__item:first-of-type .mmmp-c-breakpoints__item-label {
