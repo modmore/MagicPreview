@@ -3,6 +3,7 @@ body.mmmp {
   margin: 0;
   font-family: -apple-system,sans-serif;
 }
+
 .mmmp-c-container {
   display: flex;
   flex-direction: column;
@@ -26,13 +27,16 @@ body.mmmp {
   margin: 1rem;
   font-size: 1rem;
 }
+
 .mmmp-c-title__span {
   color: hsla(213, 66%, 85%, 1);
 }
+
 .mmmp-c-title__link {
   color: hsla(213, 66%, 95%, 1);
   text-decoration: none;
 }
+
 .mmmp-c-title__link:hover,
 .mmmp-c-title__link:focus {
   text-decoration: underline;
