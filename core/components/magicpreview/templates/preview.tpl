@@ -10,49 +10,49 @@
 </head>
 <body>
 {if $resource['id'] > 0}
-    <div id="container">
-        <div id="info">
-            <h1 class="resource">
-                <span class="preview-prefix">{$_lang['magicpreview.preview']}</span>
-                <a href="{$config.manager_url}?a=resource/update&id={$resource.id}">
+    <div class="mp-container">
+        <div class="mp-container__inner">
+            <h1 class="mp-title">
+                <span class="mp-title__span">{$_lang['magicpreview.preview']}</span>
+                <a class="mp-title__link" href="{$config.manager_url}?a=resource/update&id={$resource.id}">
                     {$resource.pagetitle|escape}
                 </a>
             </h1>
 
-            <div class="breakpoints">
-                <input type="radio" name="breakpoint" value="full" id="breakpoint-full" checked>
-                <div class="breakpoint">
-                    <label for="breakpoint-full">{$_lang['magicpreview.bp_full']}</label>
+            <div class="mp-breakpoints">
+                <input class="mp-breakpoints__input" type="radio" name="breakpoint" value="full" id="mp-breakpoint-full" checked>
+                <div class="breakpoints__item mp-js-breakpoint-input">
+                    <label class="breakpoints__item-label" for="breakpoint-full">{$_lang['magicpreview.bp_full']}</label>
                 </div>
 
-                <input type="radio" name="breakpoint" value="desktop" id="breakpoint-desktop">
-                <div class="breakpoint">
-                    <label for="breakpoint-desktop">{$_lang['magicpreview.bp_desktop']}</label>
+                <input class="mp-breakpoints__input" type="radio" name="breakpoint" value="desktop" id="mp-breakpoint-desktop">
+                <div class="breakpoints__item mp-js-breakpoint-input">
+                    <label class="breakpoints__item-label" for="breakpoint-desktop">{$_lang['magicpreview.bp_desktop']}</label>
                 </div>
 
-                <input type="radio" name="breakpoint" value="tablet" id="breakpoint-tablet">
-                <div class="breakpoint">
-                    <label for="breakpoint-tablet">{$_lang['magicpreview.bp_tablet']}</label>
+                <input class="mp-breakpoints__input" type="radio" name="breakpoint" value="tablet" id="mp-breakpoint-tablet">
+                <div class="breakpoints__item mp-js-breakpoint-input">
+                    <label class="breakpoints__item-label" for="breakpoint-tablet">{$_lang['magicpreview.bp_tablet']}</label>
                 </div>
 
-                <input type="radio" name="breakpoint" value="mobile" id="breakpoint-mobile">
-                <div class="breakpoint">
-                    <label for="breakpoint-mobile">{$_lang['magicpreview.bp_mobile']}</label>
+                <input class="mp-breakpoints__input" type="radio" name="breakpoint" value="mobile" id="mp-breakpoint-mobile">
+                <div class="breakpoints__item mp-js-breakpoint-input">
+                    <label class="breakpoints__item-label" for="breakpoint-mobile">{$_lang['magicpreview.bp_mobile']}</label>
                 </div>
             </div>
         </div>
-        <div id="frame-wrapper">
-            <iframe id="frame"></iframe>
+        <div class="mp-frame" id="mp-js-frame">
+            <iframe class="mp-frame__inner" id="mp-js-frame-inner"></iframe>
         </div>
-        <div id="loading-wrapper">
-            <p>{$_lang['magicpreview.preparing_preview']}</p>
+        <div class="mp-loading" id="mp-js-loading">
+            <p class="mp-loading__text">{$_lang['magicpreview.preparing_preview']}</p>
         </div>
     </div>
     <script>
         (function() {
-            var frame = document.getElementById('frame'),
-                frameWrapper = document.getElementById('frame-wrapper'),
-                loadingWrapper = document.getElementById('loading-wrapper'),
+            var frame = document.getElementById('mp-js-frame-inner'),
+                frameWrapper = document.getElementById('mp-js-frame'),
+                loadingWrapper = document.getElementById('mp-js-loading'),
                 baseFrameUrl = '{$baseFrameUrl|escape:javascript}',
                 joiner = baseFrameUrl.indexOf('?') === -1 ? '?' : '&';
             window.onhashchange = refreshFrame;
@@ -72,7 +72,7 @@
             }
 
             // Handle dynamic breakpoint sizing
-            var breakpoints = document.querySelectorAll('.breakpoints input');
+            var breakpoints = document.querySelectorAll('.mp-js-breakpoint-input');
             breakpoints.forEach(function(bp) {
                 bp.addEventListener('change', function () {
                     switch (this.value) {
@@ -97,9 +97,9 @@
         })()
     </script>
 {else}
-    <div id="container">
-        <div id="info">
-            <h1 class="resource">
+    <div class="mp-container">
+        <div class="mp-container__inner">
+            <h1 class="mp-title">
                 Resource not found
             </h1>
         </div>
