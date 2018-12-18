@@ -8,51 +8,51 @@
     <title>{$_lang['magicpreview.preview']} {$resource.pagetitle|escape}</title>
     <link rel="stylesheet" href="{$mp_config.assetsUrl}preview.css">
 </head>
-<body>
+<body class="mmmp">
 {if $resource['id'] > 0}
-    <div id="container">
-        <div id="info">
-            <h1 class="resource">
-                <span class="preview-prefix">{$_lang['magicpreview.preview']}</span>
-                <a href="{$config.manager_url}?a=resource/update&id={$resource.id}">
+    <div class="mmmp-c-container">
+        <div class="mmmp-c-container__inner">
+            <h1 class="mmmp-c-title">
+                <span class="mmmp-c-title__span">{$_lang['magicpreview.preview']}</span>
+                <a class="mmmp-c-title__link" href="{$config.manager_url}?a=resource/update&id={$resource.id}">
                     {$resource.pagetitle|escape}
                 </a>
             </h1>
 
-            <div class="breakpoints">
-                <input type="radio" name="breakpoint" value="full" id="breakpoint-full" checked>
-                <div class="breakpoint">
-                    <label for="breakpoint-full">{$_lang['magicpreview.bp_full']}</label>
+            <div class="mmmp-c-breakpoints">
+                <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="full" id="mmmp-breakpoint-full" checked>
+                <div class="mmmp-c-breakpoints__item">
+                    <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-full">{$_lang['magicpreview.bp_full']}</label>
                 </div>
 
-                <input type="radio" name="breakpoint" value="desktop" id="breakpoint-desktop">
-                <div class="breakpoint">
-                    <label for="breakpoint-desktop">{$_lang['magicpreview.bp_desktop']}</label>
+                <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="desktop" id="mmmp-breakpoint-desktop">
+                <div class="mmmp-c-breakpoints__item">
+                    <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-desktop">{$_lang['magicpreview.bp_desktop']}</label>
                 </div>
 
-                <input type="radio" name="breakpoint" value="tablet" id="breakpoint-tablet">
-                <div class="breakpoint">
-                    <label for="breakpoint-tablet">{$_lang['magicpreview.bp_tablet']}</label>
+                <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="tablet" id="mmmp-breakpoint-tablet">
+                <div class="mmmp-c-breakpoints__item">
+                    <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-tablet">{$_lang['magicpreview.bp_tablet']}</label>
                 </div>
 
-                <input type="radio" name="breakpoint" value="mobile" id="breakpoint-mobile">
-                <div class="breakpoint">
-                    <label for="breakpoint-mobile">{$_lang['magicpreview.bp_mobile']}</label>
+                <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="mobile" id="mmmp-breakpoint-mobile">
+                <div class="mmmp-c-breakpoints__item">
+                    <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-mobile">{$_lang['magicpreview.bp_mobile']}</label>
                 </div>
             </div>
         </div>
-        <div id="frame-wrapper">
-            <iframe id="frame"></iframe>
+        <div class="mmmp-c-frame" id="mmmp-js-frame">
+            <iframe class="mmmp-c-frame__inner" id="mmmp-js-frame-inner"></iframe>
         </div>
-        <div id="loading-wrapper">
-            <p>{$_lang['magicpreview.preparing_preview']}</p>
+        <div class="mmmp-c-loading" id="mmmp-js-loading">
+            <p class="mmmp-c-loading__text">{$_lang['magicpreview.preparing_preview']}</p>
         </div>
     </div>
     <script>
         (function() {
-            var frame = document.getElementById('frame'),
-                frameWrapper = document.getElementById('frame-wrapper'),
-                loadingWrapper = document.getElementById('loading-wrapper'),
+            var frame = document.getElementById('mmmp-js-frame-inner'),
+                frameWrapper = document.getElementById('mmmp-js-frame'),
+                loadingWrapper = document.getElementById('mmmp-js-loading'),
                 baseFrameUrl = '{$baseFrameUrl|escape:javascript}',
                 joiner = baseFrameUrl.indexOf('?') === -1 ? '?' : '&';
             window.onhashchange = refreshFrame;
@@ -72,7 +72,7 @@
             }
 
             // Handle dynamic breakpoint sizing
-            var breakpoints = document.querySelectorAll('.breakpoints input');
+            var breakpoints = document.querySelectorAll('.mmmp-js-breakpoint-input');
             breakpoints.forEach(function(bp) {
                 bp.addEventListener('change', function () {
                     switch (this.value) {
@@ -97,9 +97,9 @@
         })()
     </script>
 {else}
-    <div id="container">
-        <div id="info">
-            <h1 class="resource">
+    <div class="mmmp-c-container">
+        <div class="mmmp-c-container__inner">
+            <h1 class="mmmp-c-title mmmp-c-title--error">
                 Resource not found
             </h1>
         </div>
