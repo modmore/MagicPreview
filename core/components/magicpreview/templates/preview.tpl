@@ -8,7 +8,7 @@
     <title>{$_lang['magicpreview.preview']} {$resource.pagetitle|escape}</title>
     <link rel="stylesheet" href="{$mp_config.assetsUrl}preview.css">
 </head>
-<body>
+<body class="mmmp">
 {if $resource['id'] > 0}
     <div class="mmmp-c-container">
         <div class="mmmp-c-container__inner">
