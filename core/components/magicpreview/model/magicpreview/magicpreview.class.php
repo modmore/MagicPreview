@@ -22,6 +22,8 @@ class MagicPreview
      */
     public $debug = false;
 
+    const VERSION = '1.0.1-pl';
+
 
     /**
      * @param \modX $modx
@@ -49,6 +51,7 @@ class MagicPreview
             'cssUrl' => $assetsUrl . 'css/',
             'assetsUrl' => $assetsUrl,
             'connectorUrl' => $assetsUrl . 'connector.php',
+            'version' => self::VERSION,
         ], $config);
 
         $modelPath = $this->config['modelPath'];

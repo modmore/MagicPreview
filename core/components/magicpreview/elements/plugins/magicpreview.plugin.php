@@ -13,7 +13,7 @@ if (!($service instanceof MagicPreview)) {
 switch ($modx->event->name) {
     case 'OnDocFormRender':
         if ($resource->get('id') > 0) {
-            $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/preview.js');
+            $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/preview.js?v=' . $service::VERSION);
             $modx->controller->addHtml('<script>
     MagicPreviewConfig = ' . json_encode($service->config) . ';
     MagicPreviewResource = ' . $resource->get('id') . ';
