@@ -92,6 +92,8 @@ body.mmmp {
   flex: 1;
 }
 
+
+
 .mmmp-c-frame__inner,
 .mmmp-c-loading__text {
   width: 100%;
@@ -111,10 +113,67 @@ body.mmmp {
 }
 
 .mmmp-c-loading {
+  flex-direction: column;
+  align-items: center;
+  padding: 4rem 0;
   text-align: center;
 }
 
-.mmmp-c-loading__text {
-  padding-top: 5em;
-  height: auto;
+.mmmp-c-animation {
+  display: inline-block;
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+
+.mmmp-c-animation div {
+  position: absolute;
+  top: 21px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #123764;
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+
+.mmmp-c-animation div:nth-child(1) {
+  left: 6px;
+  animation: ellipsis1 0.6s infinite;
+}
+.mmmp-c-animation div:nth-child(2) {
+  left: 6px;
+  animation: ellipsis2 0.6s infinite;
+}
+.mmmp-c-animation div:nth-child(3) {
+  left: 26px;
+  animation: ellipsis2 0.6s infinite;
+}
+.mmmp-c-animation div:nth-child(4) {
+  left: 45px;
+  animation: ellipsis3 0.6s infinite;
+}
+
+@keyframes ellipsis1 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes ellipsis2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(19px, 0);
+  }
+}
+@keyframes ellipsis3 {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
 }
