@@ -1,15 +1,15 @@
-body {
+body#mmmp {
   height: 100vh;
   margin: 0;
   font-family: -apple-system,sans-serif;
 }
-#container {
+.mmmp-c-container {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-#info {
+.mmmp-c-container__inner {
   background-color: #123764;
   color: #fff;
   margin: 0 auto;
@@ -20,87 +20,94 @@ body {
   align-items: center;
 }
 
-h1 {
+.mmmp-c-title {
   color: hsla(213, 66%, 95%, 1);
   font-weight: lighter;
   margin: 1rem;
 }
-h1 .preview-prefix {
+.mmmp-c-title__span {
   color: hsla(213, 66%, 85%, 1);
 }
-h1 a {
+.mmmp-c-title__link {
   color: hsla(213, 66%, 95%, 1);
   text-decoration: none;
 }
-h1 a:hover, h1 a:focus {
+.mmmp-c-title__link:hover,
+.mmmp-c-title__link:focus {
   text-decoration: underline;
 }
 
-.breakpoints {
+.mmmp-c-breakpoints {
   margin-left: auto;
   margin-right: 1rem;
   display: flex;
   position: relative;
 }
 
-input[type=radio] {
+.mmmp-c-breakpoints__input[type=radio] {
   position: absolute;
   opacity: 0;
 }
 
-input[type=radio]:focus + .breakpoint label, .breakpoint label:hover {
+.mmmp-c-breakpoints__input[type=radio]:focus + .mmmp-c-breakpoints__item-label,
+.mmmp-c-breakpoints__item-label:hover {
   background: hsla(213, 66%, 45%, 1);
   color: hsla(213, 66%, 95%, 1);
 }
 
-input[type=radio]:checked + .breakpoint label{
+.mmmp-c-breakpoints__input[type=radio]:checked + .mmmp-c-breakpoints__item-label {
   background: hsla(213, 66%, 55%, 1);
   color: hsla(213, 66%, 95%, 1);
 }
 
-.breakpoint label {
+.mmmp-c-breakpoints__item-label {
   display: block;
   position: relative;
   padding: 0.67rem 1rem;
   background: hsla(213, 66%, 35%, 1);
   color: hsla(213, 66%, 85%, 1);
-  /*border: 1px solid #fff;*/
   margin-right: -1px;
   cursor: pointer;
-
   box-shadow: inset 0 2px 2px hsla(0, 0%, 0%, 0.1), inset 0 -2px 0 hsla(0, 0%, 100%, 0.15);
 }
-.breakpoint:first-of-type label {
+
+.mmmp-c-breakpoints__item:first-of-type .mmmp-c-breakpoints__item-label {
   border-radius: 5px 0 0 5px;
 }
-.breakpoint:last-of-type label {
+
+.mmmp-c-breakpoints__item:last-of-type .mmmp-c-breakpoints__item-label {
   border-radius: 0 5px 5px 0;
 }
 
-#frame-wrapper, #loading-wrapper {
+.mmmp-c-frame,
+.mmmp-c-loading {
   display: flex;
   flex: 1;
 }
 
-#frame, #loading-wrapper p {
+.mmmp-c-frame__inner,
+.mmmp-c-loading__text {
   width: 100%;
   height: 100%;
   border: none;
 }
-#frame {
+
+.mmmp-c-frame__inner {
   border-left: 5px solid #ccc;
   border-right: 5px solid #ccc;
 }
-#frame-wrapper {
+
+.mmmp-c-frame {
   margin: 0 auto;
   width: 100%;
   transition: height 400ms ease, width 400ms ease;
 }
-#loading-wrapper {
+
+.mmmp-c-loading {
   text-align: center;
 }
-#loading-wrapper p {
+
+.mmmp-c-loading__text {
   padding-top: 5em;
   height: auto;
 }
-
