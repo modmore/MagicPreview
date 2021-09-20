@@ -68,19 +68,25 @@ $builder->registerNamespace(PKG_NAME_LOWER,false,true,'{core_path}components/'.P
 $modx->getService('lexicon','modLexicon');
 
 $builder->package->put(
-    array(
+    [
         'source' => $sources['source_core'],
         'target' => "return MODX_CORE_PATH . 'components/';",
-    ),
-    array(
+    ],
+    [
         'vehicle_class' => 'xPDOFileVehicle',
-        'validate' => array(
-            array(
+        'validate' => [
+            [
                 'type' => 'php',
                 'source' => $sources['validators'] . 'requirements.validator.php'
-            )
-        )
-    )
+            ]
+        ],
+        'resolve' => [
+            [
+                'type' => 'php',
+                'source' => $sources['resolvers'] . 'customevents.resolver.php',
+            ],
+        ]
+    ]
 );
 $builder->package->put(
     array(
