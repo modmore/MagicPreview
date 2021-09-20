@@ -67,9 +67,15 @@
                             , 'modAuth': MODx.siteId
                         }
                     });
-                }
-            }
 
+                }
+            },
+
+            // Make sure the view button still has the preview url.
+            preview: function(config) {
+                window.open(config.scope.preview_url);
+                return false;
+            }
         });
     });
 })();
