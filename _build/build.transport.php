@@ -23,7 +23,7 @@ if (!defined('MOREPROVIDER_BUILD')) {
     /* define version */
     define('PKG_NAME','MagicPreview');
     define('PKG_NAME_LOWER',strtolower(PKG_NAME));
-    define('PKG_VERSION','1.0.1');
+    define('PKG_VERSION','1.1.0');
     define('PKG_RELEASE','pl');
 
     /* load modx */
@@ -44,7 +44,7 @@ else {
 }
 
 $root = dirname(dirname(__FILE__)).'/';
-$sources= array (
+$sources = [
     'root' => $root,
     'build' => $root .'_build/',
     'events' => $root . '_build/events/',
@@ -58,7 +58,7 @@ $sources= array (
     'lexicon' => $root . 'core/components/'.PKG_NAME_LOWER.'/lexicon/',
     'docs' => $root.'core/components/'.PKG_NAME_LOWER.'/docs/',
     'model' => $root.'core/components/'.PKG_NAME_LOWER.'/model/',
-);
+];
 
 $modx->loadClass('transport.modPackageBuilder','',false, true);
 $builder = new modPackageBuilder($modx);
@@ -89,32 +89,32 @@ $builder->package->put(
     ]
 );
 $builder->package->put(
-    array(
+    [
         'source' => $sources['source_assets'],
         'target' => "return MODX_ASSETS_PATH . 'components/';",
-    ),
-    array(
+    ],
+    [
         'vehicle_class' => 'xPDOFileVehicle',
-    )
+    ]
 );
 $modx->log(modX::LOG_LEVEL_INFO,'Packaged in files and encryptedVehicle.'); flush();
 
 /* add plugins */
 $plugins = include $sources['data'].'transport.plugins.php';
 if (!is_array($plugins)) { $modx->log(modX::LOG_LEVEL_FATAL,'Adding plugins failed.'); }
-$attributes= array(
+$attributes= [
     xPDOTransport::UNIQUE_KEY => 'name',
     xPDOTransport::PRESERVE_KEYS => false,
     xPDOTransport::UPDATE_OBJECT => true,
     xPDOTransport::RELATED_OBJECTS => true,
-    xPDOTransport::RELATED_OBJECT_ATTRIBUTES => array (
-        'PluginEvents' => array(
+    xPDOTransport::RELATED_OBJECT_ATTRIBUTES => [
+        'PluginEvents' => [
             xPDOTransport::PRESERVE_KEYS => true,
             xPDOTransport::UPDATE_OBJECT => false,
-            xPDOTransport::UNIQUE_KEY => array('pluginid','event'),
-        ),
-    ),
-);
+            xPDOTransport::UNIQUE_KEY => ['pluginid','event'],
+        ],
+    ],
+];
 foreach ($plugins as $plugin) {
     $vehicle = $builder->createVehicle($plugin, $attributes);
     $builder->putVehicle($vehicle);
@@ -124,14 +124,14 @@ unset($plugins,$plugin,$attributes);
 
 
 /* now pack in the license file, readme and setup options */
-$builder->setPackageAttributes(array(
+$builder->setPackageAttributes([
     'license' => file_get_contents($sources['docs'] . 'license.txt'),
     'readme' => file_get_contents($sources['docs'] . 'readme.txt'),
     'changelog' => file_get_contents($sources['docs'] . 'changelog.txt'),
-    'setup-options' => array(
+    'setup-options' => [
         'source' => $sources['build'].'setup.options.php',
-    ),
-));
+    ],
+]);
 $modx->log(modX::LOG_LEVEL_INFO,'Packaged in package attributes.'); flush();
 
 $modx->log(modX::LOG_LEVEL_INFO,'Packing...'); flush();

@@ -1,8 +1,11 @@
 <?php
-
-if ($object->xpdo) {
-    /** @var modX $modx */
-    $modx =& $object->xpdo;
+/**
+ * @var modX $modx
+ * @var modTransportPackage $transport
+ * @var array $options
+ */
+if ($transport->xpdo) {
+    $modx =& $transport->xpdo;
 
     $events = [
         'OnResourceMagicPreview',
