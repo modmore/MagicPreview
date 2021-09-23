@@ -11,18 +11,23 @@ class MagicPreviewPreviewProcessor extends modResourceUpdateProcessor {
     }
 
     public function fireBeforeSaveEvent() {
+        // Invoke an event to allow other modules to prepare/modify the resource before preview.
+        $this->modx->invokeEvent('OnResourceMagicPreview', [
+            'resource' => $this->object
+        ]);
+
         $this->failedSuccessfully = true;
 
         if ($tvs = $this->object->getMany('TemplateVars', 'all')) {
             /** @var modTemplateVar $tv */
             foreach ($tvs as $tv) {
-                $this->object->set($tv->get('name'), array(
+                $this->object->set($tv->get('name'), [
                     $tv->get('name'),
                     $this->object->get('tv' . $tv->get('id')),//$tv->getValue($resource->get('id')),
                     $tv->get('display'),
                     $tv->get('display_params'),
                     $tv->get('type'),
-                ));
+                ]);
             }
         }
         $data = $this->object->toArray('', true);
