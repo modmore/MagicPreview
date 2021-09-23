@@ -1,3 +1,10 @@
+MagicPreview 1.1.0-pl
+---------------------
+Released on 2021-
+
+- Fix view button not working after clicking on the preview button
+- Add OnResourceMagicPreview event so other extras such as ContentBlocks can hook in when using the preview button.
+
 MagicPreview 1.0.1-pl
 ---------------------
 Released on 2018-12-18
