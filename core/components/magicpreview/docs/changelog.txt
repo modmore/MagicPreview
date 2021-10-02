@@ -4,6 +4,7 @@ Released on 2021-
 
 - Fix view button not working after clicking on the preview button
 - Add OnResourceMagicPreview event so other extras such as ContentBlocks can hook in when using the preview button.
+- Fix system fonts used in the preview, did not apply on Windows (among others)
 
 MagicPreview 1.0.1-pl
 ---------------------
