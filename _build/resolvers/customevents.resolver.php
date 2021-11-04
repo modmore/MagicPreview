@@ -18,10 +18,11 @@ if ($transport->xpdo) {
                 $event = $modx->getObject('modEvent', ['name' => $eventName]);
                 if (!$event) {
                     $event = $modx->newObject('modEvent');
-                    $event->set('name', $eventName);
-                    $event->set('groupname', 'Magic Preview');
-                    $event->save();
                 }
+                $event->set('name', $eventName);
+                $event->set('groupname', 'Magic Preview');
+                $event->set('service', 6);
+                $event->save();
             }
 
             break;

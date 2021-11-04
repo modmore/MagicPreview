@@ -92,6 +92,16 @@ if ($vcPlugin) {
 }
 
 
+
+$event = $modx->getObject('modEvent', ['name' => 'OnResourceMagicPreview']);
+if (!$event) {
+    $event = $modx->newObject('modEvent');
+}
+$event->set('name', 'OnResourceMagicPreview');
+$event->set('groupname', 'Magic Preview');
+$event->set('service', 6);
+$event->save();
+
 //$settings = include dirname(dirname(__FILE__)).'/_build/data/settings.php';
 //foreach ($settings as $key => $opts) {
 //    if (!createObject('modSystemSetting', array(
