@@ -1,13 +1,15 @@
 <?php
 
-require MODX_PROCESSORS_PATH . 'resource/update.class.php';
+if (file_exists(MODX_PROCESSORS_PATH . 'resource/update.class.php')) {
+    require MODX_PROCESSORS_PATH . 'resource/update.class.php';
+}
 
 class MagicPreviewPreviewProcessor extends modResourceUpdateProcessor {
     private $previewHash;
     private $failedSuccessfully = false;
 
-    public static function getInstance(modX &$modx,$className,$properties = array()) {
-        return new self($modx,$properties);
+    public static function getInstance(modX &$modx, $className, $properties = array()) {
+        return new self($modx, $properties);
     }
 
     public function fireBeforeSaveEvent() {
