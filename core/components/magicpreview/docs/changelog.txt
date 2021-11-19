@@ -1,3 +1,9 @@
+MagicPreview 1.2.0-pl
+---------------------
+Released on 2021-11-19
+
+- Introduce compatibility for MODX 3.
+
 MagicPreview 1.1.1-pl
 ---------------------
 Released on 2021-11-16
