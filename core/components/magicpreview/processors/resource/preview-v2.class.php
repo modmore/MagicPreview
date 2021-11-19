@@ -1,12 +1,12 @@
 <?php
 
-use MODX\Revolution\Processors\Resource\Update;
+require MODX_PROCESSORS_PATH . 'resource/update.class.php';
 
-class MagicPreviewPreviewProcessor extends Update {
+class MagicPreviewPreviewProcessorV2 extends modResourceUpdateProcessor {
     private $previewHash;
     private $failedSuccessfully = false;
 
-    public static function getInstance(modX $modx, $className, $properties = []) {
+    public static function getInstance(modX &$modx, $className, $properties = array()) {
         return new self($modx, $properties);
     }
 
@@ -60,4 +60,4 @@ class MagicPreviewPreviewProcessor extends Update {
     }
 }
 
-return 'MagicPreviewPreviewProcessor';
+return 'MagicPreviewPreviewProcessorV2';
