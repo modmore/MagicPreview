@@ -1,3 +1,9 @@
+MagicPreview 1.2.1-pl
+---------------------
+Released on 2021-11-29
+
+- Make loading of required processor files more efficient by using the full path. [#17]
+
 MagicPreview 1.2.0-pl
 ---------------------
 Released on 2021-11-19
