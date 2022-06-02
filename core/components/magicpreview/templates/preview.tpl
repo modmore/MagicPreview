@@ -14,11 +14,8 @@
         <div class="mmmp-c-container__inner">
             <h1 class="mmmp-c-title">
                 <span class="mmmp-c-title__span">{$_lang['magicpreview.preview']}</span>
-                <a class="mmmp-c-title__link" id="mmmp-title-link" href="{$config.manager_url}?a=resource/update&id={$resource.id}">
-                    {$resource.pagetitle|escape}
-                </a>
+                <span class="mmmp-c-title__pagetitle">{$resource.pagetitle|escape}</span>
             </h1>
-
             <div class="mmmp-c-breakpoints">
                 <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="full" id="mmmp-breakpoint-full" checked>
                 <div class="mmmp-c-breakpoints__item">
@@ -40,6 +37,11 @@
                     <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-mobile">{$_lang['magicpreview.bp_mobile']}</label>
                 </div>
             </div>
+            <button class="mmmp-c-close" id="mmmp-c-close">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
         </div>
         <div class="mmmp-c-frame" id="mmmp-js-frame">
             <iframe class="mmmp-c-frame__inner" id="mmmp-js-frame-inner"></iframe>
@@ -58,7 +60,7 @@
                 loadingWrapper = document.getElementById('mmmp-js-loading'),
                 baseFrameUrl = '{$baseFrameUrl|escape:javascript}',
                 joiner = baseFrameUrl.indexOf('?') === -1 ? '?' : '&',
-                titleLink = document.getElementById('mmmp-title-link');
+                closeBtn = document.getElementById('mmmp-c-close');
             window.onhashchange = refreshFrame;
             refreshFrame();
 
@@ -100,7 +102,7 @@
             });
 
             // Close the preview tab/window on title click
-            titleLink.addEventListener('click', function(e) {
+            closeBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 window.close();
             });
