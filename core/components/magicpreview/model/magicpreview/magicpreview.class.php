@@ -22,7 +22,7 @@ class MagicPreview
      */
     public $debug = false;
 
-    const VERSION = '1.2.1-pl';
+    const VERSION = '1.2.2-pl';
 
 
     /**
