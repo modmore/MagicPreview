@@ -1,3 +1,10 @@
+MagicPreview 1.2.2-pl
+---------------------
+Released on 2022-06-02
+
+- Fixed a fatal error that would sometimes occur when loading a preview (thanks to @pbowyer) [#24]
+- Replaced the title link with a close button.
+
 MagicPreview 1.2.1-pl
 ---------------------
 Released on 2021-11-29
