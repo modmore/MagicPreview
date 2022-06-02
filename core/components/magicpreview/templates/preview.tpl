@@ -14,7 +14,7 @@
         <div class="mmmp-c-container__inner">
             <h1 class="mmmp-c-title">
                 <span class="mmmp-c-title__span">{$_lang['magicpreview.preview']}</span>
-                <a class="mmmp-c-title__link" href="{$config.manager_url}?a=resource/update&id={$resource.id}">
+                <a class="mmmp-c-title__link" id="mmmp-title-link" href="{$config.manager_url}?a=resource/update&id={$resource.id}">
                     {$resource.pagetitle|escape}
                 </a>
             </h1>
@@ -57,7 +57,8 @@
                 frameWrapper = document.getElementById('mmmp-js-frame'),
                 loadingWrapper = document.getElementById('mmmp-js-loading'),
                 baseFrameUrl = '{$baseFrameUrl|escape:javascript}',
-                joiner = baseFrameUrl.indexOf('?') === -1 ? '?' : '&';
+                joiner = baseFrameUrl.indexOf('?') === -1 ? '?' : '&',
+                titleLink = document.getElementById('mmmp-title-link');
             window.onhashchange = refreshFrame;
             refreshFrame();
 
@@ -96,6 +97,12 @@
                             break;
                     }
                 });
+            });
+
+            // Close the preview tab/window on title click
+            titleLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.close();
             });
         })()
     </script>
