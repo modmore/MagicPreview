@@ -44,8 +44,10 @@ body.mmmp {
   border-radius: 5px;
   border: none;
   cursor: pointer;
-  padding: 10px 12px;
-  margin: 0 2rem 0 1rem;
+  padding: 11px 12px;
+  margin: 0 2rem 0 .5rem;
+  display: flex;
+  align-items: center;
 }
 .mmmp-c-close svg {
   width: 20px;
@@ -55,6 +57,11 @@ body.mmmp {
 .mmmp-c-close:focus {
   background: #4185d8;
   
+}
+
+.mmmp-c-breakpoints__row {
+  display: flex;
+  align-items: center;
 }
 
 .mmmp-c-breakpoints {

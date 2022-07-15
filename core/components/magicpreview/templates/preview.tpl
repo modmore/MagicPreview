@@ -16,32 +16,34 @@
                 <span class="mmmp-c-title__span">{$_lang['magicpreview.preview']}</span>
                 <span class="mmmp-c-title__pagetitle">{$resource.pagetitle|escape}</span>
             </h1>
-            <div class="mmmp-c-breakpoints">
-                <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="full" id="mmmp-breakpoint-full" checked>
-                <div class="mmmp-c-breakpoints__item">
-                    <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-full">{$_lang['magicpreview.bp_full']}</label>
+            <div class="mmmp-c-breakpoints__row">
+                <div class="mmmp-c-breakpoints">
+                    <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="full" id="mmmp-breakpoint-full" checked>
+                    <div class="mmmp-c-breakpoints__item">
+                        <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-full">{$_lang['magicpreview.bp_full']}</label>
+                    </div>
+    
+                    <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="desktop" id="mmmp-breakpoint-desktop">
+                    <div class="mmmp-c-breakpoints__item">
+                        <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-desktop">{$_lang['magicpreview.bp_desktop']}</label>
+                    </div>
+    
+                    <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="tablet" id="mmmp-breakpoint-tablet">
+                    <div class="mmmp-c-breakpoints__item">
+                        <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-tablet">{$_lang['magicpreview.bp_tablet']}</label>
+                    </div>
+    
+                    <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="mobile" id="mmmp-breakpoint-mobile">
+                    <div class="mmmp-c-breakpoints__item">
+                        <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-mobile">{$_lang['magicpreview.bp_mobile']}</label>
+                    </div>
                 </div>
-
-                <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="desktop" id="mmmp-breakpoint-desktop">
-                <div class="mmmp-c-breakpoints__item">
-                    <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-desktop">{$_lang['magicpreview.bp_desktop']}</label>
-                </div>
-
-                <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="tablet" id="mmmp-breakpoint-tablet">
-                <div class="mmmp-c-breakpoints__item">
-                    <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-tablet">{$_lang['magicpreview.bp_tablet']}</label>
-                </div>
-
-                <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="mobile" id="mmmp-breakpoint-mobile">
-                <div class="mmmp-c-breakpoints__item">
-                    <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-mobile">{$_lang['magicpreview.bp_mobile']}</label>
-                </div>
+                <button class="mmmp-c-close" id="mmmp-c-close">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
-            <button class="mmmp-c-close" id="mmmp-c-close">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
         </div>
         <div class="mmmp-c-frame" id="mmmp-js-frame">
             <iframe class="mmmp-c-frame__inner" id="mmmp-js-frame-inner"></iframe>
