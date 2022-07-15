@@ -1,3 +1,9 @@
+MagicPreview 1.2.3-pl
+---------------------
+Released on 2022-07-15
+
+- CSS tweaks to cater for longer pagetitles in preview title bar. [8c80d43]
+
 MagicPreview 1.2.2-pl
 ---------------------
 Released on 2022-06-02
