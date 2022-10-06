@@ -1,3 +1,9 @@
+MagicPreview 1.2.4-pl
+---------------------
+Released on 2022-10-06
+
+- Fix preview button not showing on Collections, Articles and Location custom resources.
+
 MagicPreview 1.2.3-pl
 ---------------------
 Released on 2022-07-15

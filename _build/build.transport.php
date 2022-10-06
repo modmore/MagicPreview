@@ -23,7 +23,7 @@ if (!defined('MOREPROVIDER_BUILD')) {
     /* define version */
     define('PKG_NAME','MagicPreview');
     define('PKG_NAME_LOWER',strtolower(PKG_NAME));
-    define('PKG_VERSION','1.2.3');
+    define('PKG_VERSION','1.2.4');
     define('PKG_RELEASE','pl');
 
     /* load modx */
