@@ -1,10 +1,28 @@
 (function() {
     Ext.onReady(function() {
         var previewUrl = MODx.config.manager_url
-            + '?namespace=magicpreview&a=preview&resource=' + MagicPreviewResource;
-        Ext.override(MODx.page.UpdateResource, {
+            + '?namespace=magicpreview&a=preview&resource=' + MagicPreviewResource,
+            basePage = MODx.page.UpdateResource;
+
+        // Check for custom page types and extend those instead
+        // If a custom resource is loaded it's type will be 'object'.
+        // TODO: Add other custom objects here
+        switch ('object') {
+            case typeof Articles:
+                basePage = Articles.page.UpdateArticle ?? basePage;
+                break;
+            case typeof collections:
+                basePage = collections.page.UpdateCategory ?? basePage;
+                basePage = collections.page.UpdateSelection ?? basePage;
+                break;
+            case typeof LocationResources:
+                basePage = LocationResources.page.UpdateLocation ?? basePage;
+                break;
+        }
+
+        Ext.override(basePage, {
             _originals: {
-                getButtons: MODx.page.UpdateResource.prototype.getButtons
+                getButtons: basePage.prototype.getButtons
             },
             getButtons: function(config) {
                 var btns = this._originals.getButtons.call(this, config);
