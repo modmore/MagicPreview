@@ -31,6 +31,10 @@ class MagicPreviewPreviewManagerController extends modExtraManagerController {
 
         $this->setPlaceholder('resource', $resource->toArray());
         $this->setPlaceholder('baseFrameUrl', $this->modx->makeUrl($resourceId, '', '', 'full'));
+
+        $this->setPlaceholder('breakpointDesktop', $this->modx->getOption("magicpreview.breapointDesktop", [], "1280px"));
+        $this->setPlaceholder('breakpointTablet', $this->modx->getOption("magicpreview.breakpointTablet", [], "768px"));
+        $this->setPlaceholder('breakpointMobile', $this->modx->getOption("magicpreview.breakpointMobile", [], "320px"));
     }
 
     /**
