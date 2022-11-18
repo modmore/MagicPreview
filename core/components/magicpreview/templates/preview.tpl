@@ -22,17 +22,17 @@
                     <div class="mmmp-c-breakpoints__item">
                         <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-full">{$_lang['magicpreview.bp_full']}</label>
                     </div>
-    
+
                     <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="desktop" id="mmmp-breakpoint-desktop">
                     <div class="mmmp-c-breakpoints__item">
                         <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-desktop">{$_lang['magicpreview.bp_desktop']}</label>
                     </div>
-    
+
                     <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="tablet" id="mmmp-breakpoint-tablet">
                     <div class="mmmp-c-breakpoints__item">
                         <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-tablet">{$_lang['magicpreview.bp_tablet']}</label>
                     </div>
-    
+
                     <input class="mmmp-c-breakpoints__input mmmp-js-breakpoint-input" type="radio" name="breakpoint" value="mobile" id="mmmp-breakpoint-mobile">
                     <div class="mmmp-c-breakpoints__item">
                         <label class="mmmp-c-breakpoints__item-label" for="mmmp-breakpoint-mobile">{$_lang['magicpreview.bp_mobile']}</label>
@@ -89,15 +89,15 @@
                             break;
 
                         case 'desktop':
-                            frameWrapper.style.width = '1280px';
+                            frameWrapper.style.width = '{$breakpointDesktop}';
                             break;
 
                         case 'tablet':
-                            frameWrapper.style.width = '768px';
+                            frameWrapper.style.width = '{$breakpointTablet}';
                             break;
 
                         case 'mobile':
-                            frameWrapper.style.width = '320px';
+                            frameWrapper.style.width = '{$breakpointMobile}';
                             break;
                     }
                 });
