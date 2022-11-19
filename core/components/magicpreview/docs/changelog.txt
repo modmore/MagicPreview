@@ -1,3 +1,9 @@
+MagicPreview 1.3.0-pl
+---------------------
+Released on 2022-11-19
+
+- Make preview width breakpoints configurable via system settings (thanks to @Peeet93) [#28]
+
 MagicPreview 1.2.4-pl
 ---------------------
 Released on 2022-10-06
