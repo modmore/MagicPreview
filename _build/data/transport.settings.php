@@ -1,30 +1,26 @@
 <?php
 
-$s = [
-    "breakpointDesktop" => "1280px",
-    "breakpointTablet" => "768px",
-    "breakpointMobile" => "320px",
-];
+$settingSource = include dirname(__FILE__) . '/settings.php';
 
 $settings = [];
+foreach ($settingSource as $key => $options) {
+    $val = $options['value'];
 
-foreach ($s as $key => $value) {
-    if (is_string($value) || is_int($value)) { $type = 'textfield'; }
-    elseif (is_bool($value)) { $type = 'combo-boolean'; }
-    else { $type = 'textfield'; }
+    if (isset($options['xtype'])) $xtype = $options['xtype'];
+    elseif (is_int($val)) $xtype = 'numberfield';
+    elseif (is_bool($val)) $xtype = 'modx-combo-boolean';
+    else $xtype = 'textfield';
 
-    $parts = explode('.',$key);
-    if (count($parts) == 1) { $area = 'Default'; }
-    else { $area = $parts[0]; }
-
-    $settings['magicpreview.'.$key] = $modx->newObject('modSystemSetting');
-    $settings['magicpreview.'.$key]->set('key', 'magicpreview.'.$key);
-    $settings['magicpreview.'.$key]->fromArray(array(
-        'value' => $value,
-        'xtype' => $type,
+    /** @var modX $modx */
+    $settings[$key] = $modx->newObject('modSystemSetting');
+    $settings[$key]->fromArray([
+        'key' => 'magicpreview.' . $key,
+        'xtype' => $xtype,
+        'value' => $options['value'],
         'namespace' => 'magicpreview',
-        'area' => $area
-    ));
+        'area' => $options['area'],
+        'editedon' => time(),
+    ], '', true, true);
 }
 
 return $settings;

@@ -99,8 +99,24 @@ $builder->package->put(
 );
 $modx->log(modX::LOG_LEVEL_INFO,'Packaged in files and encryptedVehicle.'); flush();
 
+/* Settings */
+$settings = include $sources['data'] . 'transport.settings.php';
+if (is_array($settings)) {
+    $attributes = [
+        xPDOTransport::UNIQUE_KEY => 'key',
+        xPDOTransport::PRESERVE_KEYS => true,
+        xPDOTransport::UPDATE_OBJECT => false,
+    ];
+    foreach ($settings as $setting) {
+        $vehicle = $builder->createVehicle($setting,$attributes);
+        $builder->putVehicle($vehicle);
+    }
+    $modx->log(modX::LOG_LEVEL_INFO,'Packaged in ' . count($settings) . ' system settings.'); flush();
+    unset($settings,$setting,$attributes);
+}
+
 /* add plugins */
-$plugins = include $sources['data'].'transport.plugins.php';
+$plugins = include $sources['data'] . 'transport.plugins.php';
 if (!is_array($plugins)) { $modx->log(modX::LOG_LEVEL_FATAL,'Adding plugins failed.'); }
 $attributes= [
     xPDOTransport::UNIQUE_KEY => 'name',

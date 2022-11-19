@@ -18,7 +18,7 @@ class MagicPreviewPreviewManagerController extends modExtraManagerController {
     public function initialize() {
         /* Instantiate the MagicPreview class in the controller */
         $path = $this->modx->getOption('magicpreview.core_path', null, $this->modx->getOption('core_path') . 'components/magicpreview/') . 'model/magicpreview/';
-        $this->magicpreview =& $this->modx->getService('magicpreview', 'MagicPreview', $path);
+        $this->magicpreview = $this->modx->getService('magicpreview', 'MagicPreview', $path);
         $this->setPlaceholder('mp_config', $this->magicpreview->config);
     }
 
@@ -32,9 +32,9 @@ class MagicPreviewPreviewManagerController extends modExtraManagerController {
         $this->setPlaceholder('resource', $resource->toArray());
         $this->setPlaceholder('baseFrameUrl', $this->modx->makeUrl($resourceId, '', '', 'full'));
 
-        $this->setPlaceholder('breakpointDesktop', $this->modx->getOption("magicpreview.breapointDesktop", [], "1280px"));
-        $this->setPlaceholder('breakpointTablet', $this->modx->getOption("magicpreview.breakpointTablet", [], "768px"));
-        $this->setPlaceholder('breakpointMobile', $this->modx->getOption("magicpreview.breakpointMobile", [], "320px"));
+        $this->setPlaceholder('breakpointDesktop', $this->modx->getOption("magicpreview.breakpoint_desktop", [], "1280px"));
+        $this->setPlaceholder('breakpointTablet', $this->modx->getOption("magicpreview.breakpoint_tablet", [], "768px"));
+        $this->setPlaceholder('breakpointMobile', $this->modx->getOption("magicpreview.breakpoint_mobile", [], "320px"));
     }
 
     /**
@@ -62,7 +62,7 @@ class MagicPreviewPreviewManagerController extends modExtraManagerController {
         $this->addCss($this->magicpreview->config['cssUrl'].'preview.css');
         $this->addHtml('<script type="text/javascript">
         Ext.onReady(function() {
-            MagicPreviewConfig = '.$this->modx->toJSON($this->magicpreview->config).';
+            MagicPreviewConfig = ' . json_encode($this->magicpreview->config) . ';
         });
         </script>');
 

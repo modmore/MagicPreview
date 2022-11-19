@@ -66,6 +66,28 @@ if (!createObject('modSystemSetting', array(
 ), 'key', false)) {
     echo "Error creating magicpreview.assets_url setting.\n";
 }
+
+$settings = include $componentPath . '/_build/data/settings.php';
+foreach ($settings as $key => $opts) {
+    $val = $opts['value'];
+
+    if (isset($opts['xtype'])) $xtype = $opts['xtype'];
+    elseif (is_int($val)) $xtype = 'numberfield';
+    elseif (is_bool($val)) $xtype = 'modx-combo-boolean';
+    else $xtype = 'textfield';
+
+    if (!createObject('modSystemSetting', [
+        'key' => 'magicpreview.' . $key,
+        'value' => $opts['value'],
+        'xtype' => $xtype,
+        'namespace' => 'magicpreview',
+        'area' => $opts['area'],
+        'editedon' => time(),
+    ], 'key', false)) {
+        echo "Error creating magicpreview.".$key." setting.\n";
+    }
+}
+
 if (!createObject('modPlugin', array(
     'name' => 'MagicPreview',
     'static' => true,
@@ -101,21 +123,6 @@ $event->set('name', 'OnResourceMagicPreview');
 $event->set('groupname', 'Magic Preview');
 $event->set('service', 6);
 $event->save();
-
-//$settings = include dirname(dirname(__FILE__)).'/_build/data/settings.php';
-//foreach ($settings as $key => $opts) {
-//    if (!createObject('modSystemSetting', array(
-//        'key' => 'magicpreview.' . $key,
-//        'value' => $opts['value'],
-//        'xtype' => (isset($opts['xtype'])) ? $opts['xtype'] : 'textfield',
-//        'namespace' => 'magicpreview',
-//        'area' => $opts['area'],
-//        'editedon' => time(),
-//    ), 'key', false)) {
-//        echo "Error creating magicpreview.".$key." setting.\n";
-//    }
-//}
-
 
 /* Create the tables */
 $objectContainers = array(
