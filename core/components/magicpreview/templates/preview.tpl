@@ -7,6 +7,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{$_lang['magicpreview.preview']} {$resource.pagetitle|escape}</title>
     <link rel="stylesheet" href="{$mp_config.assetsUrl}preview.css?v={$mp_config.version}">
+    {if $customPreviewCss}
+        <link rel="stylesheet" href="{$customPreviewCss}?v={$mp_config.version}">
+    {/if}
 </head>
 <body class="mmmp">
 {if $resource['id'] > 0}

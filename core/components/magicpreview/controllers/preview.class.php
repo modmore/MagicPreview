@@ -34,7 +34,9 @@ class MagicPreviewPreviewManagerController extends modExtraManagerController {
 
         $this->setPlaceholder('breakpointDesktop', $this->modx->getOption("magicpreview.breakpoint_desktop", [], "1280px"));
         $this->setPlaceholder('breakpointTablet', $this->modx->getOption("magicpreview.breakpoint_tablet", [], "768px"));
-        $this->setPlaceholder('breakpointMobile', $this->modx->getOption("magicpreview.breakpoint_mobile", [], "320px"));
+        $this->setPlaceholder('breakpointMobile', $this->modx->getOption("magicpreview.breakpoint_mobile", [], "320px"));        
+        
+        $this->setPlaceholder('customPreviewCss', $this->modx->getOption("magicpreview.custom_preview_css", [], ""));
     }
 
     /**
@@ -72,7 +74,13 @@ class MagicPreviewPreviewManagerController extends modExtraManagerController {
      * The name for the template file to load.
      * @return string
      */
-    public function getTemplateFile() {
-        return $this->magicpreview->config['templatesPath'] . 'preview.tpl';
+    public function getTemplateFile(): string
+    {
+        $custom = $this->modx->getOption('magicpreview.custom_preview_tpl');
+        $tplPath = $this->magicpreview->config['templatesPath'];
+    
+        return $custom
+            ? $tplPath . $custom
+            : $tplPath . 'preview.tpl';
     }
 }
