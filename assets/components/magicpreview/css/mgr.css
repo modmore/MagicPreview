@@ -1,0 +1,13 @@
+#modx-abtn-preview {
+    margin-left: -.6rem !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+    
+#modx-abtn-preview:before {
+    content: "↗";
+}
+
+#modx-abtn-preview .x-btn-text {        
+    text-indent: -1000px;
+}

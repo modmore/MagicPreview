@@ -26,7 +26,8 @@
             },
             getButtons: function(config) {
                 var btns = this._originals.getButtons.call(this, config);
-                btns.splice(2, 0, {
+                var btnView = btns.map((btn) => { return btn.id }).indexOf("modx-abtn-preview");
+                btns.splice(btnView, 0, {
                     text: 'Preview',
                     id: 'modx-abtn-real-preview',
                     handler: this.mpPreview,
