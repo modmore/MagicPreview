@@ -14,10 +14,17 @@ switch ($modx->event->name) {
     case 'OnDocFormRender':
         if ($resource->get('id') > 0) {
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/preview.js?v=' . $service::VERSION);
-            $modx->controller->addHtml('<script>
-    MagicPreviewConfig = ' . json_encode($service->config) . ';
-    MagicPreviewResource = ' . $resource->get('id') . ';
-    </script>');
+            $modx->controller->addHtml('
+                <link
+                    rel="stylesheet"
+                    type="text/css"
+                    href="' . $service->config['assetsUrl'] . 'css/mgr.css?v=' . $service::VERSION . '"
+                />
+                <script>
+                    MagicPreviewConfig = ' . json_encode($service->config) . ';
+                    MagicPreviewResource = ' . $resource->get('id') . ';
+                </script>
+            ');
         }
         break;
 
