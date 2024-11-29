@@ -1,3 +1,7 @@
+.magicpreview_modx2 #modx-abtn-real-preview {
+    padding-right: 25px;
+}
+
 #modx-abtn-preview {
     margin-left: -.6rem !important;
     border-top-left-radius: 0 !important;

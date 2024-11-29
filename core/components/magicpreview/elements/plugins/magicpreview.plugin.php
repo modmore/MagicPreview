@@ -13,8 +13,20 @@ if (!($service instanceof MagicPreview)) {
 switch ($modx->event->name) {
     case 'OnDocFormRender':
         if ($resource->get('id') > 0) {
+            // Determine MODX version and add body class to assist with styling
+            $versionCls = 'magicpreview_modx2';
+            $modxVersion = $modx->getVersionData();
+            if (version_compare($modxVersion['full_version'], '3.0.0-dev', '>=')) {
+                $versionCls = 'magicpreview_modx3';
+            }
+
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/preview.js?v=' . $service::VERSION);
             $modx->controller->addHtml('
+                <script>
+                    Ext.onReady(() => {
+                        Ext.getBody().addClass("' . $versionCls . '");
+                    });
+                </script>
                 <link
                     rel="stylesheet"
                     type="text/css"
