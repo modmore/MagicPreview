@@ -13,4 +13,12 @@ return [
         'area' => 'Breakpoints',
         'value' => '320px'
     ],
+    'custom_preview_tpl' => [
+        'area' => 'Preview',
+        'value' => ''
+    ],
+    'custom_preview_css' => [
+        'area' => 'Preview',
+        'value' => ''
+    ],
 ];

@@ -14,3 +14,7 @@ $_lang['setting_magicpreview.breakpoint_tablet'] = 'Breakpoint - Tablet Width';
 $_lang['setting_magicpreview.breakpoint_tablet_desc'] = 'Tablet breakpoint width in pixels. Default: 768px';
 $_lang['setting_magicpreview.breakpoint_mobile'] = 'Breakpoint - Mobile Width';
 $_lang['setting_magicpreview.breakpoint_mobile_desc'] = 'Mobile breakpoint width in pixels. Default: 320px';
+$_lang['setting_magicpreview.custom_preview_tpl'] = 'Benutzerdefinierte Vorschau-Vorlage';
+$_lang['setting_magicpreview.custom_preview_tpl_desc'] = 'Der Pfad für die zu ladende Vorlagendatei.';
+$_lang['setting_magicpreview.custom_preview_css'] = 'Benutzerdefinierte Vorschau-CSS';
+$_lang['setting_magicpreview.custom_preview_css_desc'] = 'Der Pfad für die zu ladende CSS-Datei.';
