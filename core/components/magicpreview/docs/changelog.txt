@@ -1,3 +1,9 @@
+MagicPreview 1.4.0-pl
+---------------------
+
+- Group MagicPreview's Preview button with the standard MODX View resource button for a more compact view (thanks to @jenswittmann) [#31]
+- Add magicpreview.custom_preview_css and magicpreview.custom_preview_tpl to enable customising the HTML and CSS in the preview (thanks to @jenswittmann) [#32]
+
 MagicPreview 1.3.0-pl
 ---------------------
 Released on 2022-11-19
