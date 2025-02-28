@@ -1,17 +1,17 @@
 <?php
+
 /**
  * @var modX $modx
  */
-
 $path = $modx->getOption('magicpreview.core_path', null, $modx->getOption('core_path') . 'components/magicpreview/');
-$service =& $modx->getService('magicpreview', 'MagicPreview', $path . '/model/magicpreview/');
-
+$service = $modx->getService('magicpreview', 'MagicPreview', $path . '/model/magicpreview/');
 if (!($service instanceof MagicPreview)) {
     return 'Could not load MagicPreview service.';
 }
 
 switch ($modx->event->name) {
     case 'OnDocFormRender':
+        /** @var modResource|\MODX\Revolution\modResource $resource */
         if ($resource->get('id') > 0) {
             // Determine MODX version and add body class to assist with styling
             $versionCls = 'magicpreview_modx2';
