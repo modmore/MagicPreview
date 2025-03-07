@@ -44,8 +44,12 @@
                 o.form = Ext.getCmp(o.formpanel);
                 if (!o.form) return false;
 
-                if (!o.previewWindow) {
-                    o.previewWindow = window.open(previewUrl + '#loading', 'MagicPreview')
+                if (o.previewWindow && !o.previewWindow.closed) {
+                    o.previewWindow.focus();
+                }
+                else {
+                    o.previewWindow = window.open(previewUrl + '#loading', 'MagicPreview_' + MagicPreviewResource)
+                    o.previewWindow.opener = window; // Pass reference to the main window
                 }
 
                 var f = o.form.getForm ? o.form.getForm() : o.form;
@@ -63,9 +67,6 @@
                 }
 
                 if (isv) {
-                    o.previewWindow.location.hash = 'loading';
-                    o.previewWindow = window.open(previewUrl + '#loading', o.previewWindow.name);
-
                     var originalAction = o.form.baseParams['action'],
                         originalUrl = o.form.url;
                     f.baseParams['action'] = 'resource/preview';
@@ -76,7 +77,7 @@
                         f.url = originalUrl;
 
                         if (r.result && r.result.object && r.result.object.preview_hash) {
-                            o.previewWindow.location.hash = r.result.object.preview_hash;
+                            o.previewWindow.location = previewUrl + '#' + r.result.object.preview_hash;
                         }
 
                     }, this);
