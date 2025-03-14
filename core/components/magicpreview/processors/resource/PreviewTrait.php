@@ -12,7 +12,8 @@ trait PreviewTrait
     {
         // Invoke an event to allow other modules to prepare/modify the resource before preview.
         $this->modx->invokeEvent('OnResourceMagicPreview', [
-            'resource' => $this->object
+            'resource' => $this->object,
+            'properties' => $this->getProperties(),
         ]);
 
         $this->failedSuccessfully = true;

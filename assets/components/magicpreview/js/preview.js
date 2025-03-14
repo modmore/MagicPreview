@@ -36,22 +36,28 @@
                 return btns;
             },
 
+            /**
+             * Run when the preview button is clicked
+             * @returns {boolean}
+             */
             mpPreview: function() {
                 var o = this.config;
                 if (!o.formpanel) return false;
 
                 MODx.util.Progress.reset();
+
+                // Get the resource form panel
                 o.form = Ext.getCmp(o.formpanel);
                 if (!o.form) return false;
 
                 if (o.previewWindow && !o.previewWindow.closed) {
                     o.previewWindow.focus();
-                }
-                else {
+                } else {
                     o.previewWindow = window.open(previewUrl + '#loading', 'MagicPreview_' + MagicPreviewResource)
                     o.previewWindow.opener = window; // Pass reference to the main window
                 }
 
+                // Check if all the fields in the form are valid
                 var f = o.form.getForm ? o.form.getForm() : o.form;
                 var isv = true;
                 if (f.items && f.items.items) {
@@ -66,12 +72,14 @@
                     }
                 }
 
+                // If the form is valid, push the data to the preview processor
                 if (isv) {
                     var originalAction = o.form.baseParams['action'],
                         originalUrl = o.form.url;
                     f.baseParams['action'] = 'resource/preview';
                     f.url = MagicPreviewConfig.assetsUrl + 'connector.php';
 
+                    // If the response from the processor is successful, set the new location in the preview window
                     o.form.on('success', function (r) {
                         f.baseParams['action'] = originalAction;
                         f.url = originalUrl;
@@ -81,13 +89,14 @@
                         }
 
                     }, this);
+
+                    // Submit the form to the processor
                     o.form.submit({
                         headers: {
                             'Powered-By': 'MODx'
-                            , 'modAuth': MODx.siteId
+                            ,'modAuth': MODx.siteId
                         }
                     });
-
                 }
             },
 
