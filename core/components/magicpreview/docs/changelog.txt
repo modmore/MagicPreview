@@ -1,3 +1,9 @@
+MagicPreview 1.5.0-pl
+---------------------
+Released on 2025-03-14
+
+- Add support for VersionX so version deltas of resources can be previewed before reverting to them [#37]
+
 MagicPreview 1.4.1-pl
 ---------------------
 Released on 2024-12-13
