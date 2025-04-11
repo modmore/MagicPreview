@@ -1,3 +1,9 @@
+MagicPreview 1.5.1-pl
+---------------------
+Released on 2025-04-11
+
+- Fix placeholders showing the cached value instead of the change due to in-memory element cache not being cleared [79144aa]
+
 MagicPreview 1.5.0-pl
 ---------------------
 Released on 2025-03-14
