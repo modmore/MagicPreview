@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @var modX $modx
  */
@@ -52,11 +51,15 @@ switch ($modx->event->name) {
         $data = $modx->cacheManager->get($modx->resource->get('id') . '/' . $key, [
             xPDO::OPT_CACHE_KEY => 'magicpreview'
         ]);
+
         if (is_array($data)) {
             $modx->resource->fromArray($data, '', true, true);
             $modx->resource->set('cacheable', false);
             $modx->resource->setProcessed(false);
+            // The in-memory element cache needs to be wiped, otherwise placeholder values will show the existing cached value.
+            $modx->elementCache = null;
         }
         break;
-
 }
+
+return true;
