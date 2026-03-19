@@ -34,4 +34,8 @@ return [
         'value' => false,
         'xtype' => 'combo-boolean',
     ],
+    'auto_refresh_interval' => [
+        'area' => 'Preview',
+        'value' => '5',
+    ],
 ];

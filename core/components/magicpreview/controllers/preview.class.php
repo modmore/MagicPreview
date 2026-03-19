@@ -66,7 +66,7 @@ class MagicPreviewPreviewManagerController extends modExtraManagerController
      */
     public function loadCustomCssJs()
     {
-        $this->addJavascript($this->magicpreview->config['jsUrl'].'mgr/magicpreview.class.js');
+        // Note: no custom JS file needed; the preview page is self-contained
         $this->addCss($this->magicpreview->config['cssUrl'].'preview.css');
         $this->addHtml('<script type="text/javascript">
         Ext.onReady(function() {

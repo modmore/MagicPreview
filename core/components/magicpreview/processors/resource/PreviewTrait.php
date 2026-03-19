@@ -32,7 +32,10 @@ trait PreviewTrait
         }
         $data = $this->object->toArray('', true);
 
-        $key = bin2hex(random_bytes(12));
+        // Use a deterministic hash of the data so identical content
+        // returns the same key. This allows the client-side auto-refresh
+        // to skip reloading the iframe when nothing has actually changed.
+        $key = substr(hash('sha256', json_encode($data)), 0, 24);
         $this->modx->cacheManager->set($this->object->get('id') . '/' . $key, $data, 3600, [
             xPDO::OPT_CACHE_KEY => 'magicpreview'
         ]);

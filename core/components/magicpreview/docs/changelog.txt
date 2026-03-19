@@ -6,6 +6,7 @@ Released on 2026-xx-xx
 - Add magicpreview.preview_mode setting to switch between popup and panel modes
 - Add magicpreview.panel_layout setting to control panel behavior (overlay or onpage)
 - Add magicpreview.auto_preview setting to automatically generate a preview on page load
+- Add magicpreview.auto_refresh_interval setting for automatic preview refresh when form data changes
 - Add drag-to-resize on the panel edge for both overlay and onpage layouts
 - Expose global MagicPreview JS API (show/close/isOpen) for external consumers like VersionX
 - Panel includes responsive breakpoint controls that set the iframe content width

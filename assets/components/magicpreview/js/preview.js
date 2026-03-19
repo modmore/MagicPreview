@@ -34,10 +34,22 @@
             previewMode: MagicPreviewConfig.previewMode || 'newwindow',
             panelLayout: MagicPreviewConfig.panelLayout || 'overlay',
             autoPreview: !!MagicPreviewConfig.autoPreview,
+            autoRefreshInterval: parseInt(MagicPreviewConfig.autoRefreshInterval, 10) || 0,
             breakpoints: MagicPreviewConfig.breakpoints || {},
+            lexicon: MagicPreviewConfig.lexicon || {},
         };
 
         return _config;
+    }
+
+    /**
+     * Returns a lexicon string by key, falling back to the key itself.
+     * @param {string} key - Lexicon key (e.g. 'preview_button')
+     * @returns {string}
+     */
+    function lexicon(key) {
+        var lex = config().lexicon;
+        return (lex && lex[key]) ? lex[key] : key;
     }
 
     // =========================================================================
@@ -70,10 +82,10 @@
 
         // Build breakpoint buttons HTML
         var bpKeys = [
-            { key: 'full', label: 'Full' },
-            { key: 'desktop', label: 'Desktop' },
-            { key: 'tablet', label: 'Tablet' },
-            { key: 'mobile', label: 'Mobile' }
+            { key: 'full', label: lexicon('bp_full') },
+            { key: 'desktop', label: lexicon('bp_desktop') },
+            { key: 'tablet', label: lexicon('bp_tablet') },
+            { key: 'mobile', label: lexicon('bp_mobile') }
         ];
         var bpHtml = '';
         for (var i = 0; i < bpKeys.length; i++) {
@@ -88,12 +100,12 @@
             + '<div class="mmmp-panel__toolbar">'
             +   '<div class="mmmp-panel__breakpoints">' + bpHtml + '</div>'
             +   '<div class="mmmp-panel__actions">'
-            +     '<button type="button" class="mmmp-panel__reload" title="Reload preview">'
+            +     '<button type="button" class="mmmp-panel__reload" title="' + lexicon('reload_preview') + '">'
             +       '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">'
             +         '<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.992 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M20.015 4.356v4.992" />'
             +       '</svg>'
             +     '</button>'
-            +     '<button type="button" class="mmmp-panel__close" title="Close preview panel">'
+            +     '<button type="button" class="mmmp-panel__close" title="' + lexicon('close_panel') + '">'
             +       '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">'
             +         '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />'
             +       '</svg>'
@@ -106,10 +118,10 @@
             +   '</div>'
             +   '<div class="mmmp-panel__loading">'
             +     '<div class="mmmp-c-animation"><div></div><div></div><div></div><div></div></div>'
-            +     '<p>Preparing your preview...</p>'
+            +     '<p>' + lexicon('preparing_preview') + '</p>'
             +   '</div>'
             +   '<div class="mmmp-panel__idle">'
-            +     '<p>Click <strong>Preview</strong> to generate a preview.</p>'
+            +     '<p>' + lexicon('idle_message') + '</p>'
             +   '</div>'
             + '</div>';
 
@@ -259,6 +271,7 @@
         panelEl.classList.remove('mmmp-panel--open');
         document.body.classList.remove('mmmp-panel-onpage-active');
         syncActionButtonsOffset();
+        stopAutoRefresh();
 
         if (panelIframe) {
             panelIframe.src = '';
@@ -620,51 +633,116 @@
     // =========================================================================
 
     /**
+     * Syncs form data for a silent auto-refresh preview submission.
+     *
+     * Replicates the essential parts of the resource panel's beforeSubmit
+     * handler (RTE content sync, resource groups encoding) and collects
+     * third-party extra data (e.g. ContentBlocks) without firing the
+     * panel's 'save' event — which would cause side effects if triggered
+     * every few seconds.
+     *
+     * @param {Ext.form.BasicForm} fm - The resource form
+     * @param {MODx.panel.Resource} panel - The resource panel component
+     */
+    function syncFormForPreview(fm, panel) {
+        // 1. Sync RTE content: copy textarea value to hiddenContent
+        var ta = Ext.get(panel.contentField);
+        if (ta) {
+            var hc = Ext.getCmp('hiddenContent');
+            if (hc) { hc.setValue(ta.dom.value); }
+        }
+
+        // 2. Sync RTE editors (TinyMCE, CKEditor, etc.)
+        if (panel.cleanupEditor) {
+            panel.cleanupEditor();
+        }
+
+        // 3. Encode resource groups into baseParams
+        var g = Ext.getCmp('modx-grid-resource-security');
+        if (g) {
+            Ext.apply(fm.baseParams, {
+                resource_groups: g.encode()
+            });
+        }
+
+        // 4. ContentBlocks: inject block data if available
+        if (typeof ContentBlocks !== 'undefined' && ContentBlocks.getData) {
+            fm.baseParams['contentblocks'] = ContentBlocks.getData();
+        }
+    }
+
+    /**
      * Submits the resource form to the MagicPreview processor.
      *
      * Bypasses MODx.FormPanel.submit() entirely to avoid the save mask
      * (waitMsg), tree refresh, dirty-state reset, and "Save successful"
      * status message that MODX's default success handler triggers.
      *
-     * Instead, we:
-     * 1. Fire the panel's beforeSubmit event (syncs RTE content, encodes
-     *    resource groups — same as a normal save).
-     * 2. Submit the BasicForm directly to our connector with no waitMsg.
-     * 3. Handle the response in success/failure callbacks that never touch
-     *    the FormPanel-level success event.
+     * For manual previews (button click, initial auto-preview), we fire
+     * the panel's beforeSubmit event so all extras can prepare their data.
+     *
+     * For silent auto-refreshes, we use syncFormForPreview() which
+     * replicates the essential data syncing without firing the 'save'
+     * event that beforeSubmit triggers at the end.
+     *
+     * @param {object} [options] Optional settings for this submission
+     * @param {boolean} [options.showLoading=true] Whether to show the loading
+     *   animation. Set to false for background auto-refreshes.
      */
-    function submitPreview() {
+    function submitPreview(options) {
+        options = options || {};
+        var showLoading = options.showLoading !== false;
+
         var panel = Ext.getCmp('modx-panel-resource');
         if (!panel) return;
 
         var fm = panel.getForm();
         if (!fm) return;
 
-        // Show loading state immediately
-        MagicPreview.showLoading();
+        // Show loading state immediately (only for manual/initial previews)
+        if (showLoading) {
+            MagicPreview.showLoading();
+        }
 
-        // Validate form fields
-        var isValid = true;
-        if (fm.items && fm.items.items) {
-            for (var fld in fm.items.items) {
-                if (fm.items.items[fld] && fm.items.items[fld].validate) {
-                    if (!fm.items.items[fld].validate()) {
-                        fm.items.items[fld].markInvalid();
-                        isValid = false;
+        // Mark a request as in-flight so auto-refresh doesn't overlap
+        submitInFlight = true;
+
+        // Validate form fields (only for manual previews — skip for
+        // silent auto-refreshes to avoid marking fields invalid)
+        if (showLoading) {
+            var isValid = true;
+            if (fm.items && fm.items.items) {
+                for (var fld in fm.items.items) {
+                    if (fm.items.items[fld] && fm.items.items[fld].validate) {
+                        if (!fm.items.items[fld].validate()) {
+                            fm.items.items[fld].markInvalid();
+                            isValid = false;
+                        }
                     }
                 }
             }
+            if (!isValid) {
+                submitInFlight = false;
+                return;
+            }
         }
-        if (!isValid) return;
 
-        // Fire beforeSubmit on the panel so RTE content is synced,
-        // resource groups are encoded, etc. — same as a normal save.
-        var canSubmit = panel.fireEvent('beforeSubmit', {
-            form: fm,
-            options: {},
-            config: panel.config
-        });
-        if (canSubmit === false) return;
+        if (showLoading) {
+            // Manual preview: fire beforeSubmit so all extras can prepare
+            // their data (ContentBlocks, etc.) — same as a normal save.
+            var canSubmit = panel.fireEvent('beforeSubmit', {
+                form: fm,
+                options: {},
+                config: panel.config
+            });
+            if (canSubmit === false) {
+                submitInFlight = false;
+                return;
+            }
+        } else {
+            // Silent auto-refresh: sync form data without firing save event
+            syncFormForPreview(fm, panel);
+        }
 
         // Stash and swap the action + URL on the BasicForm so ExtJS
         // posts to our preview connector instead of the real save endpoint.
@@ -682,17 +760,86 @@
             success: function(form, action) {
                 fm.baseParams['action'] = originalAction;
                 fm.url = originalUrl;
+                submitInFlight = false;
 
                 var result = action.result;
                 if (result && result.object && result.object.preview_hash) {
-                    MagicPreview.show(result.object.preview_hash);
+                    var hash = result.object.preview_hash;
+
+                    // Only reload the iframe if the hash (and therefore
+                    // the preview data) has actually changed.  The server
+                    // returns a deterministic hash based on the cached
+                    // data, so identical content produces the same key.
+                    if (hash !== lastPanelHash) {
+                        MagicPreview.show(hash);
+                    }
                 }
+
+                // (Re)start the auto-refresh timer after a successful preview
+                startAutoRefresh();
             },
             failure: function(form, action) {
                 fm.baseParams['action'] = originalAction;
                 fm.url = originalUrl;
+                submitInFlight = false;
             }
         });
+    }
+
+    // =========================================================================
+    // Auto-refresh: periodically re-submits the form to detect changes
+    // =========================================================================
+
+    /** @type {boolean} Whether a preview submit request is currently in flight */
+    var submitInFlight = false;
+
+    /** @type {number|null} The setInterval ID for auto-refresh */
+    var autoRefreshTimer = null;
+
+    /**
+     * Starts the auto-refresh timer. If one is already running, it is
+     * restarted (reset). Only runs when the panel is open and the
+     * interval setting is > 0.
+     *
+     * The timer always re-submits the form to the preview processor.
+     * Change detection happens server-side: the processor returns a
+     * deterministic hash of the cached data, and the client skips
+     * reloading the iframe when the hash hasn't changed.  This approach
+     * correctly captures data from all sources (TVs, ContentBlocks,
+     * and any extras that inject data via beforeSubmit / baseParams).
+     */
+    function startAutoRefresh() {
+        stopAutoRefresh();
+
+        var interval = config().autoRefreshInterval;
+        if (interval <= 0) return;
+        if (config().previewMode !== 'panel') return;
+        if (!MagicPreview.isOpen()) return;
+
+        autoRefreshTimer = setInterval(function() {
+            // Skip if a request is already in flight
+            if (submitInFlight) return;
+
+            // Skip if the panel was closed in the meantime
+            if (!MagicPreview.isOpen()) {
+                stopAutoRefresh();
+                return;
+            }
+
+            // Always re-submit; the server returns a deterministic hash
+            // and the client skips the iframe reload when data is unchanged.
+            submitPreview({ showLoading: false });
+        }, interval * 1000);
+    }
+
+    /**
+     * Stops the auto-refresh timer.
+     */
+    function stopAutoRefresh() {
+        if (autoRefreshTimer) {
+            clearInterval(autoRefreshTimer);
+            autoRefreshTimer = null;
+        }
     }
 
     // =========================================================================
@@ -724,8 +871,10 @@
             getButtons: function(cfg) {
                 var btns = this._originals.getButtons.call(this, cfg);
                 var btnView = btns.map(function(btn) { return btn.id; }).indexOf('modx-abtn-preview');
+                // If the View button doesn't exist, insert at the start of the array
+                if (btnView === -1) btnView = 0;
                 btns.splice(btnView, 0, {
-                    text: 'Preview',
+                    text: lexicon('preview_button'),
                     id: 'modx-abtn-real-preview',
                     handler: function() { submitPreview(); },
                     scope: this

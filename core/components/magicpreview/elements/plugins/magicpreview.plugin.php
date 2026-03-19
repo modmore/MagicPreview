@@ -27,11 +27,23 @@ switch ($modx->event->name) {
             $jsConfig['previewMode'] = $modx->getOption('magicpreview.preview_mode', null, 'newwindow');
             $jsConfig['panelLayout'] = $modx->getOption('magicpreview.panel_layout', null, 'overlay');
             $jsConfig['autoPreview'] = (bool)$modx->getOption('magicpreview.auto_preview', null, false);
+            $jsConfig['autoRefreshInterval'] = (int)$modx->getOption('magicpreview.auto_refresh_interval', null, 5);
             $jsConfig['baseFrameUrl'] = $baseFrameUrl;
             $jsConfig['breakpoints'] = [
                 'desktop' => $modx->getOption('magicpreview.breakpoint_desktop', null, '1280px'),
                 'tablet' => $modx->getOption('magicpreview.breakpoint_tablet', null, '768px'),
                 'mobile' => $modx->getOption('magicpreview.breakpoint_mobile', null, '320px'),
+            ];
+            $jsConfig['lexicon'] = [
+                'preview_button' => $modx->lexicon('magicpreview.preview_button'),
+                'preparing_preview' => $modx->lexicon('magicpreview.preparing_preview'),
+                'idle_message' => $modx->lexicon('magicpreview.idle_message'),
+                'reload_preview' => $modx->lexicon('magicpreview.reload_preview'),
+                'close_panel' => $modx->lexicon('magicpreview.close_panel'),
+                'bp_full' => $modx->lexicon('magicpreview.bp_full'),
+                'bp_desktop' => $modx->lexicon('magicpreview.bp_desktop'),
+                'bp_tablet' => $modx->lexicon('magicpreview.bp_tablet'),
+                'bp_mobile' => $modx->lexicon('magicpreview.bp_mobile'),
             ];
 
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/preview.js?v=' . $service::VERSION);
