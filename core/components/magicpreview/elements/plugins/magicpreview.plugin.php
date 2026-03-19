@@ -19,6 +19,21 @@ switch ($modx->event->name) {
                 $versionCls = 'magicpreview_modx3';
             }
 
+            // Build the frontend URL for the resource (used by panel mode iframe)
+            $baseFrameUrl = $modx->makeUrl($resource->get('id'), '', '', 'full');
+
+            // Add preview mode and panel settings to the JS config
+            $jsConfig = $service->config;
+            $jsConfig['previewMode'] = $modx->getOption('magicpreview.preview_mode', null, 'newwindow');
+            $jsConfig['panelLayout'] = $modx->getOption('magicpreview.panel_layout', null, 'overlay');
+            $jsConfig['autoPreview'] = (bool)$modx->getOption('magicpreview.auto_preview', null, false);
+            $jsConfig['baseFrameUrl'] = $baseFrameUrl;
+            $jsConfig['breakpoints'] = [
+                'desktop' => $modx->getOption('magicpreview.breakpoint_desktop', null, '1280px'),
+                'tablet' => $modx->getOption('magicpreview.breakpoint_tablet', null, '768px'),
+                'mobile' => $modx->getOption('magicpreview.breakpoint_mobile', null, '320px'),
+            ];
+
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/preview.js?v=' . $service::VERSION);
             $modx->controller->addHtml('
                 <script>
@@ -32,7 +47,7 @@ switch ($modx->event->name) {
                     href="' . $service->config['assetsUrl'] . 'css/mgr.css?v=' . $service::VERSION . '"
                 />
                 <script>
-                    MagicPreviewConfig = ' . json_encode($service->config) . ';
+                    MagicPreviewConfig = ' . json_encode($jsConfig) . ';
                     MagicPreviewResource = ' . $resource->get('id') . ';
                 </script>
             ');

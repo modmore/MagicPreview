@@ -21,4 +21,17 @@ return [
         'area' => 'Preview',
         'value' => ''
     ],
+    'preview_mode' => [
+        'area' => 'Preview',
+        'value' => 'newwindow',
+    ],
+    'panel_layout' => [
+        'area' => 'Preview',
+        'value' => 'overlay',
+    ],
+    'auto_preview' => [
+        'area' => 'Preview',
+        'value' => false,
+        'xtype' => 'combo-boolean',
+    ],
 ];

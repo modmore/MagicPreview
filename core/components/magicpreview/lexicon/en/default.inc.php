@@ -2,6 +2,7 @@
 $_lang['magicpreview'] = 'Magic Preview';
 $_lang['magicpreview.preview'] = 'Preview for ';
 $_lang['magicpreview.preparing_preview'] = 'Preparing your preview...';
+$_lang['magicpreview.close_panel'] = 'Close preview panel';
 
 $_lang['magicpreview.bp_full'] = 'Full';
 $_lang['magicpreview.bp_desktop'] = 'Desktop';
@@ -19,4 +20,10 @@ $_lang['setting_magicpreview.custom_preview_tpl'] = 'Custom Preview Template';
 $_lang['setting_magicpreview.custom_preview_tpl_desc'] = 'The path for the template file to load.';
 $_lang['setting_magicpreview.custom_preview_css'] = 'Custom Preview CSS';
 $_lang['setting_magicpreview.custom_preview_css_desc'] = 'The path for the CSS file to load.';
+$_lang['setting_magicpreview.preview_mode'] = 'Preview Mode';
+$_lang['setting_magicpreview.preview_mode_desc'] = 'How to display the preview. "newwindow" opens a new browser window (default). "panel" shows an inline side panel in the manager.';
+$_lang['setting_magicpreview.panel_layout'] = 'Panel Layout';
+$_lang['setting_magicpreview.panel_layout_desc'] = 'How the preview panel interacts with the editor. "overlay" floats on top (default). "onpage" shrinks the editor to make room for a permanent column.';
+$_lang['setting_magicpreview.auto_preview'] = 'Auto Preview';
+$_lang['setting_magicpreview.auto_preview_desc'] = 'Automatically generate a preview when the resource form loads. Only applies when preview mode is set to "panel". Default: No.';
 
