@@ -47,6 +47,16 @@ switch ($modx->event->name) {
             ];
 
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/preview.js?v=' . $service::VERSION);
+
+            // When onpage panel + auto-preview is active, the panel will be
+            // visible immediately on page load. Inject an early CSS rule so
+            // the action buttons bar starts at the correct offset instead of
+            // flashing at full width before JS runs syncActionButtonsOffset().
+            $earlyPanelCss = '';
+            if ($jsConfig['previewMode'] === 'panel' && $jsConfig['panelLayout'] === 'onpage' && $jsConfig['autoPreview']) {
+                $earlyPanelCss = '<style>#modx-action-buttons { right: 40%; }</style>';
+            }
+
             $modx->controller->addHtml('
                 <script>
                     Ext.onReady(() => {
@@ -58,6 +68,7 @@ switch ($modx->event->name) {
                     type="text/css"
                     href="' . $service->config['assetsUrl'] . 'css/mgr.css?v=' . $service::VERSION . '"
                 />
+                ' . $earlyPanelCss . '
                 <script>
                     MagicPreviewConfig = ' . json_encode($jsConfig) . ';
                     MagicPreviewResource = ' . $resource->get('id') . ';
