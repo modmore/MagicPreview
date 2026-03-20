@@ -33,7 +33,7 @@
             frameJoiner: baseFrameUrl.indexOf('?') === -1 ? '?' : '&',
             previewMode: MagicPreviewConfig.previewMode || 'newwindow',
             panelLayout: MagicPreviewConfig.panelLayout || 'overlay',
-            autoPreview: !!MagicPreviewConfig.autoPreview,
+            panelExtended: !!MagicPreviewConfig.panelExtended,
             autoRefreshInterval: parseInt(MagicPreviewConfig.autoRefreshInterval, 10) || 0,
             breakpoints: MagicPreviewConfig.breakpoints || {},
             lexicon: MagicPreviewConfig.lexicon || {},
@@ -428,17 +428,17 @@
     }
 
     /**
-     * For "onpage" layout with auto-preview: opens the panel immediately
+     * For "onpage" layout with panel_extended: opens the panel immediately
      * on page load so it appears as a column alongside the editor with
      * a loading state while the preview is being generated.
      *
-     * When auto-preview is off, the panel stays hidden until the user
+     * When panel_extended is off, the panel stays hidden until the user
      * clicks Preview — openPanel() handles everything at that point.
      */
     function initOnpagePanel() {
         if (config().panelLayout !== 'onpage') return;
         if (config().previewMode !== 'panel') return;
-        if (!config().autoPreview) return;
+        if (!config().panelExtended) return;
 
         createPanel();
         panelEl.classList.add('mmmp-panel--open');
@@ -460,12 +460,12 @@
     }
 
     /**
-     * Triggers auto-preview by submitting the form after the resource
-     * panel has finished rendering. Only runs when autoPreview is
+     * Triggers an initial preview by submitting the form after the resource
+     * panel has finished rendering. Only runs when panelExtended is
      * enabled and previewMode is 'panel'.
      */
     function initAutoPreview() {
-        if (!config().autoPreview) return;
+        if (!config().panelExtended) return;
         if (config().previewMode !== 'panel') return;
 
         // For overlay mode, open the panel first (onpage is already open via initOnpagePanel)

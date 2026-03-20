@@ -26,7 +26,7 @@ switch ($modx->event->name) {
             $jsConfig = $service->config;
             $jsConfig['previewMode'] = $modx->getOption('magicpreview.preview_mode', null, 'newwindow');
             $jsConfig['panelLayout'] = $modx->getOption('magicpreview.panel_layout', null, 'overlay');
-            $jsConfig['autoPreview'] = (bool)$modx->getOption('magicpreview.auto_preview', null, false);
+            $jsConfig['panelExtended'] = (bool)$modx->getOption('magicpreview.panel_extended', null, false);
             $jsConfig['autoRefreshInterval'] = (int)$modx->getOption('magicpreview.auto_refresh_interval', null, 5);
             $jsConfig['baseFrameUrl'] = $baseFrameUrl;
             $jsConfig['breakpoints'] = [
@@ -53,7 +53,7 @@ switch ($modx->event->name) {
             // the action buttons bar starts at the correct offset instead of
             // flashing at full width before JS runs syncActionButtonsOffset().
             $earlyPanelCss = '';
-            if ($jsConfig['previewMode'] === 'panel' && $jsConfig['panelLayout'] === 'onpage' && $jsConfig['autoPreview']) {
+            if ($jsConfig['previewMode'] === 'panel' && $jsConfig['panelLayout'] === 'onpage' && $jsConfig['panelExtended']) {
                 $earlyPanelCss = '<style>#modx-action-buttons { right: 40%; }</style>';
             }
 

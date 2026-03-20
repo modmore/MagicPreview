@@ -29,7 +29,7 @@ return [
         'area' => 'Preview',
         'value' => 'overlay',
     ],
-    'auto_preview' => [
+    'panel_extended' => [
         'area' => 'Preview',
         'value' => false,
         'xtype' => 'combo-boolean',
