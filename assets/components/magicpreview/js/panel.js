@@ -96,13 +96,13 @@
             + '<div class="mmmp-panel__toolbar">'
             +   '<div class="mmmp-panel__breakpoints">' + bpHtml + '</div>'
             +   '<div class="mmmp-panel__actions">'
-            +     '<button type="button" class="mmmp-panel__reload" title="' + lexicon('reload_preview') + '">'
-            +       '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">'
+            +     '<button type="button" class="mmmp-panel__reload" title="' + lexicon('reload_preview') + '" aria-label="' + lexicon('reload_preview') + '">'
+            +       '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">'
             +         '<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.992 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M20.015 4.356v4.992" />'
             +       '</svg>'
             +     '</button>'
-            +     '<button type="button" class="mmmp-panel__close" title="' + lexicon('close_panel') + '">'
-            +       '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">'
+            +     '<button type="button" class="mmmp-panel__close" title="' + lexicon('close_panel') + '" aria-label="' + lexicon('close_panel') + '">'
+            +       '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">'
             +         '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />'
             +       '</svg>'
             +     '</button>'
@@ -257,9 +257,8 @@
             }
         } catch (e) { /* cross-origin or no document — use 0,0 */ }
 
-        // Load the new preview into the staging (hidden) iframe.
-        staging.src = url;
-
+        // Register the load handler before setting src to avoid a race
+        // condition where a cached response fires the event synchronously.
         var onLoad = function() {
             staging.removeEventListener('load', onLoad);
 
@@ -280,6 +279,9 @@
             active.src = '';
         };
         staging.addEventListener('load', onLoad);
+
+        // Load the new preview into the staging (hidden) iframe.
+        staging.src = url;
     }
 
     // =========================================================================

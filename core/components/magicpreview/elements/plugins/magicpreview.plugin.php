@@ -3,10 +3,12 @@
  * @var modX $modx
  */
 // Setting value constants
-define('MAGICPREVIEW_MODE_PANEL', 'Panel');
-define('MAGICPREVIEW_MODE_WINDOW', 'New Window');
-define('MAGICPREVIEW_LAYOUT_OVERLAY', 'Overlay');
-define('MAGICPREVIEW_LAYOUT_ONPAGE', 'On Page');
+if (!defined('MAGICPREVIEW_MODE_PANEL')) {
+    define('MAGICPREVIEW_MODE_PANEL', 'Panel');
+    define('MAGICPREVIEW_MODE_WINDOW', 'New Window');
+    define('MAGICPREVIEW_LAYOUT_OVERLAY', 'Overlay');
+    define('MAGICPREVIEW_LAYOUT_ONPAGE', 'On Page');
+}
 
 $path = $modx->getOption('magicpreview.core_path', null, $modx->getOption('core_path') . 'components/magicpreview/');
 $service = $modx->getService('magicpreview', 'MagicPreview', $path . '/model/magicpreview/');
