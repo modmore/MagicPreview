@@ -15,9 +15,9 @@
     border-top-left-radius: 0 !important;
     border-bottom-left-radius: 0 !important;
 }
-    
+
 #modx-abtn-preview:before {
-    content: "\2197";
+    content: "↗";
 }
 
 #modx-abtn-preview .x-btn-text {        
