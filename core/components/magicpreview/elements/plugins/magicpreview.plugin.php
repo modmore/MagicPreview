@@ -2,6 +2,12 @@
 /**
  * @var modX $modx
  */
+// Setting value constants
+define('MAGICPREVIEW_MODE_PANEL', 'Panel');
+define('MAGICPREVIEW_MODE_WINDOW', 'New Window');
+define('MAGICPREVIEW_LAYOUT_OVERLAY', 'Overlay');
+define('MAGICPREVIEW_LAYOUT_ONPAGE', 'On Page');
+
 $path = $modx->getOption('magicpreview.core_path', null, $modx->getOption('core_path') . 'components/magicpreview/');
 $service = $modx->getService('magicpreview', 'MagicPreview', $path . '/model/magicpreview/');
 if (!($service instanceof MagicPreview)) {
@@ -24,8 +30,8 @@ switch ($modx->event->name) {
 
             // Add preview mode and panel settings to the JS config
             $jsConfig = $service->config;
-            $jsConfig['previewMode'] = $modx->getOption('magicpreview.preview_mode', null, 'newwindow');
-            $jsConfig['panelLayout'] = $modx->getOption('magicpreview.panel_layout', null, 'overlay');
+            $jsConfig['previewMode'] = $modx->getOption('magicpreview.preview_mode', null, MAGICPREVIEW_MODE_WINDOW);
+            $jsConfig['panelLayout'] = $modx->getOption('magicpreview.panel_layout', null, MAGICPREVIEW_LAYOUT_OVERLAY);
             $jsConfig['panelExtended'] = (bool)$modx->getOption('magicpreview.panel_extended', null, false);
             $jsConfig['autoRefreshInterval'] = (int)$modx->getOption('magicpreview.auto_refresh_interval', null, 5);
             $jsConfig['baseFrameUrl'] = $baseFrameUrl;
@@ -55,7 +61,7 @@ switch ($modx->event->name) {
             // the action buttons bar starts at the correct offset instead of
             // flashing at full width before JS runs syncActionButtonsOffset().
             $earlyPanelCss = '';
-            if ($jsConfig['previewMode'] === 'panel' && $jsConfig['panelLayout'] === 'onpage' && $jsConfig['panelExtended']) {
+            if ($jsConfig['previewMode'] === MAGICPREVIEW_MODE_PANEL && $jsConfig['panelLayout'] === MAGICPREVIEW_LAYOUT_ONPAGE && $jsConfig['panelExtended']) {
                 $earlyPanelCss = '<style>.mmmp-panel-onpage-active #modx-action-buttons { right: 40%; }</style>';
             }
 
@@ -81,9 +87,16 @@ switch ($modx->event->name) {
 
     case 'OnManagerPageBeforeRender':
         // Load combo xtypes for system settings dropdowns. Only needed
-        // when viewing settings, but the JS is small enough that loading
-        // it on every manager page is harmless and avoids page detection.
-        $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/combo.js?v=' . $service::VERSION);
+        // on pages that render a settings grid.
+        $settingsActions = [
+            'system/settings',
+            'context/update',
+            'security/usergroup/update',
+            'security/user/update',
+        ];
+        if (in_array($modx->request->action, $settingsActions, true)) {
+            $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/combo.js?v=' . $service::VERSION);
+        }
         break;
 
     case 'OnLoadWebDocument':

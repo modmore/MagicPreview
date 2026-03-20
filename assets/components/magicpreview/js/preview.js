@@ -14,6 +14,17 @@
  */
 (function() {
     // =========================================================================
+    // Setting value constants
+    // =========================================================================
+
+    /** @type {string} Setting value for panel preview mode */
+    var MODE_PANEL = 'Panel';
+    /** @type {string} Setting value for new window preview mode */
+    var MODE_WINDOW = 'New Window';
+    /** @type {string} Setting value for overlay panel layout */
+    var LAYOUT_OVERLAY = 'Overlay';
+
+    // =========================================================================
     // Configuration (lazy-loaded: resolved on first access because the
     // globals MagicPreviewConfig, MagicPreviewResource and MODx.config may
     // not exist yet when this script is parsed from <head>)
@@ -35,8 +46,8 @@
                 + '?namespace=magicpreview&a=preview&resource=' + MagicPreviewResource,
             baseFrameUrl: baseFrameUrl,
             frameJoiner: baseFrameUrl.indexOf('?') === -1 ? '?' : '&',
-            previewMode: MagicPreviewConfig.previewMode ?? 'newwindow',
-            panelLayout: MagicPreviewConfig.panelLayout ?? 'overlay',
+            previewMode: MagicPreviewConfig.previewMode ?? MODE_WINDOW,
+            panelLayout: MagicPreviewConfig.panelLayout ?? LAYOUT_OVERLAY,
             panelExtended: !!MagicPreviewConfig.panelExtended,
             autoRefreshInterval: parseInt(MagicPreviewConfig.autoRefreshInterval, 10) || 0,
             breakpoints: MagicPreviewConfig.breakpoints ?? {},
@@ -90,7 +101,7 @@
     window.MagicPreview.show = function(hash) {
         var c = config();
 
-        if (c.previewMode === 'panel') {
+        if (c.previewMode === MODE_PANEL) {
             _panel.open();
             if (!hash || hash === 'loading') {
                 _panel.showLoading();
@@ -110,7 +121,7 @@
      * Close the preview (window or panel).
      */
     window.MagicPreview.close = function() {
-        if (config().previewMode === 'panel') {
+        if (config().previewMode === MODE_PANEL) {
             _panel.close();
             stopAutoRefresh();
         } else {
@@ -123,7 +134,7 @@
      * @returns {boolean}
      */
     window.MagicPreview.isOpen = function() {
-        if (config().previewMode === 'panel') {
+        if (config().previewMode === MODE_PANEL) {
             return _panel.isOpen();
         }
         return _window.isOpen();
@@ -131,7 +142,7 @@
 
     /**
      * Get the current preview mode.
-     * @returns {string} 'newwindow' or 'panel'
+     * @returns {string} MODE_WINDOW or MODE_PANEL
      */
     window.MagicPreview.getMode = function() {
         return config().previewMode;
@@ -306,7 +317,7 @@
 
                     // Only reload the iframe if the hash (and therefore
                     // the preview data) has actually changed.
-                    if (config().previewMode === 'panel') {
+                    if (config().previewMode === MODE_PANEL) {
                         if (hash !== _panel.getLastHash()) {
                             MagicPreview.show(hash);
                         }
@@ -343,7 +354,7 @@
 
         var interval = config().autoRefreshInterval;
         if (interval <= 0) return;
-        if (config().previewMode !== 'panel') return;
+        if (config().previewMode !== MODE_PANEL) return;
         if (!MagicPreview.isOpen()) return;
 
         autoRefreshTimer = setInterval(function() {
@@ -375,15 +386,15 @@
     /**
      * Triggers an initial preview by submitting the form after the
      * resource panel has finished rendering. Only runs when panelExtended
-     * is enabled and previewMode is 'panel'.
+     * is enabled and previewMode is MODE_PANEL.
      */
     function initAutoPreview() {
         if (!config().panelExtended) return;
-        if (config().previewMode !== 'panel') return;
+        if (config().previewMode !== MODE_PANEL) return;
 
         // For overlay mode, open the panel first (onpage is already open
         // via _panel.initOnpage)
-        if (config().panelLayout === 'overlay') {
+        if (config().panelLayout === LAYOUT_OVERLAY) {
             _panel.open();
             _panel.showLoading();
         }

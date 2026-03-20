@@ -5,25 +5,25 @@
  * panel_layout system settings render as dropdowns instead of plain
  * text fields in the MODX manager.
  *
- * Loaded on every manager page via OnManagerPageBeforeRender.
+ * Loaded on settings pages via OnManagerPageBeforeRender.
  */
 MagicPreview = window.MagicPreview || {};
 MagicPreview.combo = MagicPreview.combo || {};
 
 /**
- * Preview Mode combo: newwindow or panel.
+ * Preview Mode combo: New Window or Panel.
  */
 MagicPreview.combo.PreviewMode = function(config) {
     config = config || {};
     Ext.applyIf(config, {
         store: new Ext.data.SimpleStore({
-            fields: ['d', 'v'],
+            fields: ['v'],
             data: [
-                ['New Window', 'newwindow'],
-                ['Panel', 'panel']
+                ['New Window'],
+                ['Panel']
             ]
         }),
-        displayField: 'd',
+        displayField: 'v',
         valueField: 'v',
         mode: 'local',
         triggerAction: 'all',
@@ -39,19 +39,19 @@ Ext.extend(MagicPreview.combo.PreviewMode, MODx.combo.ComboBox);
 Ext.reg('magicpreview-combo-preview-mode', MagicPreview.combo.PreviewMode);
 
 /**
- * Panel Layout combo: overlay or onpage.
+ * Panel Layout combo: Overlay or On Page.
  */
 MagicPreview.combo.PanelLayout = function(config) {
     config = config || {};
     Ext.applyIf(config, {
         store: new Ext.data.SimpleStore({
-            fields: ['d', 'v'],
+            fields: ['v'],
             data: [
-                ['Overlay', 'overlay'],
-                ['On Page', 'onpage']
+                ['Overlay'],
+                ['On Page']
             ]
         }),
-        displayField: 'd',
+        displayField: 'v',
         valueField: 'v',
         mode: 'local',
         triggerAction: 'all',

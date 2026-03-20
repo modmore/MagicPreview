@@ -24,11 +24,11 @@ $_lang['setting_magicpreview.custom_preview_tpl_desc'] = 'The path for the templ
 $_lang['setting_magicpreview.custom_preview_css'] = 'Custom Preview CSS';
 $_lang['setting_magicpreview.custom_preview_css_desc'] = 'The path for the CSS file to load.';
 $_lang['setting_magicpreview.preview_mode'] = 'Preview Mode';
-$_lang['setting_magicpreview.preview_mode_desc'] = 'How to display the preview. "newwindow" opens a new browser window (default). "panel" shows an inline side panel in the manager.';
+$_lang['setting_magicpreview.preview_mode_desc'] = 'How to display the preview. "New Window" opens a new browser window (default). "Panel" shows an inline side panel in the manager.';
 $_lang['setting_magicpreview.panel_layout'] = 'Panel Layout';
-$_lang['setting_magicpreview.panel_layout_desc'] = 'How the preview panel interacts with the editor. "overlay" floats on top (default). "onpage" shrinks the editor to make room for a permanent column.';
+$_lang['setting_magicpreview.panel_layout_desc'] = 'How the preview panel interacts with the editor. "Overlay" floats on top (default). "On Page" shrinks the editor to make room for a permanent column.';
 $_lang['setting_magicpreview.panel_extended'] = 'Panel Extended';
-$_lang['setting_magicpreview.panel_extended_desc'] = 'Start with the preview panel extended when the resource form loads. Automatically generates an initial preview. Only applies when preview mode is set to "panel". Default: No.';
+$_lang['setting_magicpreview.panel_extended_desc'] = 'Start with the preview panel extended when the resource form loads. Automatically generates an initial preview. Only applies when preview mode is set to "Panel". Default: No.';
 $_lang['setting_magicpreview.auto_refresh_interval'] = 'Auto Refresh Interval';
 $_lang['setting_magicpreview.auto_refresh_interval_desc'] = 'Seconds between automatic preview refreshes while the panel is open. The preview only refreshes when form data has changed. Set to 0 to disable. Default: 5.';
 

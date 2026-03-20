@@ -23,12 +23,12 @@ return [
     ],
     'preview_mode' => [
         'area' => 'Preview',
-        'value' => 'newwindow',
+        'value' => 'New Window',
         'xtype' => 'magicpreview-combo-preview-mode',
     ],
     'panel_layout' => [
         'area' => 'Preview',
-        'value' => 'overlay',
+        'value' => 'Overlay',
         'xtype' => 'magicpreview-combo-panel-layout',
     ],
     'panel_extended' => [

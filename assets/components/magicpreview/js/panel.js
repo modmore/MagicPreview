@@ -20,8 +20,23 @@
     // Configuration (set via init)
     // =========================================================================
 
+    /** @type {string} Setting value for overlay layout */
+    var LAYOUT_OVERLAY = 'Overlay';
+    /** @type {string} Setting value for on-page layout */
+    var LAYOUT_ONPAGE = 'On Page';
+
     /** @type {object|null} */
     var _cfg = null;
+
+    /**
+     * Returns a CSS-safe slug from a setting value.
+     * e.g. 'On Page' -> 'onpage', 'Overlay' -> 'overlay'
+     * @param {string} value
+     * @returns {string}
+     */
+    function cssSlug(value) {
+        return value.toLowerCase().replace(/\s+/g, '');
+    }
 
     /**
      * Returns a lexicon string by key, falling back to the key itself.
@@ -59,7 +74,7 @@
 
         panelEl = document.createElement('div');
         panelEl.id = 'mmmp-panel';
-        panelEl.className = 'mmmp-panel mmmp-panel--' + _cfg.panelLayout;
+        panelEl.className = 'mmmp-panel mmmp-panel--' + cssSlug(_cfg.panelLayout);
 
         // Build breakpoint buttons HTML
         var bpKeys = [
@@ -287,7 +302,7 @@
 
         panelEl.classList.add('mmmp-panel--open');
 
-        if (_cfg.panelLayout === 'onpage') {
+        if (_cfg.panelLayout === LAYOUT_ONPAGE) {
             document.body.classList.add('mmmp-panel-onpage-active');
             syncActionButtonsOffset();
             relayoutModx();
@@ -405,7 +420,7 @@
             customPanelWidth = panelEl.offsetWidth;
 
             // For onpage mode, recalculate the ExtJS layout
-            if (_cfg.panelLayout === 'onpage' && document.body.classList.contains('mmmp-panel-onpage-active')) {
+            if (_cfg.panelLayout === LAYOUT_ONPAGE && document.body.classList.contains('mmmp-panel-onpage-active')) {
                 relayoutModx();
             }
         }
@@ -424,7 +439,7 @@
         var actionBar = document.getElementById('modx-action-buttons');
         if (!actionBar) return;
 
-        if (_cfg.panelLayout === 'onpage' && document.body.classList.contains('mmmp-panel-onpage-active')) {
+        if (_cfg.panelLayout === LAYOUT_ONPAGE && document.body.classList.contains('mmmp-panel-onpage-active')) {
             actionBar.style.right = getPanelWidth() + 'px';
         } else {
             actionBar.style.right = '';
@@ -499,7 +514,7 @@
      * clicks Preview — open() handles everything at that point.
      */
     function initOnpage() {
-        if (_cfg.panelLayout !== 'onpage') return;
+        if (_cfg.panelLayout !== LAYOUT_ONPAGE) return;
         if (!_cfg.panelExtended) return;
 
         createPanel();
@@ -530,7 +545,7 @@
          * Initialise the panel module with configuration.
          * Must be called once before any other method.
          * @param {object} cfg
-         * @param {string} cfg.panelLayout - 'overlay' or 'onpage'
+         * @param {string} cfg.panelLayout - LAYOUT_OVERLAY or LAYOUT_ONPAGE
          * @param {boolean} cfg.panelExtended - Start with panel open
          * @param {object} cfg.breakpoints - {desktop, tablet, mobile}
          * @param {object} cfg.lexicon - Lexicon strings
