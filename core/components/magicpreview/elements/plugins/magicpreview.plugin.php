@@ -46,6 +46,8 @@ switch ($modx->event->name) {
                 'bp_mobile' => $modx->lexicon('magicpreview.bp_mobile'),
             ];
 
+            $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/window.js?v=' . $service::VERSION);
+            $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/panel.js?v=' . $service::VERSION);
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/preview.js?v=' . $service::VERSION);
 
             // When onpage panel + auto-preview is active, the panel will be
@@ -54,7 +56,7 @@ switch ($modx->event->name) {
             // flashing at full width before JS runs syncActionButtonsOffset().
             $earlyPanelCss = '';
             if ($jsConfig['previewMode'] === 'panel' && $jsConfig['panelLayout'] === 'onpage' && $jsConfig['panelExtended']) {
-                $earlyPanelCss = '<style>#modx-action-buttons { right: 40%; }</style>';
+                $earlyPanelCss = '<style>.mmmp-panel-onpage-active #modx-action-buttons { right: 40%; }</style>';
             }
 
             $modx->controller->addHtml('
@@ -75,6 +77,13 @@ switch ($modx->event->name) {
                 </script>
             ');
         }
+        break;
+
+    case 'OnManagerPageBeforeRender':
+        // Load combo xtypes for system settings dropdowns. Only needed
+        // when viewing settings, but the JS is small enough that loading
+        // it on every manager page is harmless and avoids page detection.
+        $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/combo.js?v=' . $service::VERSION);
         break;
 
     case 'OnLoadWebDocument':

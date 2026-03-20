@@ -46,7 +46,7 @@ class MagicPreviewPreviewManagerController extends modExtraManagerController
      * Defines the lexicon topics to load in our controller.
      * @return array
      */
-    public function getLanguageTopics(): array
+    public function getLanguageTopics()
     {
         return ['magicpreview:default'];
     }
@@ -55,7 +55,7 @@ class MagicPreviewPreviewManagerController extends modExtraManagerController
      * The pagetitle to put in the <title> attribute.
      * @return null|string
      */
-    public function getPageTitle(): ?string
+    public function getPageTitle()
     {
         return $this->modx->lexicon('magicpreview');
     }
@@ -80,7 +80,7 @@ class MagicPreviewPreviewManagerController extends modExtraManagerController
      * The name for the template file to load.
      * @return string
      */
-    public function getTemplateFile(): string
+    public function getTemplateFile()
     {
         $custom = $this->modx->getOption('magicpreview.custom_preview_tpl');
         $tplPath = $this->magicpreview->config['templatesPath'];

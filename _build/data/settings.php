@@ -24,10 +24,12 @@ return [
     'preview_mode' => [
         'area' => 'Preview',
         'value' => 'newwindow',
+        'xtype' => 'magicpreview-combo-preview-mode',
     ],
     'panel_layout' => [
         'area' => 'Preview',
         'value' => 'overlay',
+        'xtype' => 'magicpreview-combo-panel-layout',
     ],
     'panel_extended' => [
         'area' => 'Preview',
@@ -37,5 +39,6 @@ return [
     'auto_refresh_interval' => [
         'area' => 'Preview',
         'value' => '5',
+        'xtype' => 'numberfield',
     ],
 ];
