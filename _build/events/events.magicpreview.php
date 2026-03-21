@@ -5,6 +5,7 @@ $events = array();
 $e = array(
     'OnDocFormRender',
     'OnLoadWebDocument',
+    'OnManagerPageBeforeRender',
 );
 
 foreach ($e as $ev) {

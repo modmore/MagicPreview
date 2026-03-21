@@ -111,6 +111,13 @@ if ($vcPlugin) {
     ), array('pluginid','event'), false)) {
         echo "Error creating modPluginEvent.\n";
     }
+    if (!createObject('modPluginEvent', array(
+        'pluginid' => $vcPlugin->get('id'),
+        'event' => 'OnManagerPageBeforeRender',
+        'priority' => 0,
+    ), array('pluginid','event'), false)) {
+        echo "Error creating modPluginEvent.\n";
+    }
 }
 
 

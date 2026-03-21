@@ -84,7 +84,7 @@
 
             // Handle dynamic breakpoint sizing
             var breakpoints = document.querySelectorAll('.mmmp-js-breakpoint-input');
-            breakpoints.forEach(function(bp) {
+            breakpoints.forEach(function (bp) {
                 bp.addEventListener('change', function () {
                     switch (this.value) {
                         case 'full':
