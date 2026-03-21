@@ -311,6 +311,12 @@
                 fm.url = originalUrl;
                 submitInFlight = false;
 
+                // If the panel was closed while the request was in flight,
+                // discard the result to avoid re-opening the panel.
+                if (config().previewMode === MODE_PANEL && !MagicPreview.isOpen()) {
+                    return;
+                }
+
                 var result = action.result;
                 if (result && result.object && result.object.preview_hash) {
                     var hash = result.object.preview_hash;
