@@ -476,9 +476,11 @@
             }
         });
 
-        // For "onpage" panel layout, open the panel immediately as a
-        // permanent column alongside the resource editor.
-        _panel.initOnpage();
+        // For "onpage" panel layout in panel mode, open the panel
+        // immediately as a permanent column alongside the resource editor.
+        if (config().previewMode === MODE_PANEL) {
+            _panel.initOnpage();
+        }
 
         // Auto-preview: submit the form immediately to generate a preview
         initAutoPreview();
