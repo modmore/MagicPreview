@@ -41,4 +41,14 @@ return [
         'value' => '5',
         'xtype' => 'numberfield',
     ],
+    'auto_save_draft' => [
+        'area' => 'Drafts',
+        'value' => false,
+        'xtype' => 'combo-boolean',
+    ],
+    'draft_ttl' => [
+        'area' => 'Drafts',
+        'value' => '0',
+        'xtype' => 'numberfield',
+    ],
 ];

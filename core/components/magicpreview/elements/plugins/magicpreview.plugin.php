@@ -52,7 +52,25 @@ switch ($modx->event->name) {
                 'bp_desktop' => $modx->lexicon('magicpreview.bp_desktop'),
                 'bp_tablet' => $modx->lexicon('magicpreview.bp_tablet'),
                 'bp_mobile' => $modx->lexicon('magicpreview.bp_mobile'),
+                'save_draft' => $modx->lexicon('magicpreview.save_draft'),
+                'draft_saved' => $modx->lexicon('magicpreview.draft_saved'),
+                'draft_discarded' => $modx->lexicon('magicpreview.draft_discarded'),
+                'draft_restore_title' => $modx->lexicon('magicpreview.draft_restore_title'),
+                'draft_restore_msg' => $modx->lexicon('magicpreview.draft_restore_msg'),
+                'draft_restore' => $modx->lexicon('magicpreview.draft_restore'),
+                'draft_discard' => $modx->lexicon('magicpreview.draft_discard'),
             ];
+
+            // Check for a saved draft for this resource + user
+            $draftKey = $resource->get('id') . '/' . $modx->user->get('id');
+            $draft = $modx->cacheManager->get($draftKey, [
+                xPDO::OPT_CACHE_KEY => 'magicpreview_drafts',
+            ]);
+            if (!empty($draft) && is_array($draft) && !empty($draft['data'])) {
+                $jsConfig['hasDraft'] = true;
+                $jsConfig['draftSavedAt'] = date('Y-m-d H:i', (int) $draft['saved_at']);
+            }
+            $jsConfig['autoSaveDraft'] = (bool)$modx->getOption('magicpreview.auto_save_draft', null, false);
 
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/window.js?v=' . $service::VERSION);
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/panel.js?v=' . $service::VERSION);
@@ -121,6 +139,16 @@ switch ($modx->event->name) {
             // The in-memory element cache needs to be wiped, otherwise placeholder values will show the existing cached value.
             $modx->elementCache = null;
         }
+        break;
+
+    case 'OnDocFormSave':
+        // Discard the draft when the resource is actually saved, since
+        // the persisted data now matches (or supersedes) the draft.
+        /** @var modResource|\MODX\Revolution\modResource $resource */
+        $draftKey = $resource->get('id') . '/' . $modx->user->get('id');
+        $modx->cacheManager->delete($draftKey, [
+            xPDO::OPT_CACHE_KEY => 'magicpreview_drafts',
+        ]);
         break;
 }
 

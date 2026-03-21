@@ -41,6 +41,25 @@ trait PreviewTrait
         ]);
         $this->previewHash = $key;
 
+        // Save a draft of the current form state so the user can restore
+        // it later, even after closing the browser or losing the session.
+        // The draft is keyed by resource ID and user ID (one per user per resource).
+        $saveDraft = (bool) $this->getProperty('save_draft', false);
+        $autoSave = (bool) $this->modx->getOption('magicpreview.auto_save_draft', null, false);
+        if ($saveDraft || $autoSave) {
+            $draftTtl = (int) $this->modx->getOption('magicpreview.draft_ttl', null, 0);
+            $draftKey = $this->object->get('id') . '/' . $this->modx->user->get('id');
+            $draftData = [
+                'data' => $data,
+                'saved_at' => time(),
+                'user_id' => $this->modx->user->get('id'),
+                'resource_id' => $this->object->get('id'),
+            ];
+            $this->modx->cacheManager->set($draftKey, $draftData, $draftTtl, [
+                xPDO::OPT_CACHE_KEY => 'magicpreview_drafts',
+            ]);
+        }
+
         return false;
     }
 

@@ -4,6 +4,7 @@ $events = array();
 
 $e = array(
     'OnDocFormRender',
+    'OnDocFormSave',
     'OnLoadWebDocument',
     'OnManagerPageBeforeRender',
 );

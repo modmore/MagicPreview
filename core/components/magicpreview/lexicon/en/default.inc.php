@@ -32,3 +32,18 @@ $_lang['setting_magicpreview.panel_extended_desc'] = 'Start with the preview pan
 $_lang['setting_magicpreview.auto_refresh_interval'] = 'Auto Refresh Interval';
 $_lang['setting_magicpreview.auto_refresh_interval_desc'] = 'Seconds between automatic preview refreshes while the panel is open. The preview only refreshes when form data has changed. Set to 0 to disable. Default: 5.';
 
+// Drafts
+$_lang['magicpreview.save_draft'] = 'Save draft';
+$_lang['magicpreview.draft_saved'] = 'Draft saved';
+$_lang['magicpreview.draft_discarded'] = 'Draft discarded';
+$_lang['magicpreview.draft_restore_title'] = 'Restore Draft';
+$_lang['magicpreview.draft_restore_msg'] = 'A draft from [[+date]] is available for this resource. Would you like to restore it?';
+$_lang['magicpreview.draft_restore'] = 'Restore';
+$_lang['magicpreview.draft_discard'] = 'Discard';
+
+// Draft settings
+$_lang['setting_magicpreview.auto_save_draft'] = 'Auto Save Draft';
+$_lang['setting_magicpreview.auto_save_draft_desc'] = 'Automatically save a draft of unsaved changes every time a preview is generated. Default: No.';
+$_lang['setting_magicpreview.draft_ttl'] = 'Draft TTL';
+$_lang['setting_magicpreview.draft_ttl_desc'] = 'How long saved drafts are kept, in seconds. Set to 0 to keep drafts indefinitely (until the resource is saved or the draft is manually discarded). Default: 0.';
+

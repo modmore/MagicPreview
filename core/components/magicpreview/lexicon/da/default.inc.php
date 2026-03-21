@@ -31,3 +31,18 @@ $_lang['setting_magicpreview.panel_extended'] = 'Panel udvidet';
 $_lang['setting_magicpreview.panel_extended_desc'] = 'Start med forhåndsvisningspanelet udvidet, når ressourceformularen indlæses. Genererer automatisk en indledende forhåndsvisning. Gælder kun når forhåndsvisningstilstanden er sat til "Panel". Standard: Nej.';
 $_lang['setting_magicpreview.auto_refresh_interval'] = 'Automatisk opdateringsinterval';
 $_lang['setting_magicpreview.auto_refresh_interval_desc'] = 'Sekunder mellem automatiske forhåndsvisningsopdateringer, mens panelet er åbent. Forhåndsvisningen opdateres kun, når formulardata er ændret. Sæt til 0 for at deaktivere. Standard: 5.';
+
+// Kladder
+$_lang['magicpreview.save_draft'] = 'Gem kladde';
+$_lang['magicpreview.draft_saved'] = 'Kladde gemt';
+$_lang['magicpreview.draft_discarded'] = 'Kladde kasseret';
+$_lang['magicpreview.draft_restore_title'] = 'Gendan kladde';
+$_lang['magicpreview.draft_restore_msg'] = 'En kladde fra [[+date]] er tilgængelig for denne ressource. Vil du gendanne den?';
+$_lang['magicpreview.draft_restore'] = 'Gendan';
+$_lang['magicpreview.draft_discard'] = 'Kassér';
+
+// Kladde-indstillinger
+$_lang['setting_magicpreview.auto_save_draft'] = 'Gem kladde automatisk';
+$_lang['setting_magicpreview.auto_save_draft_desc'] = 'Gem automatisk en kladde af ikke-gemte ændringer, hver gang en forhåndsvisning genereres. Standard: Nej.';
+$_lang['setting_magicpreview.draft_ttl'] = 'Kladde-TTL';
+$_lang['setting_magicpreview.draft_ttl_desc'] = 'Hvor længe gemte kladder opbevares, i sekunder. Sæt til 0 for at beholde kladder på ubestemt tid (indtil ressourcen gemmes, eller kladden kasseres manuelt). Standard: 0.';

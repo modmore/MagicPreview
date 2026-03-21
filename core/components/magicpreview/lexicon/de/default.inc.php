@@ -30,3 +30,18 @@ $_lang['setting_magicpreview.panel_extended'] = 'Panel ausgeklappt';
 $_lang['setting_magicpreview.panel_extended_desc'] = 'Mit ausgeklapptem Vorschau-Panel starten, wenn das Ressourcen-Formular geladen wird. Generiert automatisch eine erste Vorschau. Gilt nur wenn der Vorschau-Modus auf "Panel" eingestellt ist. Standard: Nein.';
 $_lang['setting_magicpreview.auto_refresh_interval'] = 'Automatisches Aktualisierungsintervall';
 $_lang['setting_magicpreview.auto_refresh_interval_desc'] = 'Sekunden zwischen automatischen Vorschau-Aktualisierungen, während das Panel geöffnet ist. Die Vorschau wird nur aktualisiert, wenn sich Formulardaten geändert haben. Auf 0 setzen zum Deaktivieren. Standard: 5.';
+
+// Entwürfe
+$_lang['magicpreview.save_draft'] = 'Entwurf speichern';
+$_lang['magicpreview.draft_saved'] = 'Entwurf gespeichert';
+$_lang['magicpreview.draft_discarded'] = 'Entwurf verworfen';
+$_lang['magicpreview.draft_restore_title'] = 'Entwurf wiederherstellen';
+$_lang['magicpreview.draft_restore_msg'] = 'Ein Entwurf vom [[+date]] ist für diese Ressource verfügbar. Möchten Sie ihn wiederherstellen?';
+$_lang['magicpreview.draft_restore'] = 'Wiederherstellen';
+$_lang['magicpreview.draft_discard'] = 'Verwerfen';
+
+// Entwurf-Einstellungen
+$_lang['setting_magicpreview.auto_save_draft'] = 'Entwurf automatisch speichern';
+$_lang['setting_magicpreview.auto_save_draft_desc'] = 'Automatisch einen Entwurf der ungespeicherten Änderungen bei jeder Vorschau-Generierung speichern. Standard: Nein.';
+$_lang['setting_magicpreview.draft_ttl'] = 'Entwurf-TTL';
+$_lang['setting_magicpreview.draft_ttl_desc'] = 'Wie lange gespeicherte Entwürfe aufbewahrt werden, in Sekunden. Auf 0 setzen, um Entwürfe unbegrenzt zu behalten (bis die Ressource gespeichert oder der Entwurf manuell verworfen wird). Standard: 0.';

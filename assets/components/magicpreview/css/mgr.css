@@ -202,6 +202,27 @@
     background: #4185d8;
 }
 
+.mmmp-panel__save-draft {
+    background: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0.4rem;
+    display: flex;
+    align-items: center;
+}
+
+.mmmp-panel__save-draft svg {
+    width: 18px;
+    height: 18px;
+    color: #fff;
+}
+
+.mmmp-panel__save-draft:hover,
+.mmmp-panel__save-draft:focus {
+    background: #4185d8;
+}
+
 /* --------------------------------------------------------------------------
    Preview Panel: content area (iframe + loading)
    -------------------------------------------------------------------------- */

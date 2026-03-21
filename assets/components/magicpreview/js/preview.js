@@ -51,7 +51,10 @@
             panelExtended: !!MagicPreviewConfig.panelExtended,
             autoRefreshInterval: parseInt(MagicPreviewConfig.autoRefreshInterval, 10) || 0,
             breakpoints: MagicPreviewConfig.breakpoints ?? {},
-            lexicon: MagicPreviewConfig.lexicon ?? {}
+            lexicon: MagicPreviewConfig.lexicon ?? {},
+            hasDraft: !!MagicPreviewConfig.hasDraft,
+            draftSavedAt: MagicPreviewConfig.draftSavedAt ?? '',
+            autoSaveDraft: !!MagicPreviewConfig.autoSaveDraft
         };
 
         return _config;
@@ -237,10 +240,13 @@
      * @param {object} [options] Optional settings for this submission
      * @param {boolean} [options.showLoading=true] Whether to show the
      *   loading animation. Set to false for background auto-refreshes.
+     * @param {boolean} [options.saveDraft=false] Whether to explicitly
+     *   request a draft save (sent as save_draft=1 to the processor).
      */
     function submitPreview(options) {
         options = options || {};
         var showLoading = options.showLoading !== false;
+        var saveDraft = !!options.saveDraft;
 
         var panel = Ext.getCmp('modx-panel-resource');
         if (!panel) return;
@@ -300,6 +306,12 @@
         fm.baseParams['action'] = 'resource/preview';
         fm.url = MagicPreviewConfig.assetsUrl + 'connector.php';
 
+        // When explicitly saving a draft, tell the processor to always
+        // save regardless of the auto_save_draft setting.
+        if (saveDraft) {
+            fm.baseParams['save_draft'] = '1';
+        }
+
         fm.submit({
             // No waitMsg — prevents the "Saving..." mask
             headers: {
@@ -309,6 +321,7 @@
             success: function(form, action) {
                 fm.baseParams['action'] = originalAction;
                 fm.url = originalUrl;
+                delete fm.baseParams['save_draft'];
                 submitInFlight = false;
 
                 // If the panel was closed while the request was in flight,
@@ -332,12 +345,21 @@
                     }
                 }
 
+                // Show status feedback when a draft was explicitly saved
+                if (saveDraft) {
+                    MODx.msg.status({
+                        title: lexicon('draft_saved'),
+                        delay: 3
+                    });
+                }
+
                 // (Re)start the auto-refresh timer after a successful preview
                 startAutoRefresh();
             },
             failure: function(form, action) {
                 fm.baseParams['action'] = originalAction;
                 fm.url = originalUrl;
+                delete fm.baseParams['save_draft'];
                 submitInFlight = false;
             }
         });
@@ -383,6 +405,106 @@
             clearInterval(autoRefreshTimer);
             autoRefreshTimer = null;
         }
+    }
+
+    // =========================================================================
+    // Draft management: restore, discard, and prompt
+    // =========================================================================
+
+    /**
+     * Restores a saved draft by sending form data to the restore-draft
+     * processor, which injects it into the MODX reload registry. On
+     * success, the page redirects with ?reload=<token> so MODX natively
+     * restores all fields, TVs, and extras data.
+     */
+    function restoreDraft() {
+        var tokenField = Ext.getCmp('modx-create-resource-token');
+        var token = tokenField ? tokenField.getValue() : '';
+
+        MODx.Ajax.request({
+            url: MagicPreviewConfig.assetsUrl + 'connector.php',
+            params: {
+                action: 'resource/restore-draft',
+                id: MagicPreviewResource,
+                'create-resource-token': token
+            },
+            listeners: {
+                success: {
+                    fn: function(r) {
+                        var obj = r.object || r;
+                        MODx.loadPage(
+                            obj.action,
+                            'id=' + (obj.id || 0)
+                                + '&reload=' + obj.reload
+                                + '&class_key=' + obj.class_key
+                                + '&context_key=' + obj.context_key
+                        );
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Discards the saved draft for the current resource.
+     */
+    function discardDraft() {
+        MODx.Ajax.request({
+            url: MagicPreviewConfig.assetsUrl + 'connector.php',
+            params: {
+                action: 'resource/discard-draft',
+                id: MagicPreviewResource
+            },
+            listeners: {
+                success: {
+                    fn: function() {
+                        MODx.msg.status({
+                            title: lexicon('draft_discarded'),
+                            delay: 3
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Shows the draft restore/discard prompt if a draft exists for this
+     * resource. Uses Ext.Msg.show with Yes/No buttons remapped to
+     * Restore/Discard labels.
+     */
+    function showDraftPrompt() {
+        var c = config();
+        if (!c.hasDraft) return;
+
+        // Build the message, replacing the [[+date]] placeholder
+        var msg = lexicon('draft_restore_msg').replace('[[+date]]', c.draftSavedAt);
+
+        // Temporarily override ExtJS button labels for this dialog
+        var origYes = Ext.Msg.buttonText.yes;
+        var origNo = Ext.Msg.buttonText.no;
+        Ext.Msg.buttonText.yes = lexicon('draft_restore');
+        Ext.Msg.buttonText.no = lexicon('draft_discard');
+
+        Ext.Msg.show({
+            title: lexicon('draft_restore_title'),
+            msg: msg,
+            buttons: Ext.Msg.YESNO,
+            icon: Ext.Msg.QUESTION,
+            closable: false,
+            width: 420,
+            fn: function(btnId) {
+                // Restore original button labels
+                Ext.Msg.buttonText.yes = origYes;
+                Ext.Msg.buttonText.no = origNo;
+
+                if (btnId === 'yes') {
+                    restoreDraft();
+                } else {
+                    discardDraft();
+                }
+            }
+        });
     }
 
     // =========================================================================
@@ -436,6 +558,9 @@
             lexicon: c.lexicon,
             onReload: function() {
                 submitPreview();
+            },
+            onSaveDraft: function() {
+                submitPreview({ saveDraft: true, showLoading: false });
             }
         });
     }
@@ -481,6 +606,9 @@
         if (config().previewMode === MODE_PANEL) {
             _panel.initOnpage();
         }
+
+        // Check for a saved draft and show restore/discard prompt
+        showDraftPrompt();
 
         // Auto-preview: submit the form immediately to generate a preview
         initAutoPreview();
