@@ -54,7 +54,8 @@
             lexicon: MagicPreviewConfig.lexicon ?? {},
             hasDraft: !!MagicPreviewConfig.hasDraft,
             draftSavedAt: MagicPreviewConfig.draftSavedAt ?? '',
-            autoSaveDraft: !!MagicPreviewConfig.autoSaveDraft
+            iconSaveDraft: MagicPreviewConfig.iconSaveDraft ?? '',
+            iconView: MagicPreviewConfig.iconView ?? ''
         };
 
         return _config;
@@ -240,13 +241,10 @@
      * @param {object} [options] Optional settings for this submission
      * @param {boolean} [options.showLoading=true] Whether to show the
      *   loading animation. Set to false for background auto-refreshes.
-     * @param {boolean} [options.saveDraft=false] Whether to explicitly
-     *   request a draft save (sent as save_draft=1 to the processor).
      */
     function submitPreview(options) {
         options = options || {};
         var showLoading = options.showLoading !== false;
-        var saveDraft = !!options.saveDraft;
 
         var panel = Ext.getCmp('modx-panel-resource');
         if (!panel) return;
@@ -306,12 +304,6 @@
         fm.baseParams['action'] = 'resource/preview';
         fm.url = MagicPreviewConfig.assetsUrl + 'connector.php';
 
-        // When explicitly saving a draft, tell the processor to always
-        // save regardless of the auto_save_draft setting.
-        if (saveDraft) {
-            fm.baseParams['save_draft'] = '1';
-        }
-
         fm.submit({
             // No waitMsg — prevents the "Saving..." mask
             headers: {
@@ -321,7 +313,6 @@
             success: function(form, action) {
                 fm.baseParams['action'] = originalAction;
                 fm.url = originalUrl;
-                delete fm.baseParams['save_draft'];
                 submitInFlight = false;
 
                 // If the panel was closed while the request was in flight,
@@ -345,21 +336,12 @@
                     }
                 }
 
-                // Show status feedback when a draft was explicitly saved
-                if (saveDraft) {
-                    MODx.msg.status({
-                        title: lexicon('draft_saved'),
-                        delay: 3
-                    });
-                }
-
                 // (Re)start the auto-refresh timer after a successful preview
                 startAutoRefresh();
             },
             failure: function(form, action) {
                 fm.baseParams['action'] = originalAction;
                 fm.url = originalUrl;
-                delete fm.baseParams['save_draft'];
                 submitInFlight = false;
             }
         });
@@ -408,8 +390,62 @@
     }
 
     // =========================================================================
-    // Draft management: restore, discard, and prompt
+    // Draft management: save, restore, discard, and prompt
     // =========================================================================
+
+    /**
+     * Saves a draft by submitting the resource form to the preview
+     * processor with save_draft=1. Does NOT open or update any preview
+     * window/panel — only saves the draft and shows a status toast.
+     */
+    function saveDraft() {
+        var panel = Ext.getCmp('modx-panel-resource');
+        if (!panel) return;
+
+        var fm = panel.getForm();
+        if (!fm) return;
+
+        // Fire beforeSubmit so extras (ContentBlocks, etc.) prepare data
+        var canSubmit = panel.fireEvent('beforeSubmit', {
+            form: fm,
+            options: {},
+            config: panel.config
+        });
+        if (canSubmit === false) return;
+
+        var originalAction = fm.baseParams['action'];
+        var originalUrl = fm.url;
+        fm.baseParams['action'] = 'resource/preview';
+        fm.baseParams['save_draft'] = '1';
+        fm.url = MagicPreviewConfig.assetsUrl + 'connector.php';
+
+        fm.submit({
+            headers: {
+                'Powered-By': 'MODx',
+                'modAuth': MODx.siteId
+            },
+            success: function() {
+                fm.baseParams['action'] = originalAction;
+                fm.url = originalUrl;
+                delete fm.baseParams['save_draft'];
+
+                // Clear the dirty state so the browser doesn't warn
+                // about unsaved changes when navigating away.
+                panel.clearDirty();
+                panel.warnUnsavedChanges = false;
+
+                MODx.msg.status({
+                    title: lexicon('draft_saved'),
+                    delay: 3
+                });
+            },
+            failure: function() {
+                fm.baseParams['action'] = originalAction;
+                fm.url = originalUrl;
+                delete fm.baseParams['save_draft'];
+            }
+        });
+    }
 
     /**
      * Restores a saved draft by sending form data to the restore-draft
@@ -431,6 +467,13 @@
             listeners: {
                 success: {
                     fn: function(r) {
+                        // Suppress the "unsaved changes" browser alert
+                        // before navigating to the reload URL.
+                        var panel = Ext.getCmp('modx-panel-resource');
+                        if (panel) {
+                            panel.warnUnsavedChanges = false;
+                        }
+
                         var obj = r.object || r;
                         MODx.loadPage(
                             obj.action,
@@ -469,40 +512,46 @@
     }
 
     /**
-     * Shows the draft restore/discard prompt if a draft exists for this
-     * resource. Uses Ext.Msg.show with Yes/No buttons remapped to
-     * Restore/Discard labels.
+     * Shows a draft banner above the resource panel. Appended to the
+     * #modx-panel-resource-div container which sits directly above the
+     * ExtJS-rendered resource panel in the DOM. Stays visible until
+     * the user clicks Restore or Discard.
      */
-    function showDraftPrompt() {
+    function showDraftBanner() {
         var c = config();
         if (!c.hasDraft) return;
 
-        // Build the message, replacing the [[+date]] placeholder
-        var msg = lexicon('draft_restore_msg').replace('[[+date]]', c.draftSavedAt);
+        var container = document.getElementById('modx-panel-resource-div');
+        if (!container) return;
 
-        // Temporarily override ExtJS button labels for this dialog
-        var origYes = Ext.Msg.buttonText.yes;
-        var origNo = Ext.Msg.buttonText.no;
-        Ext.Msg.buttonText.yes = lexicon('draft_restore');
-        Ext.Msg.buttonText.no = lexicon('draft_discard');
+        var msg = lexicon('draft_banner_msg').replace('[[+date]]', '<b>' + c.draftSavedAt + '</b>');
 
-        Ext.Msg.show({
-            title: lexicon('draft_restore_title'),
-            msg: msg,
-            buttons: Ext.Msg.YESNO,
-            icon: Ext.Msg.QUESTION,
-            closable: false,
-            width: 420,
-            fn: function(btnId) {
-                // Restore original button labels
-                Ext.Msg.buttonText.yes = origYes;
-                Ext.Msg.buttonText.no = origNo;
+        var bookmarkSvg = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" class="mmmp-draft-banner__icon"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0z" /></svg>';
 
-                if (btnId === 'yes') {
-                    restoreDraft();
-                } else {
-                    discardDraft();
-                }
+        var banner = document.createElement('div');
+        banner.id = 'mmmp-draft-banner';
+        banner.className = 'mmmp-draft-banner';
+        banner.innerHTML = '<span class="mmmp-draft-banner__msg">' + bookmarkSvg + msg + '</span>'
+            + '<span class="mmmp-draft-banner__actions">'
+            + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--restore" data-action="restore">'
+            + lexicon('draft_restore') + '</button>'
+            + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--discard" data-action="discard">'
+            + lexicon('draft_discard') + '</button>'
+            + '</span>';
+
+        container.appendChild(banner);
+
+        // Delegate click events from the banner's buttons
+        banner.addEventListener('click', function(e) {
+            var target = e.target.closest('[data-action]');
+            if (!target) return;
+
+            var action = target.getAttribute('data-action');
+            if (action === 'restore') {
+                restoreDraft();
+            } else if (action === 'discard') {
+                discardDraft();
+                banner.remove();
             }
         });
     }
@@ -560,7 +609,7 @@
                 submitPreview();
             },
             onSaveDraft: function() {
-                submitPreview({ saveDraft: true, showLoading: false });
+                saveDraft();
             }
         });
     }
@@ -583,14 +632,30 @@
             getButtons: function(cfg) {
                 var btns = this._mpOrigGetButtons.call(this, cfg);
                 var btnView = btns.map(function(btn) { return btn.id; }).indexOf('modx-abtn-preview');
+                var hasViewBtn = btnView !== -1;
                 // If the View button doesn't exist, insert at the start
-                if (btnView === -1) btnView = 0;
+                if (!hasViewBtn) btnView = 0;
+
+                // Save Draft icon button — sits between Preview and View
+                btns.splice(btnView, 0, {
+                    text: config().iconSaveDraft,
+                    id: 'modx-abtn-save-draft',
+                    handler: function() { saveDraft(); },
+                    scope: this
+                });
+
+                // Preview button
                 btns.splice(btnView, 0, {
                     text: lexicon('preview_button'),
                     id: 'modx-abtn-real-preview',
                     handler: function() { submitPreview(); },
                     scope: this
                 });
+
+                // Replace the View button text with an icon
+                if (hasViewBtn) {
+                    btns[btnView + 2].text = config().iconView;
+                }
                 return btns;
             },
 
@@ -601,14 +666,38 @@
             }
         });
 
+        // Create styled tooltips on the action bar buttons. Uses
+        // Ext.ToolTip targeted at the button's outer element (the 3×3
+        // <table> that ExtJS renders for each button). Because DOM
+        // mouseover events bubble, hovering any child cell triggers the
+        // tooltip. This renders with MODX's themed .x-tip styling
+        // (dark background, light text) instead of unstyled native
+        // title attributes. We defer to let the buttons render first.
+        setTimeout(function() {
+            var tooltips = {
+                'modx-abtn-real-preview': lexicon('preview_button_tooltip'),
+                'modx-abtn-save-draft': lexicon('save_draft'),
+                'modx-abtn-preview': lexicon('view_button_tooltip')
+            };
+            for (var id in tooltips) {
+                var cmp = Ext.getCmp(id);
+                if (cmp && cmp.el) {
+                    new Ext.ToolTip({
+                        target: cmp.el,
+                        html: tooltips[id]
+                    });
+                }
+            }
+        }, 100);
+
         // For "onpage" panel layout in panel mode, open the panel
         // immediately as a permanent column alongside the resource editor.
         if (config().previewMode === MODE_PANEL) {
             _panel.initOnpage();
         }
 
-        // Check for a saved draft and show restore/discard prompt
-        showDraftPrompt();
+        // Check for a saved draft and show restore/discard banner
+        showDraftBanner();
 
         // Auto-preview: submit the form immediately to generate a preview
         initAutoPreview();

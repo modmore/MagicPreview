@@ -5,6 +5,8 @@ $_lang['magicpreview.preparing_preview'] = 'Ihre Vorschau wird vorbereitet...';
 $_lang['magicpreview.close_panel'] = 'Vorschau-Panel schließen';
 $_lang['magicpreview.reload_preview'] = 'Vorschau neu laden';
 $_lang['magicpreview.preview_button'] = 'Vorschau';
+$_lang['magicpreview.preview_button_tooltip'] = 'Nicht gespeicherte Änderungen als Vorschau anzeigen';
+$_lang['magicpreview.view_button_tooltip'] = 'Veröffentlichte Ressource ansehen';
 $_lang['magicpreview.idle_message'] = 'Klicken Sie auf <strong>Vorschau</strong>, um eine Vorschau zu erstellen.';
 $_lang['magicpreview.bp_full'] = 'Volle Breite';
 $_lang['magicpreview.bp_desktop'] = 'Desktop';
@@ -35,13 +37,16 @@ $_lang['setting_magicpreview.auto_refresh_interval_desc'] = 'Sekunden zwischen a
 $_lang['magicpreview.save_draft'] = 'Entwurf speichern';
 $_lang['magicpreview.draft_saved'] = 'Entwurf gespeichert';
 $_lang['magicpreview.draft_discarded'] = 'Entwurf verworfen';
-$_lang['magicpreview.draft_restore_title'] = 'Entwurf wiederherstellen';
-$_lang['magicpreview.draft_restore_msg'] = 'Ein Entwurf vom [[+date]] ist für diese Ressource verfügbar. Möchten Sie ihn wiederherstellen?';
+$_lang['magicpreview.draft_banner_msg'] = 'Ein Entwurf vom [[+date]] ist verfügbar.';
 $_lang['magicpreview.draft_restore'] = 'Wiederherstellen';
 $_lang['magicpreview.draft_discard'] = 'Verwerfen';
 
 // Entwurf-Einstellungen
-$_lang['setting_magicpreview.auto_save_draft'] = 'Entwurf automatisch speichern';
-$_lang['setting_magicpreview.auto_save_draft_desc'] = 'Automatisch einen Entwurf der ungespeicherten Änderungen bei jeder Vorschau-Generierung speichern. Standard: Nein.';
 $_lang['setting_magicpreview.draft_ttl'] = 'Entwurf-TTL';
 $_lang['setting_magicpreview.draft_ttl_desc'] = 'Wie lange gespeicherte Entwürfe aufbewahrt werden, in Sekunden. Auf 0 setzen, um Entwürfe unbegrenzt zu behalten (bis die Ressource gespeichert oder der Entwurf manuell verworfen wird). Standard: 0.';
+
+// Symbol-Einstellungen
+$_lang['setting_magicpreview.icon_save_draft'] = 'Entwurf-Symbol';
+$_lang['setting_magicpreview.icon_save_draft_desc'] = 'Symbol für den Entwurf-Button in der Aktionsleiste. Geben Sie einen FontAwesome-Symbolnamen ein (z.B. "icon-bookmark-o") oder lassen Sie es leer für das Standard-Symbol.';
+$_lang['setting_magicpreview.icon_view'] = 'Ansicht-Symbol';
+$_lang['setting_magicpreview.icon_view_desc'] = 'Symbol für den Ansicht-Button in der Aktionsleiste. Geben Sie einen FontAwesome-Symbolnamen ein (z.B. "icon-external-link") oder lassen Sie es leer für das Standard-Symbol.';

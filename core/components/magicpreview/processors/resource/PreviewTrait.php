@@ -45,10 +45,10 @@ trait PreviewTrait
         // it later, even after closing the browser or losing the session.
         // The draft is keyed by resource ID and user ID (one per user per resource).
         $saveDraft = (bool) $this->getProperty('save_draft', false);
-        $autoSave = (bool) $this->modx->getOption('magicpreview.auto_save_draft', null, false);
-        if ($saveDraft || $autoSave) {
+        if ($saveDraft) {
             $draftTtl = (int) $this->modx->getOption('magicpreview.draft_ttl', null, 0);
             $draftKey = $this->object->get('id') . '/' . $this->modx->user->get('id');
+
             $draftData = [
                 'data' => $data,
                 'saved_at' => time(),
