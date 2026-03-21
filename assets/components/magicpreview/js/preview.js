@@ -442,28 +442,15 @@
         // Initialise the panel sub-module with config
         initPanelModule();
 
-        var basePage = MODx.page.UpdateResource;
-
-        // Check for custom page types and extend those instead.
-        switch ('object') {
-            case typeof Articles:
-                basePage = Articles.page.UpdateArticle || basePage;
-                break;
-            case typeof collections:
-                basePage = collections.page.UpdateCategory || basePage;
-                basePage = collections.page.UpdateSelection || basePage;
-                break;
-            case typeof LocationResources:
-                basePage = LocationResources.page.UpdateLocation || basePage;
-                break;
-        }
-
-        Ext.override(basePage, {
-            _originals: {
-                getButtons: basePage.prototype.getButtons
-            },
+        // Override getButtons on the base UpdateResource prototype. Extras
+        // like Collections, Articles, and LocationResources extend this class
+        // without overriding getButtons, so patching the base covers them all.
+        // If another extra also wraps getButtons via Ext.override(), the
+        // wrap-and-delegate pattern ensures both run regardless of load order.
+        Ext.override(MODx.page.UpdateResource, {
+            _mpOrigGetButtons: MODx.page.UpdateResource.prototype.getButtons,
             getButtons: function(cfg) {
-                var btns = this._originals.getButtons.call(this, cfg);
+                var btns = this._mpOrigGetButtons.call(this, cfg);
                 var btnView = btns.map(function(btn) { return btn.id; }).indexOf('modx-abtn-preview');
                 // If the View button doesn't exist, insert at the start
                 if (btnView === -1) btnView = 0;
