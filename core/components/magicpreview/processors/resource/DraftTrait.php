@@ -12,9 +12,10 @@ trait DraftTrait
      */
     private function getDraftCacheKey()
     {
-        $resourceId = (int) $this->getProperty('id');
-        $userId = $this->modx->user->get('id');
-        return $resourceId . '/' . $userId;
+        return MagicPreview::getDraftCacheKey(
+            (int) $this->getProperty('id'),
+            $this->modx->user->get('id')
+        );
     }
 
     /**

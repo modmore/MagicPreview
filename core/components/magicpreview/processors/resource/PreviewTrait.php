@@ -47,7 +47,7 @@ trait PreviewTrait
         $saveDraft = (bool) $this->getProperty('save_draft', false);
         if ($saveDraft) {
             $draftTtl = (int) $this->modx->getOption('magicpreview.draft_ttl', null, 0);
-            $draftKey = $this->object->get('id') . '/' . $this->modx->user->get('id');
+            $draftKey = MagicPreview::getDraftCacheKey($this->object->get('id'), $this->modx->user->get('id'));
 
             $draftData = [
                 'data' => $data,

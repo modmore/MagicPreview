@@ -434,6 +434,10 @@
                 panel.clearDirty();
                 panel.warnUnsavedChanges = false;
 
+                // Update the banner date, or show a new banner if
+                // this is the first draft save on this page load.
+                updateDraftBanner();
+
                 MODx.msg.status({
                     title: lexicon('draft_saved'),
                     delay: 3
@@ -512,6 +516,51 @@
     }
 
     /**
+     * Formats a Date object as 'YYYY-MM-DD HH:MM:SS' to match the PHP
+     * date('Y-m-d H:i:s') format used by the server.
+     * @param {Date} d
+     * @returns {string}
+     */
+    function formatDateTime(d) {
+        var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+            + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    }
+
+    /**
+     * Builds the banner message HTML for a given datetime string.
+     * @param {string} dateStr
+     * @returns {string}
+     */
+    function bannerMsgHtml(dateStr) {
+        var bookmarkSvg = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" class="mmmp-draft-banner__icon"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0z" /></svg>';
+        var msg = lexicon('draft_banner_msg').replace('[[+date]]', '<b><em>' + dateStr + '</em></b>');
+        return bookmarkSvg + msg;
+    }
+
+    /**
+     * Updates the draft banner's datetime to now, or creates the
+     * banner if it doesn't exist yet (first save on this page load).
+     */
+    function updateDraftBanner() {
+        var dateStr = formatDateTime(new Date());
+        var banner = document.getElementById('mmmp-draft-banner');
+
+        if (banner) {
+            // Update just the message text, preserving the action buttons
+            var msgEl = banner.querySelector('.mmmp-draft-banner__msg');
+            if (msgEl) {
+                msgEl.innerHTML = bannerMsgHtml(dateStr);
+            }
+        } else {
+            // No banner yet — set config and show it
+            _config.hasDraft = true;
+            _config.draftSavedAt = dateStr;
+            showDraftBanner();
+        }
+    }
+
+    /**
      * Shows a draft banner above the resource panel. Appended to the
      * #modx-panel-resource-div container which sits directly above the
      * ExtJS-rendered resource panel in the DOM. Stays visible until
@@ -524,14 +573,10 @@
         var container = document.getElementById('modx-panel-resource-div');
         if (!container) return;
 
-        var msg = lexicon('draft_banner_msg').replace('[[+date]]', '<b>' + c.draftSavedAt + '</b>');
-
-        var bookmarkSvg = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" class="mmmp-draft-banner__icon"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0z" /></svg>';
-
         var banner = document.createElement('div');
         banner.id = 'mmmp-draft-banner';
         banner.className = 'mmmp-draft-banner';
-        banner.innerHTML = '<span class="mmmp-draft-banner__msg">' + bookmarkSvg + msg + '</span>'
+        banner.innerHTML = '<span class="mmmp-draft-banner__msg">' + bannerMsgHtml(c.draftSavedAt) + '</span>'
             + '<span class="mmmp-draft-banner__actions">'
             + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--restore" data-action="restore">'
             + lexicon('draft_restore') + '</button>'
@@ -640,6 +685,7 @@
                 btns.splice(btnView, 0, {
                     text: config().iconSaveDraft,
                     id: 'modx-abtn-save-draft',
+                    tooltip: lexicon('save_draft'),
                     handler: function() { saveDraft(); },
                     scope: this
                 });
