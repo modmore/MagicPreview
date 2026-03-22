@@ -41,4 +41,17 @@ return [
         'value' => '5',
         'xtype' => 'numberfield',
     ],
+    'draft_ttl' => [
+        'area' => 'Drafts',
+        'value' => '0',
+        'xtype' => 'numberfield',
+    ],
+    'icon_save_draft' => [
+        'area' => 'Icons',
+        'value' => '',
+    ],
+    'icon_view' => [
+        'area' => 'Icons',
+        'value' => '',
+    ],
 ];

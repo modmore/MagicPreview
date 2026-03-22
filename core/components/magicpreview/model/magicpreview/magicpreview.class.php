@@ -24,6 +24,18 @@ class MagicPreview
 
     const VERSION = '1.5.1-pl';
 
+    /**
+     * Returns the cache key for a resource draft, scoped by user.
+     *
+     * @param int $resourceId
+     * @param int $userId
+     * @return string
+     */
+    public static function getDraftCacheKey($resourceId, $userId)
+    {
+        return (int) $resourceId . '/' . (int) $userId;
+    }
+
 
     /**
      * @param \modX $modx

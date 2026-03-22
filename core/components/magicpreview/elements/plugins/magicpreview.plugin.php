@@ -44,6 +44,8 @@ switch ($modx->event->name) {
             ];
             $jsConfig['lexicon'] = [
                 'preview_button' => $modx->lexicon('magicpreview.preview_button'),
+                'preview_button_tooltip' => $modx->lexicon('magicpreview.preview_button_tooltip'),
+                'view_button_tooltip' => $modx->lexicon('magicpreview.view_button_tooltip'),
                 'preparing_preview' => $modx->lexicon('magicpreview.preparing_preview'),
                 'idle_message' => $modx->lexicon('magicpreview.idle_message'),
                 'reload_preview' => $modx->lexicon('magicpreview.reload_preview'),
@@ -52,7 +54,33 @@ switch ($modx->event->name) {
                 'bp_desktop' => $modx->lexicon('magicpreview.bp_desktop'),
                 'bp_tablet' => $modx->lexicon('magicpreview.bp_tablet'),
                 'bp_mobile' => $modx->lexicon('magicpreview.bp_mobile'),
+                'save_draft' => $modx->lexicon('magicpreview.save_draft'),
+                'draft_saved' => $modx->lexicon('magicpreview.draft_saved'),
+                'draft_discarded' => $modx->lexicon('magicpreview.draft_discarded'),
+                'draft_banner_msg' => $modx->lexicon('magicpreview.draft_banner_msg'),
+                'draft_restore' => $modx->lexicon('magicpreview.draft_restore'),
+                'draft_discard' => $modx->lexicon('magicpreview.draft_discard'),
             ];
+
+            // Check for a saved draft for this resource + user
+            $draftKey = MagicPreview::getDraftCacheKey($resource->get('id'), $modx->user->get('id'));
+            $draft = $modx->cacheManager->get($draftKey, [
+                xPDO::OPT_CACHE_KEY => 'magicpreview_drafts',
+            ]);
+            if (!empty($draft) && is_array($draft) && !empty($draft['data'])) {
+                $jsConfig['hasDraft'] = true;
+                $jsConfig['draftSavedAt'] = date('Y-m-d H:i:s', isset($draft['saved_at']) ? (int) $draft['saved_at'] : time());
+            }
+            // Build icon HTML for the Save Draft and View action bar buttons.
+            // Empty setting = default SVG; otherwise treat as FA class name.
+            $iconSaveDraft = trim($modx->getOption('magicpreview.icon_save_draft', null, ''));
+            $iconView = trim($modx->getOption('magicpreview.icon_view', null, ''));
+            $jsConfig['iconSaveDraft'] = $iconSaveDraft !== ''
+                ? '<i class="icon ' . htmlspecialchars($iconSaveDraft, ENT_QUOTES, 'UTF-8') . '" aria-hidden="true"></i>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" class="mmmp-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0z" /></svg>';
+            $jsConfig['iconView'] = $iconView !== ''
+                ? '<i class="icon ' . htmlspecialchars($iconView, ENT_QUOTES, 'UTF-8') . '" aria-hidden="true"></i>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" class="mmmp-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>';
 
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/window.js?v=' . $service::VERSION);
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/panel.js?v=' . $service::VERSION);
@@ -122,6 +150,7 @@ switch ($modx->event->name) {
             $modx->elementCache = null;
         }
         break;
+
 }
 
 return true;

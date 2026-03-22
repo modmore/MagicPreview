@@ -3,26 +3,151 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   Button styling: merge Preview + View buttons
+   Draft banner: notification bar above the resource panel.
+   Appended to #modx-panel-resource-div via plain DOM.
    -------------------------------------------------------------------------- */
+
+.mmmp-draft-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: 45px;
+    padding: 0 1rem;
+    background: #D6E7F8;
+    color: #234368;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mmmp-draft-banner__msg {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.mmmp-draft-banner__msg b {
+    font-weight: 600 !important;
+}
+
+.mmmp-draft-banner__icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.mmmp-draft-banner__actions {
+    display: flex;
+    gap: 0.375rem;
+    flex-shrink: 0;
+}
+
+.mmmp-draft-banner__btn {
+    padding: 0.375rem 0.875rem;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: normal;
+    font-family: inherit;
+    line-height: 1;
+    transition: background-color 0.2s ease-out;
+}
+
+.mmmp-draft-banner__btn--restore {
+    background: #234368;
+    color: #fff;
+    box-shadow: none;
+}
+
+.mmmp-draft-banner__btn--restore:hover,
+.mmmp-draft-banner__btn--restore:focus {
+    background: #1a3350;
+}
+
+.mmmp-draft-banner__btn--discard {
+    background: #fff;
+    color: #515151;
+    box-shadow: 0 0 0 1px #E4E4E4;
+}
+
+.mmmp-draft-banner__btn--discard:hover,
+.mmmp-draft-banner__btn--discard:focus {
+    background: #E4E4E4;
+}
+
+/* Push the fixed-position action buttons below the banner */
+body:has(.mmmp-draft-banner) #modx-action-buttons {
+    top: 48px;
+}
+
+body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-action-buttons {
+    top: 100px;
+}
+
+/* --------------------------------------------------------------------------
+   Button styling: merge Preview + Save Draft + View into one group
+
+   The action bar renders each button inside a separate <td> cell.
+   MODX 3 spaces them with padding on .x-toolbar-cell (0.25rem each
+   side); MODX 2 spaces them with margin-left on .x-btn (7px). We
+   zero out the gap between our three buttons at the source so they
+   sit flush, then remove the shared box-shadow borders on adjacent
+   edges so the group reads as a single merged control.
+   -------------------------------------------------------------------------- */
+
+/* -- MODX 3: eliminate cell padding between merged buttons --------------- */
+
+#modx-action-buttons .x-toolbar-cell:has(> #modx-abtn-real-preview) {
+    padding-right: 0;
+}
+
+#modx-action-buttons .x-toolbar-cell:has(> #modx-abtn-save-draft) {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+#modx-action-buttons .x-toolbar-cell:has(> #modx-abtn-preview) {
+    padding-left: 0;
+}
+
+/* -- MODX 2: eliminate margin between merged buttons --------------------- */
+
+.magicpreview_modx2 #modx-abtn-save-draft,
+.magicpreview_modx2 #modx-abtn-preview {
+    margin-left: 0 !important;
+}
 
 .magicpreview_modx2 #modx-abtn-real-preview {
     padding-right: 25px;
 }
 
+/* -- Shared: border-radius, box-shadow, and dividers -------------------- */
+
+#modx-abtn-real-preview {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-right: 1px solid #E4E4E4 !important;
+}
+
+#modx-abtn-save-draft {
+    border-radius: 0 !important;
+    border-right: 1px solid #E4E4E4 !important;
+}
+
 #modx-abtn-preview {
-    margin-left: -.6rem !important;
     border-top-left-radius: 0 !important;
     border-bottom-left-radius: 0 !important;
 }
 
-#modx-abtn-preview:before {
-    content: "↗";
-}
+/* -- Icon sizing for SVG icons inside action bar buttons ---------------- */
 
-#modx-abtn-preview .x-btn-text {        
-    text-indent: -1000px;
-    overflow: auto;
+.mmmp-icon {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
 }
 
 /* --------------------------------------------------------------------------
@@ -199,6 +324,27 @@
 
 .mmmp-panel__reload:hover,
 .mmmp-panel__reload:focus {
+    background: #4185d8;
+}
+
+.mmmp-panel__save-draft {
+    background: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0.4rem;
+    display: flex;
+    align-items: center;
+}
+
+.mmmp-panel__save-draft svg {
+    width: 18px;
+    height: 18px;
+    color: #fff;
+}
+
+.mmmp-panel__save-draft:hover,
+.mmmp-panel__save-draft:focus {
     background: #4185d8;
 }
 

@@ -101,6 +101,11 @@
             +         '<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.992 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M20.015 4.356v4.992" />'
             +       '</svg>'
             +     '</button>'
+            +     '<button type="button" class="mmmp-panel__save-draft" title="' + lexicon('save_draft') + '" aria-label="' + lexicon('save_draft') + '">'
+            +       '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">'
+            +         '<path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0z" />'
+            +       '</svg>'
+            +     '</button>'
             +     '<button type="button" class="mmmp-panel__close" title="' + lexicon('close_panel') + '" aria-label="' + lexicon('close_panel') + '">'
             +       '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">'
             +         '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />'
@@ -143,6 +148,11 @@
         // Reload button: delegates to the orchestrator's onReload callback
         panelEl.querySelector('.mmmp-panel__reload').addEventListener('click', function() {
             if (_cfg.onReload) _cfg.onReload();
+        });
+
+        // Save Draft button: delegates to the orchestrator's onSaveDraft callback
+        panelEl.querySelector('.mmmp-panel__save-draft').addEventListener('click', function() {
+            if (_cfg.onSaveDraft) _cfg.onSaveDraft();
         });
 
         // Breakpoint buttons
@@ -552,6 +562,7 @@
          * @param {object} cfg.breakpoints - {desktop, tablet, mobile}
          * @param {object} cfg.lexicon - Lexicon strings
          * @param {Function} cfg.onReload - Callback for reload button
+         * @param {Function} cfg.onSaveDraft - Callback for save draft button
          */
         init: function(cfg) {
             _cfg = cfg;
