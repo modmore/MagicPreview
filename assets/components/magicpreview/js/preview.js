@@ -747,5 +747,42 @@
 
         // Auto-preview: submit the form immediately to generate a preview
         initAutoPreview();
+
+        // =================================================================
+        // Keyboard shortcuts
+        // =================================================================
+
+        /**
+         * Registers keyboard shortcuts for the resource editor:
+         *   Ctrl+Shift+S  — Save draft
+         *   Ctrl+P        — Preview (mode-aware: opens/refreshes panel
+         *                    or opens new window depending on setting)
+         *
+         * Uses Cmd instead of Ctrl on macOS. Both shortcuts preventDefault
+         * to suppress the browser's native behaviour (Save As / Print).
+         *
+         * The listener is registered on the capture phase so it fires
+         * before ExtJS's Ext.KeyMap (which listens on the bubble phase).
+         * We're doing this to prevent the resource saving at the same time.
+         */
+        document.addEventListener('keydown', function(e) {
+            var ctrlOrCmd = e.ctrlKey || e.metaKey;
+            if (!ctrlOrCmd) return;
+
+            // Ctrl+Shift+S  —  Save Draft
+            if (e.shiftKey && (e.key === 'S' || e.key === 's')) {
+                e.preventDefault();
+                e.stopPropagation();
+                saveDraft();
+                return;
+            }
+
+            // Ctrl+P  —  Preview
+            if (!e.shiftKey && !e.altKey && (e.key === 'P' || e.key === 'p')) {
+                e.preventDefault();
+                submitPreview();
+                return;
+            }
+        }, true);
     });
 })();
