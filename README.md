@@ -1,6 +1,6 @@
 # MagicPreview for MODX
 
-MagicPreview adds a **Preview** button to the MODX Revolution resource editor that renders a live preview of your unsaved changes — without saving the resource. Preview in a popup window or an inline side panel with responsive breakpoints, auto-refresh, drag-to-resize, and draft support.
+MagicPreview adds a **Preview** button to the MODX Revolution resource editor that renders a live preview of your unsaved changes — without saving the resource. Preview in a popup window or an inline side panel with responsive breakpoints, auto-refresh, and draft support.
 
 Compatible with **MODX 2.x** and **MODX 3.x**.
 
@@ -10,7 +10,6 @@ Compatible with **MODX 2.x** and **MODX 3.x**.
 - **Popup window or inline panel** — choose between a new browser window or a side panel (overlay or on-page column)
 - **Responsive breakpoints** — preview at desktop, tablet, and mobile widths (configurable via system settings)
 - **Auto-refresh** — the panel automatically re-renders when form data changes (configurable interval)
-- **Drag-to-resize** — adjust the panel width by dragging its edge
 - **Draft system** — save a draft of unsaved form data that persists across sessions and can be restored later
 - **Custom event** — `OnResourceMagicPreview` allows other extras (e.g. ContentBlocks) to hook into the preview process
 - **Customisable** — override the preview HTML template and CSS via system settings
@@ -18,7 +17,7 @@ Compatible with **MODX 2.x** and **MODX 3.x**.
 
 ## Installation
 
-Install MagicPreview from the [modmore package provider](https://modmore.com/) via the MODX Package Manager.
+Install MagicPreview from the [modmore package provider](https://modmore.com/about/package-provider/).
 
 ## System Settings
 
