@@ -773,14 +773,14 @@
             if (e.shiftKey && (e.key === 'S' || e.key === 's')) {
                 e.preventDefault();
                 e.stopPropagation();
-                saveDraft();
+                if (!e.repeat) saveDraft();
                 return;
             }
 
             // Ctrl+P  —  Preview
             if (!e.shiftKey && !e.altKey && (e.key === 'P' || e.key === 'p')) {
                 e.preventDefault();
-                submitPreview();
+                if (!e.repeat) submitPreview();
                 return;
             }
         }, true);
