@@ -6,7 +6,7 @@ $_lang['magicpreview.close_panel'] = 'Close preview panel';
 $_lang['magicpreview.reload_preview'] = 'Reload preview';
 $_lang['magicpreview.preview_button'] = 'Preview';
 $_lang['magicpreview.preview_button_tooltip'] = 'Preview unsaved changes';
-$_lang['magicpreview.view_button_tooltip'] = 'View published resource';
+$_lang['magicpreview.view_button_tooltip'] = 'View saved resource';
 $_lang['magicpreview.idle_message'] = 'Click <strong>Preview</strong> to generate a preview.';
 
 $_lang['magicpreview.bp_full'] = 'Full';

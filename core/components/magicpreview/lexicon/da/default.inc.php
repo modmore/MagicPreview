@@ -6,7 +6,7 @@ $_lang['magicpreview.close_panel'] = 'Luk forhåndsvisningspanel';
 $_lang['magicpreview.reload_preview'] = 'Genindlæs forhåndsvisning';
 $_lang['magicpreview.preview_button'] = 'Forhåndsvisning';
 $_lang['magicpreview.preview_button_tooltip'] = 'Forhåndsvis ikke-gemte ændringer';
-$_lang['magicpreview.view_button_tooltip'] = 'Vis publiceret ressource';
+$_lang['magicpreview.view_button_tooltip'] = 'Vis gemt ressource';
 $_lang['magicpreview.idle_message'] = 'Klik på <strong>Forhåndsvisning</strong> for at generere en forhåndsvisning.';
 
 $_lang['magicpreview.bp_full'] = 'Fuld størrelse';
