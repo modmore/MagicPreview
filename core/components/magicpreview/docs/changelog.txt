@@ -1,16 +1,17 @@
 MagicPreview 1.6.0-pl
 ---------------------
-Released on 2026-xx-xx
+Released on 2026-03-28
 
-- Add inline side panel preview mode as an alternative to the popup window [#xx]
-- Add magicpreview.preview_mode setting to switch between popup and panel modes
-- Add magicpreview.panel_layout setting to control panel behavior (overlay or onpage)
-- Add per-resource overrides for preview_mode and panel_layout in the resource Settings tab
-- Replace magicpreview.panel_extended setting with automatic panel state persistence via Ext.state.Manager
-- Add magicpreview.auto_refresh_interval setting for automatic preview refresh when form data changes
-- Add drag-to-resize on the panel edge for both overlay and onpage layouts
-- Expose global MagicPreview JS API (show/close/isOpen) for external consumers like VersionX
-- Panel includes responsive breakpoint controls that set the iframe content width
+- Add inline side panel preview mode with overlay and on-page layouts
+- Add per-resource overrides for preview mode and panel layout
+- Add auto-refresh with configurable interval
+- Add drag-to-resize for the panel
+- Add draft save/restore with Ctrl+Shift+S shortcut
+- Add configurable draft TTL
+- Add configurable icons for Save Draft and View buttons
+- Add Ctrl+P keyboard shortcut for preview
+- Add Ctrl+Shift+S keyboard shortcut for saving a draft
+- Add panel state persistence
 
 MagicPreview 1.5.1-pl
 ---------------------
