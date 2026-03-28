@@ -24,6 +24,9 @@
     /** @type {string} Setting value for overlay panel layout */
     var LAYOUT_OVERLAY = 'Overlay';
 
+    /** @type {string} State manager key for panel open/width state */
+    var STATE_KEY = 'mmmp-panel';
+
     // =========================================================================
     // Configuration (lazy-loaded: resolved on first access because the
     // globals MagicPreviewConfig, MagicPreviewResource and MODx.config may
@@ -48,7 +51,8 @@
             frameJoiner: baseFrameUrl.indexOf('?') === -1 ? '?' : '&',
             previewMode: MagicPreviewConfig.previewMode ?? MODE_WINDOW,
             panelLayout: MagicPreviewConfig.panelLayout ?? LAYOUT_OVERLAY,
-            panelExtended: !!MagicPreviewConfig.panelExtended,
+            resourcePreviewMode: MagicPreviewConfig.resourcePreviewMode ?? '',
+            resourcePanelLayout: MagicPreviewConfig.resourcePanelLayout ?? '',
             autoRefreshInterval: parseInt(MagicPreviewConfig.autoRefreshInterval, 10) || 0,
             breakpoints: MagicPreviewConfig.breakpoints ?? {},
             lexicon: MagicPreviewConfig.lexicon ?? {},
@@ -79,6 +83,39 @@
     var _panel = window.MagicPreview._panel;
 
     // =========================================================================
+    // Panel state persistence (via MODX's Ext.state.Manager)
+    // =========================================================================
+
+    /**
+     * Reads the saved panel state from the MODX state manager.
+     * @returns {{ open: boolean, width: number|null }}
+     */
+    function getSavedPanelState() {
+        var state = Ext.state.Manager.get(STATE_KEY);
+        if (state && typeof state === 'object') {
+            return {
+                open: !!state.open,
+                width: state.width ? parseInt(state.width, 10) : null
+            };
+        }
+        return { open: false, width: null };
+    }
+
+    /**
+     * Persists the panel state (open/closed + width) via the MODX state
+     * manager. Writes are debounced by MODX's HttpProvider.
+     * @param {boolean} open
+     * @param {number|null} [width]
+     */
+    function savePanelState(open, width) {
+        var state = { open: !!open };
+        if (width) {
+            state.width = width;
+        }
+        Ext.state.Manager.set(STATE_KEY, state);
+    }
+
+    // =========================================================================
     // Panel helper: build the full preview URL from a hash
     // =========================================================================
 
@@ -106,7 +143,14 @@
         var c = config();
 
         if (c.previewMode === MODE_PANEL) {
+            // Only persist "open" when actually transitioning from closed,
+            // to avoid redundant state writes on every auto-refresh that
+            // could race with a close() write via the debounced HttpProvider.
+            var wasOpen = _panel.isOpen();
             _panel.open();
+            if (!wasOpen) {
+                savePanelState(true, _panel.getPanelWidth() || null);
+            }
             if (!hash || hash === 'loading') {
                 _panel.showLoading();
             } else {
@@ -127,6 +171,7 @@
     window.MagicPreview.close = function() {
         if (config().previewMode === MODE_PANEL) {
             _panel.close();
+            savePanelState(false, _panel.getPanelWidth() || null);
             stopAutoRefresh();
         } else {
             _window.close();
@@ -607,11 +652,12 @@
 
     /**
      * Triggers an initial preview by submitting the form after the
-     * resource panel has finished rendering. Only runs when panelExtended
-     * is enabled and previewMode is MODE_PANEL.
+     * resource panel has finished rendering. Only runs when the user's
+     * saved panel state is open and previewMode is MODE_PANEL.
      */
     function initAutoPreview() {
-        if (!config().panelExtended) return;
+        var savedState = getSavedPanelState();
+        if (!savedState.open) return;
         if (config().previewMode !== MODE_PANEL) return;
 
         // For overlay mode, open the panel first (onpage is already open
@@ -645,9 +691,11 @@
      */
     function initPanelModule() {
         var c = config();
+        var savedState = getSavedPanelState();
         _panel.init({
             panelLayout: c.panelLayout,
-            panelExtended: c.panelExtended,
+            panelOpen: savedState.open,
+            savedWidth: savedState.width,
             breakpoints: c.breakpoints,
             lexicon: c.lexicon,
             onReload: function() {
@@ -655,6 +703,9 @@
             },
             onSaveDraft: function() {
                 saveDraft();
+            },
+            onResize: function(width) {
+                savePanelState(true, width);
             }
         });
     }
@@ -666,6 +717,61 @@
     Ext.onReady(function() {
         // Initialise the panel sub-module with config
         initPanelModule();
+
+        // =================================================================
+        // Per-resource settings: inject combos into the Settings tab
+        // =================================================================
+
+        /**
+         * Returns an array of field configs for the per-resource
+         * MagicPreview settings (preview mode + panel layout combos).
+         * Each combo includes a "System Default" option (empty string)
+         * that inherits the value from the system setting.
+         * @returns {Array}
+         */
+        function getResourceSettingFields() {
+            var c = config();
+            return [
+                {
+                    xtype: 'fieldset',
+                    title: c.lexicon.magicpreview || 'Magic Preview',
+                    collapsible: false,
+                    autoHeight: true,
+                    defaults: { anchor: '100%' },
+                    items: [
+                        {
+                            xtype: 'magicpreview-combo-preview-mode-resource',
+                            fieldLabel: c.lexicon.resource_preview_mode || 'Preview Mode',
+                            description: '<b>[[*properties.magicpreview.preview_mode]]</b><br>' + (c.lexicon.resource_preview_mode_desc || ''),
+                            name: 'magicpreview_preview_mode',
+                            hiddenName: 'magicpreview_preview_mode',
+                            value: c.resourcePreviewMode || 'system_default'
+                        },
+                        {
+                            xtype: 'magicpreview-combo-panel-layout-resource',
+                            fieldLabel: c.lexicon.resource_panel_layout || 'Panel Layout',
+                            description: '<b>[[*properties.magicpreview.panel_layout]]</b><br>' + (c.lexicon.resource_panel_layout_desc || ''),
+                            name: 'magicpreview_panel_layout',
+                            hiddenName: 'magicpreview_panel_layout',
+                            value: c.resourcePanelLayout || 'system_default'
+                        }
+                    ]
+                }
+            ];
+        }
+
+        // Override the resource panel's getSettingLeftFields to append
+        // MagicPreview's per-resource combos into the Settings tab.
+        // This runs before the panel is constructed because addJavascript()
+        // loads this file in <head>, so our Ext.onReady fires before the
+        // controller's inline Ext.onReady that calls MODx.load().
+        Ext.override(MODx.panel.Resource, {
+            _mpOrigGetSettingLeftFields: MODx.panel.Resource.prototype.getSettingLeftFields,
+            getSettingLeftFields: function(config) {
+                var fields = this._mpOrigGetSettingLeftFields.call(this, config);
+                return fields.concat(getResourceSettingFields());
+            }
+        });
 
         // Override getButtons on the base UpdateResource prototype. Extras
         // like Collections, Articles, and LocationResources extend this class

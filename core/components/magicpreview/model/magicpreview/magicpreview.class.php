@@ -22,7 +22,7 @@ class MagicPreview
      */
     public $debug = false;
 
-    const VERSION = '1.5.1-pl';
+    const VERSION = '1.6.0-pl';
 
     /**
      * Returns the cache key for a resource draft, scoped by user.

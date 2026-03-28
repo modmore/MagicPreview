@@ -127,6 +127,11 @@
             +   '</div>'
             + '</div>';
 
+        // Apply saved width before appending to prevent width flash on reload
+        if (customPanelWidth) {
+            panelEl.style.width = customPanelWidth + 'px';
+        }
+
         document.body.appendChild(panelEl);
 
         panelIframeA = document.getElementById('mmmp-panel-iframe-a');
@@ -431,6 +436,11 @@
 
             customPanelWidth = panelEl.offsetWidth;
 
+            // Notify the orchestrator so it can persist the new width
+            if (_cfg.onResize) {
+                _cfg.onResize(customPanelWidth);
+            }
+
             // For onpage mode, recalculate the ExtJS layout
             if (_cfg.panelLayout === LAYOUT_ONPAGE && document.body.classList.contains('mmmp-panel-onpage-active')) {
                 relayoutModx();
@@ -518,16 +528,16 @@
     // =========================================================================
 
     /**
-     * For "onpage" layout with panel_extended: opens the panel immediately
-     * on page load so it appears as a column alongside the editor with
-     * a loading state while the preview is being generated.
+     * For "onpage" layout with saved panel state open: opens the panel
+     * immediately on page load so it appears as a column alongside the
+     * editor with a loading state while the preview is being generated.
      *
-     * When panel_extended is off, the panel stays hidden until the user
-     * clicks Preview — open() handles everything at that point.
+     * When the saved state is closed, the panel stays hidden until the
+     * user clicks Preview — open() handles everything at that point.
      */
     function initOnpage() {
         if (_cfg.panelLayout !== LAYOUT_ONPAGE) return;
-        if (!_cfg.panelExtended) return;
+        if (!_cfg.panelOpen) return;
 
         createPanel();
         panelEl.classList.add('mmmp-panel--open');
@@ -558,14 +568,19 @@
          * Must be called once before any other method.
          * @param {object} cfg
          * @param {string} cfg.panelLayout - LAYOUT_OVERLAY or LAYOUT_ONPAGE
-         * @param {boolean} cfg.panelExtended - Start with panel open
+         * @param {boolean} cfg.panelOpen - Whether the panel was open when last saved
+         * @param {number|null} cfg.savedWidth - Saved panel width in pixels
          * @param {object} cfg.breakpoints - {desktop, tablet, mobile}
          * @param {object} cfg.lexicon - Lexicon strings
          * @param {Function} cfg.onReload - Callback for reload button
          * @param {Function} cfg.onSaveDraft - Callback for save draft button
+         * @param {Function} cfg.onResize - Callback when panel is resized (receives width in px)
          */
         init: function(cfg) {
             _cfg = cfg;
+            if (cfg.savedWidth) {
+                customPanelWidth = cfg.savedWidth;
+            }
         },
 
         open: open,

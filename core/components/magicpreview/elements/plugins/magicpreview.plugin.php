@@ -34,8 +34,26 @@ switch ($modx->event->name) {
             $jsConfig = $service->config;
             $jsConfig['previewMode'] = $modx->getOption('magicpreview.preview_mode', null, MAGICPREVIEW_MODE_WINDOW);
             $jsConfig['panelLayout'] = $modx->getOption('magicpreview.panel_layout', null, MAGICPREVIEW_LAYOUT_OVERLAY);
-            $jsConfig['panelExtended'] = (bool)$modx->getOption('magicpreview.panel_extended', null, false);
             $jsConfig['autoRefreshInterval'] = (int)$modx->getOption('magicpreview.auto_refresh_interval', null, 5);
+
+            // Per-resource overrides: stored in the resource's properties column
+            $resourceProps = $resource->getProperties('magicpreview');
+            $resourcePreviewMode = '';
+            $resourcePanelLayout = '';
+            $validModes = [MAGICPREVIEW_MODE_PANEL, MAGICPREVIEW_MODE_WINDOW];
+            $validLayouts = [MAGICPREVIEW_LAYOUT_OVERLAY, MAGICPREVIEW_LAYOUT_ONPAGE];
+            if (is_array($resourceProps)) {
+                if (!empty($resourceProps['preview_mode']) && in_array($resourceProps['preview_mode'], $validModes, true)) {
+                    $resourcePreviewMode = $resourceProps['preview_mode'];
+                    $jsConfig['previewMode'] = $resourcePreviewMode;
+                }
+                if (!empty($resourceProps['panel_layout']) && in_array($resourceProps['panel_layout'], $validLayouts, true)) {
+                    $resourcePanelLayout = $resourceProps['panel_layout'];
+                    $jsConfig['panelLayout'] = $resourcePanelLayout;
+                }
+            }
+            $jsConfig['resourcePreviewMode'] = $resourcePreviewMode;
+            $jsConfig['resourcePanelLayout'] = $resourcePanelLayout;
             $jsConfig['baseFrameUrl'] = $baseFrameUrl;
             $jsConfig['breakpoints'] = [
                 'desktop' => $modx->getOption('magicpreview.breakpoint_desktop', null, '1280px'),
@@ -60,6 +78,12 @@ switch ($modx->event->name) {
                 'draft_banner_msg' => $modx->lexicon('magicpreview.draft_banner_msg'),
                 'draft_restore' => $modx->lexicon('magicpreview.draft_restore'),
                 'draft_discard' => $modx->lexicon('magicpreview.draft_discard'),
+                'magicpreview' => $modx->lexicon('magicpreview'),
+                'resource_preview_mode' => $modx->lexicon('magicpreview.resource_preview_mode'),
+                'resource_preview_mode_desc' => $modx->lexicon('magicpreview.resource_preview_mode_desc'),
+                'resource_panel_layout' => $modx->lexicon('magicpreview.resource_panel_layout'),
+                'resource_panel_layout_desc' => $modx->lexicon('magicpreview.resource_panel_layout_desc'),
+                'system_default' => $modx->lexicon('magicpreview.system_default'),
             ];
 
             // Check for a saved draft for this resource + user
@@ -86,13 +110,19 @@ switch ($modx->event->name) {
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/panel.js?v=' . $service::VERSION);
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/preview.js?v=' . $service::VERSION);
 
-            // When onpage panel + auto-preview is active, the panel will be
-            // visible immediately on page load. Inject an early CSS rule so
+            // When onpage panel is active, the panel will be visible
+            // immediately on page load. Read the user's saved panel state
+            // from the MODX file-based registry to get the exact width, so
             // the action buttons bar starts at the correct offset instead of
             // flashing at full width before JS runs syncActionButtonsOffset().
             $earlyPanelCss = '';
-            if ($jsConfig['previewMode'] === MAGICPREVIEW_MODE_PANEL && $jsConfig['panelLayout'] === MAGICPREVIEW_LAYOUT_ONPAGE && $jsConfig['panelExtended']) {
-                $earlyPanelCss = '<style>.mmmp-panel-onpage-active #modx-action-buttons { right: 40%; }</style>';
+            if ($jsConfig['previewMode'] === MAGICPREVIEW_MODE_PANEL && $jsConfig['panelLayout'] === MAGICPREVIEW_LAYOUT_ONPAGE) {
+                $stateFile = $modx->getCachePath() . 'registry/state/ys/user-' . $modx->user->get('id') . '/mmmp-panel.msg.php';
+                $panelState = @include $stateFile;
+                if (is_array($panelState) && !empty($panelState['open'])) {
+                    $panelWidth = !empty($panelState['width']) ? (int)$panelState['width'] . 'px' : '40%';
+                    $earlyPanelCss = '<style>.mmmp-panel-onpage-active #modx-action-buttons { right: ' . $panelWidth . '; }</style>';
+                }
             }
 
             $modx->controller->addHtml('
@@ -116,16 +146,38 @@ switch ($modx->event->name) {
         break;
 
     case 'OnManagerPageBeforeRender':
-        // Load combo xtypes for system settings dropdowns. Only needed
-        // on pages that render a settings grid.
-        $settingsActions = [
+        // Load combo xtypes for system settings dropdowns and resource
+        // editor settings tab. Needed on settings pages and resource pages.
+        $comboActions = [
             'system/settings',
             'context/update',
             'security/usergroup/update',
             'security/user/update',
+            'resource/update',
+            'resource/create',
         ];
-        if (in_array($modx->request->action, $settingsActions, true)) {
+        if (in_array($modx->request->action, $comboActions, true)) {
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/combo.js?v=' . $service::VERSION);
+        }
+        break;
+
+    case 'OnDocFormSave':
+        /** @var modResource|\MODX\Revolution\modResource $resource */
+        $validModes = [MAGICPREVIEW_MODE_PANEL, MAGICPREVIEW_MODE_WINDOW];
+        $validLayouts = [MAGICPREVIEW_LAYOUT_OVERLAY, MAGICPREVIEW_LAYOUT_ONPAGE];
+
+        $props = [];
+        if (isset($_POST['magicpreview_preview_mode'])) {
+            $val = (string)$_POST['magicpreview_preview_mode'];
+            $props['preview_mode'] = in_array($val, $validModes, true) ? $val : '';
+        }
+        if (isset($_POST['magicpreview_panel_layout'])) {
+            $val = (string)$_POST['magicpreview_panel_layout'];
+            $props['panel_layout'] = in_array($val, $validLayouts, true) ? $val : '';
+        }
+        if (!empty($props)) {
+            $resource->setProperties($props, 'magicpreview');
+            $resource->save();
         }
         break;
 

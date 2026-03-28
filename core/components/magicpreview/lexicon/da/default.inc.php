@@ -29,8 +29,6 @@ $_lang['setting_magicpreview.preview_mode'] = 'Forhåndsvisningstilstand';
 $_lang['setting_magicpreview.preview_mode_desc'] = 'Hvordan forhåndsvisningen vises. "New Window" åbner et nyt browservindue (standard). "Panel" viser et sidepanel i manageren.';
 $_lang['setting_magicpreview.panel_layout'] = 'Panel-layout';
 $_lang['setting_magicpreview.panel_layout_desc'] = 'Hvordan forhåndsvisningspanelet interagerer med editoren. "Overlay" svæver ovenpå (standard). "On Page" formindsker editoren for en permanent kolonne.';
-$_lang['setting_magicpreview.panel_extended'] = 'Panel udvidet';
-$_lang['setting_magicpreview.panel_extended_desc'] = 'Start med forhåndsvisningspanelet udvidet, når ressourceformularen indlæses. Genererer automatisk en indledende forhåndsvisning. Gælder kun når forhåndsvisningstilstanden er sat til "Panel". Standard: Nej.';
 $_lang['setting_magicpreview.auto_refresh_interval'] = 'Automatisk opdateringsinterval';
 $_lang['setting_magicpreview.auto_refresh_interval_desc'] = 'Sekunder mellem automatiske forhåndsvisningsopdateringer, mens panelet er åbent. Forhåndsvisningen opdateres kun, når formulardata er ændret. Sæt til 0 for at deaktivere. Standard: 5.';
 
@@ -51,3 +49,10 @@ $_lang['setting_magicpreview.icon_save_draft'] = 'Gem kladde-ikon';
 $_lang['setting_magicpreview.icon_save_draft_desc'] = 'Ikon til Gem kladde-knappen i handlingslinjen. Indtast et FontAwesome-ikonnavn (f.eks. "icon-bookmark-o") eller lad det være tomt for standardikonet.';
 $_lang['setting_magicpreview.icon_view'] = 'Vis-ikon';
 $_lang['setting_magicpreview.icon_view_desc'] = 'Ikon til Vis-knappen i handlingslinjen. Indtast et FontAwesome-ikonnavn (f.eks. "icon-external-link") eller lad det være tomt for standardikonet.';
+
+// Ressource-specifikke indstillinger
+$_lang['magicpreview.resource_preview_mode'] = 'Forhåndsvisningstilstand';
+$_lang['magicpreview.resource_preview_mode_desc'] = 'Tilsidesæt den systemdækkende forhåndsvisningstilstand for denne ressource. Efterlad som "Systemstandard" for at arve systemindstillingen.';
+$_lang['magicpreview.resource_panel_layout'] = 'Panel-layout';
+$_lang['magicpreview.resource_panel_layout_desc'] = 'Tilsidesæt det systemdækkende panel-layout for denne ressource. Efterlad som "Systemstandard" for at arve systemindstillingen.';
+$_lang['magicpreview.system_default'] = 'Systemstandard';

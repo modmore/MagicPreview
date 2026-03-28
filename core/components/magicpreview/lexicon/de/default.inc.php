@@ -28,8 +28,6 @@ $_lang['setting_magicpreview.preview_mode'] = 'Vorschau-Modus';
 $_lang['setting_magicpreview.preview_mode_desc'] = 'Wie die Vorschau angezeigt wird. "New Window" öffnet ein neues Browserfenster (Standard). "Panel" zeigt ein Seitenpanel im Manager.';
 $_lang['setting_magicpreview.panel_layout'] = 'Panel-Layout';
 $_lang['setting_magicpreview.panel_layout_desc'] = 'Wie das Vorschau-Panel mit dem Editor interagiert. "Overlay" schwebt darüber (Standard). "On Page" verkleinert den Editor für eine permanente Spalte.';
-$_lang['setting_magicpreview.panel_extended'] = 'Panel ausgeklappt';
-$_lang['setting_magicpreview.panel_extended_desc'] = 'Mit ausgeklapptem Vorschau-Panel starten, wenn das Ressourcen-Formular geladen wird. Generiert automatisch eine erste Vorschau. Gilt nur wenn der Vorschau-Modus auf "Panel" eingestellt ist. Standard: Nein.';
 $_lang['setting_magicpreview.auto_refresh_interval'] = 'Automatisches Aktualisierungsintervall';
 $_lang['setting_magicpreview.auto_refresh_interval_desc'] = 'Sekunden zwischen automatischen Vorschau-Aktualisierungen, während das Panel geöffnet ist. Die Vorschau wird nur aktualisiert, wenn sich Formulardaten geändert haben. Auf 0 setzen zum Deaktivieren. Standard: 5.';
 
@@ -50,3 +48,10 @@ $_lang['setting_magicpreview.icon_save_draft'] = 'Entwurf-Symbol';
 $_lang['setting_magicpreview.icon_save_draft_desc'] = 'Symbol für den Entwurf-Button in der Aktionsleiste. Geben Sie einen FontAwesome-Symbolnamen ein (z.B. "icon-bookmark-o") oder lassen Sie es leer für das Standard-Symbol.';
 $_lang['setting_magicpreview.icon_view'] = 'Ansicht-Symbol';
 $_lang['setting_magicpreview.icon_view_desc'] = 'Symbol für den Ansicht-Button in der Aktionsleiste. Geben Sie einen FontAwesome-Symbolnamen ein (z.B. "icon-external-link") oder lassen Sie es leer für das Standard-Symbol.';
+
+// Ressourcen-spezifische Einstellungen
+$_lang['magicpreview.resource_preview_mode'] = 'Vorschau-Modus';
+$_lang['magicpreview.resource_preview_mode_desc'] = 'Überschreibt den systemweiten Vorschau-Modus für diese Ressource. Belassen Sie "Systemstandard", um die Systemeinstellung zu übernehmen.';
+$_lang['magicpreview.resource_panel_layout'] = 'Panel-Layout';
+$_lang['magicpreview.resource_panel_layout_desc'] = 'Überschreibt das systemweite Panel-Layout für diese Ressource. Belassen Sie "Systemstandard", um die Systemeinstellung zu übernehmen.';
+$_lang['magicpreview.system_default'] = 'Systemstandard';

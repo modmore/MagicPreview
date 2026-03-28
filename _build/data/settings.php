@@ -31,11 +31,6 @@ return [
         'value' => 'Overlay',
         'xtype' => 'magicpreview-combo-panel-layout',
     ],
-    'panel_extended' => [
-        'area' => 'Preview',
-        'value' => false,
-        'xtype' => 'combo-boolean',
-    ],
     'auto_refresh_interval' => [
         'area' => 'Preview',
         'value' => '5',

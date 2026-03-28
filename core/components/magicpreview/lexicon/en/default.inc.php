@@ -29,8 +29,6 @@ $_lang['setting_magicpreview.preview_mode'] = 'Preview Mode';
 $_lang['setting_magicpreview.preview_mode_desc'] = 'How to display the preview. "New Window" opens a new browser window (default). "Panel" shows an inline side panel in the manager.';
 $_lang['setting_magicpreview.panel_layout'] = 'Panel Layout';
 $_lang['setting_magicpreview.panel_layout_desc'] = 'How the preview panel interacts with the editor. "Overlay" floats on top (default). "On Page" shrinks the editor to make room for a permanent column.';
-$_lang['setting_magicpreview.panel_extended'] = 'Panel Extended';
-$_lang['setting_magicpreview.panel_extended_desc'] = 'Start with the preview panel extended when the resource form loads. Automatically generates an initial preview. Only applies when preview mode is set to "Panel". Default: No.';
 $_lang['setting_magicpreview.auto_refresh_interval'] = 'Auto Refresh Interval';
 $_lang['setting_magicpreview.auto_refresh_interval_desc'] = 'Seconds between automatic preview refreshes while the panel is open. The preview only refreshes when form data has changed. Set to 0 to disable. Default: 5.';
 
@@ -51,4 +49,11 @@ $_lang['setting_magicpreview.icon_save_draft'] = 'Save Draft Icon';
 $_lang['setting_magicpreview.icon_save_draft_desc'] = 'Icon for the Save Draft button in the action bar. Enter a FontAwesome icon name (e.g. "icon-bookmark-o") or leave empty for the default icon.';
 $_lang['setting_magicpreview.icon_view'] = 'View Icon';
 $_lang['setting_magicpreview.icon_view_desc'] = 'Icon for the View button in the action bar. Enter a FontAwesome icon name (e.g. "icon-external-link") or leave empty for the default icon.';
+
+// Per-resource settings
+$_lang['magicpreview.resource_preview_mode'] = 'Preview Mode';
+$_lang['magicpreview.resource_preview_mode_desc'] = 'Override the system-wide preview mode for this resource. Leave as "System Default" to inherit the system setting.';
+$_lang['magicpreview.resource_panel_layout'] = 'Panel Layout';
+$_lang['magicpreview.resource_panel_layout_desc'] = 'Override the system-wide panel layout for this resource. Leave as "System Default" to inherit the system setting.';
+$_lang['magicpreview.system_default'] = 'System Default';
 

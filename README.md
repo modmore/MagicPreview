@@ -27,7 +27,6 @@ All settings use the `magicpreview.` prefix and can be configured in the MODX ma
 | ----------------------- | ------------ | ------------------------------------------------------------------- |
 | `preview_mode`          | `New Window` | `New Window` or `Panel`                                             |
 | `panel_layout`          | `Overlay`    | `Overlay` (floats over content) or `On Page` (pushes content aside) |
-| `panel_extended`        | `false`      | Start with the panel open on page load                              |
 | `auto_refresh_interval` | `5`          | Seconds between auto-refresh checks (0 to disable)                  |
 | `breakpoint_desktop`    | `1280px`     | Desktop breakpoint width                                            |
 | `breakpoint_tablet`     | `768px`      | Tablet breakpoint width                                             |
@@ -37,6 +36,16 @@ All settings use the `magicpreview.` prefix and can be configured in the MODX ma
 | `draft_ttl`             | `0`          | Draft expiry in seconds (0 = no expiry)                             |
 | `icon_save_draft`       | _(empty)_    | FontAwesome class for the Save Draft button icon                    |
 | `icon_view`             | _(empty)_    | FontAwesome class for the View button icon                          |
+
+## Per-Resource Settings
+
+You can override `preview_mode` and `panel_layout` on individual resources. The override fields appear in the resource editor's **Settings** tab under a "Magic Preview" fieldset. Select "System Default" (the default) to inherit the system setting, or choose a specific value to override it for that resource.
+
+Per-resource settings are stored in the resource's `properties` column under the `magicpreview` namespace.
+
+## Panel State
+
+The preview panel remembers whether it was open or closed (and its drag-resized width) per user. This state is persisted automatically via MODX's built-in `Ext.state.Manager` — the same mechanism MODX uses for the left tree panel's collapsed/expanded state. When you reopen a resource, the panel restores to its previous state. The panel defaults to hidden.
 
 ## Development
 

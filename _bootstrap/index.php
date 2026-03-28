@@ -118,6 +118,13 @@ if ($vcPlugin) {
     ), array('pluginid','event'), false)) {
         echo "Error creating modPluginEvent.\n";
     }
+    if (!createObject('modPluginEvent', array(
+        'pluginid' => $vcPlugin->get('id'),
+        'event' => 'OnDocFormSave',
+        'priority' => 0,
+    ), array('pluginid','event'), false)) {
+        echo "Error creating modPluginEvent.\n";
+    }
 }
 
 
