@@ -1,13 +1,13 @@
 # MagicPreview for MODX
 
-MagicPreview adds a **Preview** button to the MODX Revolution resource editor that renders a live preview of your unsaved changes — without saving the resource. Preview in a popup window or an inline side panel with responsive breakpoints, auto-refresh, and draft support.
+MagicPreview adds a **Preview** button to the MODX Revolution resource editor that renders a live preview of your unsaved changes — without saving the resource. Preview in a new browser window/tab or an inline side panel with responsive breakpoints, auto-refresh, and draft support.
 
 Compatible with **MODX 2.x** and **MODX 3.x**.
 
 ## Features
 
 - **Preview without saving** — see your changes rendered on the actual front-end template, without persisting anything to the database
-- **Popup window or inline panel** — choose between a new browser window or a side panel (overlay or on-page column)
+- **New window/tab or inline panel** — choose between a new browser window or a side panel (overlay or on-page column)
 - **Responsive breakpoints** — preview at desktop, tablet, and mobile widths (configurable via system settings)
 - **Auto-refresh** — the panel automatically re-renders when form data changes (configurable interval)
 - **Draft system** — save a draft of unsaved form data that persists across sessions and can be restored later
