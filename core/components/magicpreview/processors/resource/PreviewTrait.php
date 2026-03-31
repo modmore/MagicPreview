@@ -23,7 +23,7 @@ trait PreviewTrait
             foreach ($tvs as $tv) {
                 $this->object->set($tv->get('name'), [
                     $tv->get('name'),
-                    $this->object->get('tv' . $tv->get('id')),
+                    $this->modx->getObject('modTemplateVar', $tv->get('id'))->renderOutput($this->object->get('id')),
                     $tv->get('display'),
                     $tv->get('display_params'),
                     $tv->get('type'),
