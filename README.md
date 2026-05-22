@@ -31,7 +31,7 @@ All settings use the `magicpreview.` prefix and can be configured in the MODX ma
 | `breakpoint_desktop`    | `1280px`     | Desktop breakpoint width                                            |
 | `breakpoint_tablet`     | `768px`      | Tablet breakpoint width                                             |
 | `breakpoint_mobile`     | `320px`      | Mobile breakpoint width                                             |
-| `custom_preview_tpl`    | _(empty)_    | Custom Smarty template chunk for preview page                       |
+| `custom_preview_tpl`    | _(empty)_    | Custom Smarty template file for preview page (relative to templates/) |
 | `custom_preview_css`    | _(empty)_    | Custom CSS file URL for preview page                                |
 | `draft_ttl`             | `0`          | Draft expiry in seconds (0 = no expiry)                             |
 | `icon_save_draft`       | _(empty)_    | FontAwesome class for the Save Draft button icon                    |
@@ -85,7 +85,7 @@ assets/components/magicpreview/
   js/                        Client-side JS modules (window, panel, preview, combo)
 core/components/magicpreview/
   controllers/               Manager controller for preview page
-  elements/plugins/          Main plugin (3 system events)
+  elements/plugins/          Main plugin (4 system events)
   lexicon/                   i18n strings (en, de, da)
   model/magicpreview/        Service class + VERSION constant
   processors/resource/       Preview, draft, and restore processors (v2 + v3)
