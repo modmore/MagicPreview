@@ -207,6 +207,28 @@ body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-action-buttons {
 }
 
 /* --------------------------------------------------------------------------
+   On-page layout: resource sidebar repositioned to bottom
+
+   When on-page preview is active, the resource editor's right column
+   (#modx-resource-main-right: Template, Published, etc.) stacks below the
+   main left column (#modx-resource-main-left) so the editor gets full width.
+   -------------------------------------------------------------------------- */
+
+body.mmmp-panel-onpage-active .x-panel-body {
+    width: 100% !important;
+}
+
+body.mmmp-panel-onpage-active #modx-resource-main-left {
+    width: calc(100% - 30px) !important;
+}
+
+body.mmmp-panel-onpage-active #modx-resource-main-right {
+    width: 100% !important;
+    margin-top: 15px !important;
+    margin-left: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
    Preview Panel: resize handle
    A thin invisible strip along the left edge of the panel that the user
    can click and drag to resize the panel horizontally.
