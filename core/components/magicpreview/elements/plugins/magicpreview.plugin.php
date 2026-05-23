@@ -8,6 +8,11 @@ if (!defined('MAGICPREVIEW_MODE_PANEL')) {
     define('MAGICPREVIEW_MODE_WINDOW', 'New Window');
     define('MAGICPREVIEW_LAYOUT_OVERLAY', 'Overlay');
     define('MAGICPREVIEW_LAYOUT_ONPAGE', 'On Page');
+    define('MAGICPREVIEW_FILTER_NONE', 'None');
+    define('MAGICPREVIEW_FILTER_BLOCK', 'Block Listed');
+    define('MAGICPREVIEW_FILTER_ALLOW', 'Allow Listed Only');
+    define('MAGICPREVIEW_RESOURCE_ENABLED', 'Yes');
+    define('MAGICPREVIEW_RESOURCE_DISABLED', 'No');
 }
 
 $path = $modx->getOption('magicpreview.core_path', null, $modx->getOption('core_path') . 'components/magicpreview/');
@@ -40,8 +45,10 @@ switch ($modx->event->name) {
             $resourceProps = $resource->getProperties('magicpreview');
             $resourcePreviewMode = '';
             $resourcePanelLayout = '';
+            $resourceEnabled = '';
             $validModes = [MAGICPREVIEW_MODE_PANEL, MAGICPREVIEW_MODE_WINDOW];
             $validLayouts = [MAGICPREVIEW_LAYOUT_OVERLAY, MAGICPREVIEW_LAYOUT_ONPAGE];
+            $validEnabled = [MAGICPREVIEW_RESOURCE_ENABLED, MAGICPREVIEW_RESOURCE_DISABLED];
             if (is_array($resourceProps)) {
                 if (!empty($resourceProps['preview_mode']) && in_array($resourceProps['preview_mode'], $validModes, true)) {
                     $resourcePreviewMode = $resourceProps['preview_mode'];
@@ -51,9 +58,40 @@ switch ($modx->event->name) {
                     $resourcePanelLayout = $resourceProps['panel_layout'];
                     $jsConfig['panelLayout'] = $resourcePanelLayout;
                 }
+                if (!empty($resourceProps['enabled']) && in_array($resourceProps['enabled'], $validEnabled, true)) {
+                    $resourceEnabled = $resourceProps['enabled'];
+                }
             }
             $jsConfig['resourcePreviewMode'] = $resourcePreviewMode;
             $jsConfig['resourcePanelLayout'] = $resourcePanelLayout;
+            $jsConfig['resourceEnabled'] = $resourceEnabled;
+
+            // Decide whether the Preview button should be injected for this resource.
+            // Per-resource override wins; otherwise apply the system-wide template filter.
+            $previewHidden = false;
+            if ($resourceEnabled === MAGICPREVIEW_RESOURCE_DISABLED) {
+                $previewHidden = true;
+            } elseif ($resourceEnabled !== MAGICPREVIEW_RESOURCE_ENABLED) {
+                $filterMode = $modx->getOption('magicpreview.template_filter_mode', null, MAGICPREVIEW_FILTER_NONE);
+                if ($filterMode === MAGICPREVIEW_FILTER_BLOCK || $filterMode === MAGICPREVIEW_FILTER_ALLOW) {
+                    $rawIds = (string)$modx->getOption('magicpreview.template_filter_ids', null, '');
+                    $ids = [];
+                    foreach (explode(',', $rawIds) as $token) {
+                        $token = trim($token);
+                        if ($token !== '' && is_numeric($token)) {
+                            $ids[(int)$token] = true;
+                        }
+                    }
+                    $templateId = (int)$resource->get('template');
+                    $inList = isset($ids[$templateId]);
+                    if ($filterMode === MAGICPREVIEW_FILTER_BLOCK && $inList) {
+                        $previewHidden = true;
+                    } elseif ($filterMode === MAGICPREVIEW_FILTER_ALLOW && !$inList) {
+                        $previewHidden = true;
+                    }
+                }
+            }
+            $jsConfig['previewHidden'] = $previewHidden;
             $jsConfig['baseFrameUrl'] = $baseFrameUrl;
             $jsConfig['breakpoints'] = [
                 'desktop' => $modx->getOption('magicpreview.breakpoint_desktop', null, '1280px'),
@@ -83,6 +121,10 @@ switch ($modx->event->name) {
                 'resource_preview_mode_desc' => $modx->lexicon('magicpreview.resource_preview_mode_desc'),
                 'resource_panel_layout' => $modx->lexicon('magicpreview.resource_panel_layout'),
                 'resource_panel_layout_desc' => $modx->lexicon('magicpreview.resource_panel_layout_desc'),
+                'resource_enabled' => $modx->lexicon('magicpreview.resource_enabled'),
+                'resource_enabled_desc' => $modx->lexicon('magicpreview.resource_enabled_desc'),
+                'yes' => $modx->lexicon('yes'),
+                'no' => $modx->lexicon('no'),
                 'system_default' => $modx->lexicon('magicpreview.system_default'),
             ];
 
@@ -165,6 +207,7 @@ switch ($modx->event->name) {
         /** @var modResource|\MODX\Revolution\modResource $resource */
         $validModes = [MAGICPREVIEW_MODE_PANEL, MAGICPREVIEW_MODE_WINDOW];
         $validLayouts = [MAGICPREVIEW_LAYOUT_OVERLAY, MAGICPREVIEW_LAYOUT_ONPAGE];
+        $validEnabled = [MAGICPREVIEW_RESOURCE_ENABLED, MAGICPREVIEW_RESOURCE_DISABLED];
 
         $props = [];
         if (isset($_POST['magicpreview_preview_mode'])) {
@@ -174,6 +217,10 @@ switch ($modx->event->name) {
         if (isset($_POST['magicpreview_panel_layout'])) {
             $val = (string)$_POST['magicpreview_panel_layout'];
             $props['panel_layout'] = in_array($val, $validLayouts, true) ? $val : '';
+        }
+        if (isset($_POST['magicpreview_enabled'])) {
+            $val = (string)$_POST['magicpreview_enabled'];
+            $props['enabled'] = in_array($val, $validEnabled, true) ? $val : '';
         }
         if (!empty($props)) {
             $resource->setProperties($props, 'magicpreview');

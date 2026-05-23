@@ -112,6 +112,71 @@ Ext.extend(MagicPreview.combo.PreviewModeResource, MODx.combo.ComboBox);
 Ext.reg('magicpreview-combo-preview-mode-resource', MagicPreview.combo.PreviewModeResource);
 
 /**
+ * Template Filter Mode combo for system settings.
+ */
+MagicPreview.combo.TemplateFilterMode = function(config) {
+    config = config || {};
+    Ext.applyIf(config, {
+        store: new Ext.data.SimpleStore({
+            fields: ['v'],
+            data: [
+                ['None'],
+                ['Block Listed'],
+                ['Allow Listed Only']
+            ]
+        }),
+        displayField: 'v',
+        valueField: 'v',
+        mode: 'local',
+        triggerAction: 'all',
+        editable: false,
+        selectOnFocus: false,
+        preventRender: true,
+        forceSelection: true,
+        enableKeyEvents: true
+    });
+    MagicPreview.combo.TemplateFilterMode.superclass.constructor.call(this, config);
+};
+Ext.extend(MagicPreview.combo.TemplateFilterMode, MODx.combo.ComboBox);
+Ext.reg('magicpreview-combo-template-filter-mode', MagicPreview.combo.TemplateFilterMode);
+
+/**
+ * Per-resource enabled override combo: System Default / Yes / No.
+ * Inherits from the template filter system setting when "System Default".
+ */
+MagicPreview.combo.ResourceEnabled = function(config) {
+    config = config || {};
+    var labelYes = (typeof MagicPreviewConfig !== 'undefined'
+        && MagicPreviewConfig.lexicon
+        && MagicPreviewConfig.lexicon.yes) || 'Yes';
+    var labelNo = (typeof MagicPreviewConfig !== 'undefined'
+        && MagicPreviewConfig.lexicon
+        && MagicPreviewConfig.lexicon.no) || 'No';
+    Ext.applyIf(config, {
+        store: new Ext.data.SimpleStore({
+            fields: ['v', 'd'],
+            data: [
+                ['system_default', getSystemDefaultLabel()],
+                ['Yes', labelYes],
+                ['No', labelNo]
+            ]
+        }),
+        displayField: 'd',
+        valueField: 'v',
+        mode: 'local',
+        triggerAction: 'all',
+        editable: false,
+        selectOnFocus: false,
+        preventRender: true,
+        forceSelection: true,
+        enableKeyEvents: true
+    });
+    MagicPreview.combo.ResourceEnabled.superclass.constructor.call(this, config);
+};
+Ext.extend(MagicPreview.combo.ResourceEnabled, MODx.combo.ComboBox);
+Ext.reg('magicpreview-combo-resource-enabled', MagicPreview.combo.ResourceEnabled);
+
+/**
  * Panel Layout combo for resource settings: includes a "System Default"
  * option (empty string value) that inherits from the system setting.
  */

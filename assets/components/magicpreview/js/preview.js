@@ -53,6 +53,8 @@
             panelLayout: MagicPreviewConfig.panelLayout ?? LAYOUT_OVERLAY,
             resourcePreviewMode: MagicPreviewConfig.resourcePreviewMode ?? '',
             resourcePanelLayout: MagicPreviewConfig.resourcePanelLayout ?? '',
+            resourceEnabled: MagicPreviewConfig.resourceEnabled ?? '',
+            previewHidden: !!MagicPreviewConfig.previewHidden,
             autoRefreshInterval: parseInt(MagicPreviewConfig.autoRefreshInterval, 10) || 0,
             breakpoints: MagicPreviewConfig.breakpoints ?? {},
             lexicon: MagicPreviewConfig.lexicon ?? {},
@@ -715,8 +717,16 @@
     // =========================================================================
 
     Ext.onReady(function() {
+        var hidden = !!config().previewHidden;
+
         // Initialise the panel sub-module with config
-        initPanelModule();
+        if (!hidden) {
+            // Marker class for CSS rules that should only apply when the
+            // Preview/Save Draft buttons are actually injected. Keeps the
+            // native View button untouched when MagicPreview is hidden.
+            Ext.getBody().addClass('magicpreview_active');
+            initPanelModule();
+        }
 
         // =================================================================
         // Per-resource settings: inject combos into the Settings tab
@@ -739,6 +749,14 @@
                     autoHeight: true,
                     defaults: { anchor: '100%' },
                     items: [
+                        {
+                            xtype: 'magicpreview-combo-resource-enabled',
+                            fieldLabel: c.lexicon.resource_enabled || 'Use Magic Preview?',
+                            description: '<b>[[*properties.magicpreview.enabled]]</b><br>' + (c.lexicon.resource_enabled_desc || ''),
+                            name: 'magicpreview_enabled',
+                            hiddenName: 'magicpreview_enabled',
+                            value: c.resourceEnabled || 'system_default'
+                        },
                         {
                             xtype: 'magicpreview-combo-preview-mode-resource',
                             fieldLabel: c.lexicon.resource_preview_mode || 'Preview Mode',
@@ -772,6 +790,15 @@
                 return fields.concat(getResourceSettingFields());
             }
         });
+
+        // If the Preview button is hidden for this resource (via the system
+        // template filter or a per-resource override), skip button injection,
+        // tooltips, panel onpage init, draft banner, auto-preview, and
+        // keyboard shortcuts. The Settings-tab combos above remain active so
+        // editors can flip the override back on without leaving the page.
+        if (hidden) {
+            return;
+        }
 
         // Override getButtons on the base UpdateResource prototype. Extras
         // like Collections, Articles, and LocationResources extend this class
