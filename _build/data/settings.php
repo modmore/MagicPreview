@@ -36,6 +36,15 @@ return [
         'value' => '5',
         'xtype' => 'numberfield',
     ],
+    'template_filter_mode' => [
+        'area' => 'Visibility',
+        'value' => 'None',
+        'xtype' => 'magicpreview-combo-template-filter-mode',
+    ],
+    'template_filter_ids' => [
+        'area' => 'Visibility',
+        'value' => '',
+    ],
     'draft_ttl' => [
         'area' => 'Drafts',
         'value' => '0',

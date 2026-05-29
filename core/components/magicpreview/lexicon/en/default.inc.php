@@ -31,6 +31,10 @@ $_lang['setting_magicpreview.panel_layout'] = 'Panel Layout';
 $_lang['setting_magicpreview.panel_layout_desc'] = 'How the preview panel interacts with the editor. "Overlay" floats on top (default). "On Page" shrinks the editor to make room for a permanent column.';
 $_lang['setting_magicpreview.auto_refresh_interval'] = 'Auto Refresh Interval';
 $_lang['setting_magicpreview.auto_refresh_interval_desc'] = 'Seconds between automatic preview refreshes while the panel is open. The preview only refreshes when form data has changed. Set to 0 to disable. Default: 5.';
+$_lang['setting_magicpreview.template_filter_mode'] = 'Template Filter Mode';
+$_lang['setting_magicpreview.template_filter_mode_desc'] = 'Restrict where the Preview button appears based on template ID. "None" shows the button on every resource (default). "Block Listed" hides the button on resources using a template ID listed in Template Filter IDs. "Allow Listed Only" shows the button only on resources using a listed template ID (an empty list will hide it everywhere).';
+$_lang['setting_magicpreview.template_filter_ids'] = 'Template Filter IDs';
+$_lang['setting_magicpreview.template_filter_ids_desc'] = 'Comma-separated list of template IDs (e.g. 1,5,12) used by Template Filter Mode. Ignored when mode is "None".';
 
 // Drafts
 $_lang['magicpreview.save_draft'] = 'Save draft';
@@ -55,5 +59,7 @@ $_lang['magicpreview.resource_preview_mode'] = 'Preview Mode';
 $_lang['magicpreview.resource_preview_mode_desc'] = 'Override the system-wide preview mode for this resource. Leave as "System Default" to inherit the system setting.';
 $_lang['magicpreview.resource_panel_layout'] = 'Panel Layout';
 $_lang['magicpreview.resource_panel_layout_desc'] = 'Override the system-wide panel layout for this resource. Leave as "System Default" to inherit the system setting.';
+$_lang['magicpreview.resource_enabled'] = 'Use Magic Preview?';
+$_lang['magicpreview.resource_enabled_desc'] = 'Override the template filter for this resource. "Yes" forces the Preview button to appear even if the template is excluded by the system filter. "No" hides the button even if the template would otherwise allow it.';
 $_lang['magicpreview.system_default'] = 'System Default';
 

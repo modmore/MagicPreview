@@ -31,6 +31,10 @@ $_lang['setting_magicpreview.panel_layout'] = 'Panel-layout';
 $_lang['setting_magicpreview.panel_layout_desc'] = 'Hvordan forhåndsvisningspanelet interagerer med editoren. "Overlay" svæver ovenpå (standard). "On Page" formindsker editoren for en permanent kolonne.';
 $_lang['setting_magicpreview.auto_refresh_interval'] = 'Automatisk opdateringsinterval';
 $_lang['setting_magicpreview.auto_refresh_interval_desc'] = 'Sekunder mellem automatiske forhåndsvisningsopdateringer, mens panelet er åbent. Forhåndsvisningen opdateres kun, når formulardata er ændret. Sæt til 0 for at deaktivere. Standard: 5.';
+$_lang['setting_magicpreview.template_filter_mode'] = 'Skabelon-filtertilstand';
+$_lang['setting_magicpreview.template_filter_mode_desc'] = 'Begrænser hvor Forhåndsvisnings-knappen vises baseret på skabelon-ID. "None" viser knappen på alle ressourcer (standard). "Block Listed" skjuler knappen på ressourcer, der bruger et skabelon-ID på listen i "Skabelon-filter-ID\'er". "Allow Listed Only" viser kun knappen på ressourcer med et skabelon-ID på listen (en tom liste skjuler den overalt).';
+$_lang['setting_magicpreview.template_filter_ids'] = 'Skabelon-filter-ID\'er';
+$_lang['setting_magicpreview.template_filter_ids_desc'] = 'Komma-separeret liste af skabelon-ID\'er (f.eks. 1,5,12), der bruges af Skabelon-filtertilstand. Ignoreres, når tilstanden er "None".';
 
 // Kladder
 $_lang['magicpreview.save_draft'] = 'Gem kladde';
@@ -55,4 +59,6 @@ $_lang['magicpreview.resource_preview_mode'] = 'Forhåndsvisningstilstand';
 $_lang['magicpreview.resource_preview_mode_desc'] = 'Tilsidesæt den systemdækkende forhåndsvisningstilstand for denne ressource. Efterlad som "Systemstandard" for at arve systemindstillingen.';
 $_lang['magicpreview.resource_panel_layout'] = 'Panel-layout';
 $_lang['magicpreview.resource_panel_layout_desc'] = 'Tilsidesæt det systemdækkende panel-layout for denne ressource. Efterlad som "Systemstandard" for at arve systemindstillingen.';
+$_lang['magicpreview.resource_enabled'] = 'Brug Magic Preview?';
+$_lang['magicpreview.resource_enabled_desc'] = 'Tilsidesæt skabelonfilteret for denne ressource. "Ja" tvinger Forhåndsvisnings-knappen til at blive vist, selvom skabelonen er udelukket af systemfilteret. "Nej" skjuler knappen, selvom skabelonen ellers ville tillade det.';
 $_lang['magicpreview.system_default'] = 'Systemstandard';

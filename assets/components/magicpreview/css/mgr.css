@@ -109,14 +109,14 @@ body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-action-buttons {
     padding-right: 0;
 }
 
-#modx-action-buttons .x-toolbar-cell:has(> #modx-abtn-preview) {
+.magicpreview_active #modx-action-buttons .x-toolbar-cell:has(> #modx-abtn-preview) {
     padding-left: 0;
 }
 
 /* -- MODX 2: eliminate margin between merged buttons --------------------- */
 
 .magicpreview_modx2 #modx-abtn-save-draft,
-.magicpreview_modx2 #modx-abtn-preview {
+.magicpreview_active.magicpreview_modx2 #modx-abtn-preview {
     margin-left: 0 !important;
 }
 
@@ -137,7 +137,7 @@ body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-action-buttons {
     border-right: 1px solid #E4E4E4 !important;
 }
 
-#modx-abtn-preview {
+.magicpreview_active #modx-abtn-preview {
     border-top-left-radius: 0 !important;
     border-bottom-left-radius: 0 !important;
 }

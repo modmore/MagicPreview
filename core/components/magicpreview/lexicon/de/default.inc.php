@@ -30,6 +30,10 @@ $_lang['setting_magicpreview.panel_layout'] = 'Panel-Layout';
 $_lang['setting_magicpreview.panel_layout_desc'] = 'Wie das Vorschau-Panel mit dem Editor interagiert. "Overlay" schwebt darüber (Standard). "On Page" verkleinert den Editor für eine permanente Spalte.';
 $_lang['setting_magicpreview.auto_refresh_interval'] = 'Automatisches Aktualisierungsintervall';
 $_lang['setting_magicpreview.auto_refresh_interval_desc'] = 'Sekunden zwischen automatischen Vorschau-Aktualisierungen, während das Panel geöffnet ist. Die Vorschau wird nur aktualisiert, wenn sich Formulardaten geändert haben. Auf 0 setzen zum Deaktivieren. Standard: 5.';
+$_lang['setting_magicpreview.template_filter_mode'] = 'Vorlagen-Filtermodus';
+$_lang['setting_magicpreview.template_filter_mode_desc'] = 'Begrenzt, wo der Vorschau-Button erscheint, basierend auf der Vorlagen-ID. "None" zeigt den Button für alle Ressourcen (Standard). "Block Listed" blendet den Button für Ressourcen mit einer in "Vorlagen-Filter-IDs" aufgelisteten Vorlagen-ID aus. "Allow Listed Only" zeigt den Button nur für Ressourcen mit aufgelisteter Vorlagen-ID (leere Liste blendet ihn überall aus).';
+$_lang['setting_magicpreview.template_filter_ids'] = 'Vorlagen-Filter-IDs';
+$_lang['setting_magicpreview.template_filter_ids_desc'] = 'Komma-separierte Liste von Vorlagen-IDs (z.B. 1,5,12), die vom Vorlagen-Filtermodus verwendet wird. Wird ignoriert, wenn der Modus "None" ist.';
 
 // Entwürfe
 $_lang['magicpreview.save_draft'] = 'Entwurf speichern';
@@ -54,4 +58,6 @@ $_lang['magicpreview.resource_preview_mode'] = 'Vorschau-Modus';
 $_lang['magicpreview.resource_preview_mode_desc'] = 'Überschreibt den systemweiten Vorschau-Modus für diese Ressource. Belassen Sie "Systemstandard", um die Systemeinstellung zu übernehmen.';
 $_lang['magicpreview.resource_panel_layout'] = 'Panel-Layout';
 $_lang['magicpreview.resource_panel_layout_desc'] = 'Überschreibt das systemweite Panel-Layout für diese Ressource. Belassen Sie "Systemstandard", um die Systemeinstellung zu übernehmen.';
+$_lang['magicpreview.resource_enabled'] = 'Magic Preview verwenden?';
+$_lang['magicpreview.resource_enabled_desc'] = 'Überschreibt den Vorlagenfilter für diese Ressource. "Ja" erzwingt, dass der Vorschau-Button erscheint, auch wenn die Vorlage durch den Systemfilter ausgeschlossen ist. "Nein" blendet den Button auch dann aus, wenn die Vorlage ihn sonst zulassen würde.';
 $_lang['magicpreview.system_default'] = 'Systemstandard';
