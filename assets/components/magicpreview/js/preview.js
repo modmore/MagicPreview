@@ -683,6 +683,33 @@
     }
 
     // =========================================================================
+    // Reload preview on save
+    // =========================================================================
+
+    /**
+     * Handler for a resource save. MODX's FormPanel fires the
+     * 'success' event after a completed save (Save button or Ctrl+S). Our own
+     * preview/draft submissions call fm.submit() directly on the BasicForm and
+     * never fire this event, so this only runs for real saves.
+     *
+     * Silently re-submits the (now-saved) form to refresh an open preview, so
+     * the editor doesn't have to also press Preview/Ctrl+P. Issue #48.
+     */
+    function onResourceSaveSuccess() {
+        // Only refresh an already-open preview; a save shouldn't pop it open.
+        if (!MagicPreview.isOpen()) {
+            return;
+        }
+        // Don't stack on top of an in-flight auto-refresh; that request will
+        // pick up the saved content anyway.
+        if (submitInFlight) {
+            return;
+        }
+
+        submitPreview({ showLoading: false });
+    }
+
+    // =========================================================================
     // Panel module initialisation
     // =========================================================================
 
@@ -799,6 +826,22 @@
         if (hidden) {
             return;
         }
+
+        // Reload an open preview whenever the resource is saved natively.
+        // MODx.FormPanel fires 'success' on the panel after a completed save
+        // (Save button or Ctrl+S); our own preview/draft submissions bypass
+        // this (they call fm.submit() directly), so it only fires for real
+        // saves. We attach the listener by wrapping the panel's initComponent
+        // rather than polling for the component: this override is registered
+        // before the controller constructs the panel (see getSettingLeftFields
+        // note above), so every instance wires itself up on construction.
+        Ext.override(MODx.panel.Resource, {
+            _mpOrigInitComponent: MODx.panel.Resource.prototype.initComponent,
+            initComponent: function() {
+                this._mpOrigInitComponent.call(this);
+                this.on('success', onResourceSaveSuccess);
+            }
+        });
 
         // Override getButtons on the base UpdateResource prototype. Extras
         // like Collections, Articles, and LocationResources extend this class
