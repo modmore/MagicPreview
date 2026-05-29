@@ -21,6 +21,15 @@ if (!($service instanceof MagicPreview)) {
     return 'Could not load MagicPreview service.';
 }
 
+// Per-resource override schema: property key => allowed values. Shared by the
+// read (OnDocFormRender) and write (OnDocFormSave) handlers so the whitelist
+// lives in one place. The matching POST field is 'magicpreview_<key>'.
+$mpOverrides = [
+    'preview_mode' => [MAGICPREVIEW_MODE_PANEL, MAGICPREVIEW_MODE_WINDOW],
+    'panel_layout' => [MAGICPREVIEW_LAYOUT_OVERLAY, MAGICPREVIEW_LAYOUT_ONPAGE],
+    'enabled'      => [MAGICPREVIEW_RESOURCE_ENABLED, MAGICPREVIEW_RESOURCE_DISABLED],
+];
+
 switch ($modx->event->name) {
     case 'OnDocFormRender':
         /** @var modResource|\MODX\Revolution\modResource $resource */
@@ -41,29 +50,28 @@ switch ($modx->event->name) {
             $jsConfig['panelLayout'] = $modx->getOption('magicpreview.panel_layout', null, MAGICPREVIEW_LAYOUT_OVERLAY);
             $jsConfig['autoRefreshInterval'] = (int)$modx->getOption('magicpreview.auto_refresh_interval', null, 5);
 
-            // Per-resource overrides: stored in the resource's properties column
+            // Per-resource overrides: stored in the resource's properties column.
+            // Each value is validated against its whitelist; anything else
+            // (including a missing key or the "system_default" sentinel) becomes
+            // an empty string, meaning "inherit the system setting".
             $resourceProps = $resource->getProperties('magicpreview');
-            $resourcePreviewMode = '';
-            $resourcePanelLayout = '';
-            $resourceEnabled = '';
-            $validModes = [MAGICPREVIEW_MODE_PANEL, MAGICPREVIEW_MODE_WINDOW];
-            $validLayouts = [MAGICPREVIEW_LAYOUT_OVERLAY, MAGICPREVIEW_LAYOUT_ONPAGE];
-            $validEnabled = [MAGICPREVIEW_RESOURCE_ENABLED, MAGICPREVIEW_RESOURCE_DISABLED];
-            if (is_array($resourceProps)) {
-                if (!empty($resourceProps['preview_mode']) && in_array($resourceProps['preview_mode'], $validModes, true)) {
-                    $resourcePreviewMode = $resourceProps['preview_mode'];
-                    $jsConfig['previewMode'] = $resourcePreviewMode;
-                }
-                if (!empty($resourceProps['panel_layout']) && in_array($resourceProps['panel_layout'], $validLayouts, true)) {
-                    $resourcePanelLayout = $resourceProps['panel_layout'];
-                    $jsConfig['panelLayout'] = $resourcePanelLayout;
-                }
-                if (!empty($resourceProps['enabled']) && in_array($resourceProps['enabled'], $validEnabled, true)) {
-                    $resourceEnabled = $resourceProps['enabled'];
-                }
+            $resourceValues = [];
+            foreach ($mpOverrides as $key => $valid) {
+                $val = is_array($resourceProps) && isset($resourceProps[$key]) ? $resourceProps[$key] : '';
+                $resourceValues[$key] = in_array($val, $valid, true) ? $val : '';
             }
-            $jsConfig['resourcePreviewMode'] = $resourcePreviewMode;
-            $jsConfig['resourcePanelLayout'] = $resourcePanelLayout;
+
+            // preview_mode / panel_layout overrides replace the effective
+            // system setting used by the rest of the page.
+            if ($resourceValues['preview_mode'] !== '') {
+                $jsConfig['previewMode'] = $resourceValues['preview_mode'];
+            }
+            if ($resourceValues['panel_layout'] !== '') {
+                $jsConfig['panelLayout'] = $resourceValues['panel_layout'];
+            }
+            $resourceEnabled = $resourceValues['enabled'];
+            $jsConfig['resourcePreviewMode'] = $resourceValues['preview_mode'];
+            $jsConfig['resourcePanelLayout'] = $resourceValues['panel_layout'];
             $jsConfig['resourceEnabled'] = $resourceEnabled;
 
             // Decide whether the Preview button should be injected for this resource.
@@ -123,8 +131,6 @@ switch ($modx->event->name) {
                 'resource_panel_layout_desc' => $modx->lexicon('magicpreview.resource_panel_layout_desc'),
                 'resource_enabled' => $modx->lexicon('magicpreview.resource_enabled'),
                 'resource_enabled_desc' => $modx->lexicon('magicpreview.resource_enabled_desc'),
-                'yes' => $modx->lexicon('yes'),
-                'no' => $modx->lexicon('no'),
                 'system_default' => $modx->lexicon('magicpreview.system_default'),
             ];
 
@@ -205,22 +211,14 @@ switch ($modx->event->name) {
 
     case 'OnDocFormSave':
         /** @var modResource|\MODX\Revolution\modResource $resource */
-        $validModes = [MAGICPREVIEW_MODE_PANEL, MAGICPREVIEW_MODE_WINDOW];
-        $validLayouts = [MAGICPREVIEW_LAYOUT_OVERLAY, MAGICPREVIEW_LAYOUT_ONPAGE];
-        $validEnabled = [MAGICPREVIEW_RESOURCE_ENABLED, MAGICPREVIEW_RESOURCE_DISABLED];
-
         $props = [];
-        if (isset($_POST['magicpreview_preview_mode'])) {
-            $val = (string)$_POST['magicpreview_preview_mode'];
-            $props['preview_mode'] = in_array($val, $validModes, true) ? $val : '';
-        }
-        if (isset($_POST['magicpreview_panel_layout'])) {
-            $val = (string)$_POST['magicpreview_panel_layout'];
-            $props['panel_layout'] = in_array($val, $validLayouts, true) ? $val : '';
-        }
-        if (isset($_POST['magicpreview_enabled'])) {
-            $val = (string)$_POST['magicpreview_enabled'];
-            $props['enabled'] = in_array($val, $validEnabled, true) ? $val : '';
+        foreach ($mpOverrides as $key => $valid) {
+            $postKey = 'magicpreview_' . $key;
+            if (isset($_POST[$postKey])) {
+                $val = (string)$_POST[$postKey];
+                // Invalid values (incl. the "system_default" sentinel) clear the override.
+                $props[$key] = in_array($val, $valid, true) ? $val : '';
+            }
         }
         if (!empty($props)) {
             $resource->setProperties($props, 'magicpreview');
