@@ -213,6 +213,10 @@ body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-action-buttons {
    (#modx-resource-main-right: Template, Published, etc.) stacks below the
    main left column (#modx-resource-main-left) so the editor gets full width.
 
+   The 15px gaps match MODX's native column gutter (its own responsive CSS
+   stacks these columns the same way under ~1140px); the left column drops
+   30px (2x that gutter) so full width clears it without a horizontal scrollbar.
+
    MODX 3.x only — MODX 2.x has no resource sidebar, so these rules would
    distort its single-column layout.
    -------------------------------------------------------------------------- */
