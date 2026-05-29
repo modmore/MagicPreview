@@ -656,11 +656,18 @@
      * Triggers an initial preview by submitting the form after the
      * resource panel has finished rendering. Only runs when the user's
      * saved panel state is open and previewMode is MODE_PANEL.
+     *
+     * Wired to the resource panel's 'afterrender' event (see the
+     * Ext.override below) rather than polling for the component.
      */
     function initAutoPreview() {
         var savedState = getSavedPanelState();
-        if (!savedState.open) return;
-        if (config().previewMode !== MODE_PANEL) return;
+        if (!savedState.open) {
+            return;
+        }
+        if (config().previewMode !== MODE_PANEL) {
+            return;
+        }
 
         // For overlay mode, open the panel first (onpage is already open
         // via _panel.initOnpage)
@@ -669,17 +676,10 @@
             _panel.showLoading();
         }
 
-        // Wait for the resource panel to be available, then submit.
-        var checkInterval = setInterval(function() {
-            var panel = Ext.getCmp('modx-panel-resource');
-            if (panel && panel.getForm()) {
-                clearInterval(checkInterval);
-                // Give RTEs a moment to initialise their content
-                setTimeout(function() {
-                    submitPreview();
-                }, 500);
-            }
-        }, 100);
+        // Give on page elements a moment to finish loading
+        setTimeout(function() {
+            submitPreview();
+        }, 500);
     }
 
     // =========================================================================
@@ -827,19 +827,23 @@
             return;
         }
 
-        // Reload an open preview whenever the resource is saved natively.
-        // MODx.FormPanel fires 'success' on the panel after a completed save
-        // (Save button or Ctrl+S); our own preview/draft submissions bypass
-        // this (they call fm.submit() directly), so it only fires for real
-        // saves. We attach the listener by wrapping the panel's initComponent
-        // rather than polling for the component: this override is registered
-        // before the controller constructs the panel (see getSettingLeftFields
-        // note above), so every instance wires itself up on construction.
+        // Hook the resource panel's lifecycle by wrapping initComponent rather
+        // than polling for the component: this override is registered before
+        // the controller constructs the panel (see getSettingLeftFields note
+        // above), so every instance wires itself up on construction.
+        //
+        //  - 'success' fires after a completed native save (Save button or
+        //    Ctrl+S). Our own preview/draft submissions bypass it (they call
+        //    fm.submit() directly), so it only fires for real saves — we use it
+        //    to reload an open preview.
+        //  - 'afterrender' (once) triggers the initial auto-preview now that the
+        //    panel and its form exist.
         Ext.override(MODx.panel.Resource, {
             _mpOrigInitComponent: MODx.panel.Resource.prototype.initComponent,
             initComponent: function() {
                 this._mpOrigInitComponent.call(this);
                 this.on('success', onResourceSaveSuccess);
+                this.on('afterrender', initAutoPreview, this, { single: true });
             }
         });
 
@@ -921,8 +925,8 @@
         // Check for a saved draft and show restore/discard banner
         showDraftBanner();
 
-        // Auto-preview: submit the form immediately to generate a preview
-        initAutoPreview();
+        // Auto-preview is triggered from the panel's 'afterrender' event,
+        // wired up in the Ext.override(MODx.panel.Resource) block above.
 
         // =================================================================
         // Keyboard shortcuts
