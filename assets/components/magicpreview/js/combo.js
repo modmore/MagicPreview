@@ -45,11 +45,32 @@ MagicPreview.combo.Base = function(config) {
 Ext.extend(MagicPreview.combo.Base, MODx.combo.ComboBox);
 
 /**
+ * Base for system-settings combos, where the stored value is also the
+ * display label. Subclasses pass their values via config.values.
+ */
+MagicPreview.combo.SystemBase = function(config) {
+    config = config || {};
+    var values = config.values || [];
+    delete config.values;
+    Ext.applyIf(config, {
+        store: new Ext.data.SimpleStore({
+            fields: ['v'],
+            data: values.map(function(v) { return [v]; })
+        }),
+        displayField: 'v',
+        valueField: 'v'
+    });
+    MagicPreview.combo.SystemBase.superclass.constructor.call(this, config);
+};
+Ext.extend(MagicPreview.combo.SystemBase, MagicPreview.combo.Base);
+
+/**
  * Base for per-resource combos: prepends a localised "System Default" row
  * (value 'system_default', cleared to '' on save) ahead of the subclass's
  * own rows. Subclasses pass their [value, label] pairs via config.rows.
- * Rows are read at construction time so labels that depend on
- * MagicPreviewConfig (injected lazily) resolve correctly.
+ * The store is built per construction so the System Default label, read
+ * lazily from MagicPreviewConfig via getSystemDefaultLabel(), resolves once
+ * that global has been injected.
  */
 MagicPreview.combo.ResourceBase = function(config) {
     config = config || {};
@@ -75,16 +96,11 @@ Ext.extend(MagicPreview.combo.ResourceBase, MagicPreview.combo.Base);
 MagicPreview.combo.PreviewMode = function(config) {
     config = config || {};
     Ext.applyIf(config, {
-        store: new Ext.data.SimpleStore({
-            fields: ['v'],
-            data: [['New Window'], ['Panel']]
-        }),
-        displayField: 'v',
-        valueField: 'v'
+        values: ['New Window', 'Panel']
     });
     MagicPreview.combo.PreviewMode.superclass.constructor.call(this, config);
 };
-Ext.extend(MagicPreview.combo.PreviewMode, MagicPreview.combo.Base);
+Ext.extend(MagicPreview.combo.PreviewMode, MagicPreview.combo.SystemBase);
 Ext.reg('magicpreview-combo-preview-mode', MagicPreview.combo.PreviewMode);
 
 /**
@@ -93,16 +109,11 @@ Ext.reg('magicpreview-combo-preview-mode', MagicPreview.combo.PreviewMode);
 MagicPreview.combo.PanelLayout = function(config) {
     config = config || {};
     Ext.applyIf(config, {
-        store: new Ext.data.SimpleStore({
-            fields: ['v'],
-            data: [['Overlay'], ['On Page']]
-        }),
-        displayField: 'v',
-        valueField: 'v'
+        values: ['Overlay', 'On Page']
     });
     MagicPreview.combo.PanelLayout.superclass.constructor.call(this, config);
 };
-Ext.extend(MagicPreview.combo.PanelLayout, MagicPreview.combo.Base);
+Ext.extend(MagicPreview.combo.PanelLayout, MagicPreview.combo.SystemBase);
 Ext.reg('magicpreview-combo-panel-layout', MagicPreview.combo.PanelLayout);
 
 /**
@@ -111,16 +122,11 @@ Ext.reg('magicpreview-combo-panel-layout', MagicPreview.combo.PanelLayout);
 MagicPreview.combo.TemplateFilterMode = function(config) {
     config = config || {};
     Ext.applyIf(config, {
-        store: new Ext.data.SimpleStore({
-            fields: ['v'],
-            data: [['None'], ['Block Listed'], ['Allow Listed Only']]
-        }),
-        displayField: 'v',
-        valueField: 'v'
+        values: ['None', 'Block Listed', 'Allow Listed Only']
     });
     MagicPreview.combo.TemplateFilterMode.superclass.constructor.call(this, config);
 };
-Ext.extend(MagicPreview.combo.TemplateFilterMode, MagicPreview.combo.Base);
+Ext.extend(MagicPreview.combo.TemplateFilterMode, MagicPreview.combo.SystemBase);
 Ext.reg('magicpreview-combo-template-filter-mode', MagicPreview.combo.TemplateFilterMode);
 
 // -- Per-resource combos (include a "System Default" inherit option) ---------
