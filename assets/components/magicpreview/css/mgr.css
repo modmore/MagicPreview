@@ -217,7 +217,7 @@ body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-action-buttons {
    distort its single-column layout.
    -------------------------------------------------------------------------- */
 
-body.magicpreview_modx3.mmmp-panel-onpage-active .x-panel-body {
+body.magicpreview_modx3.mmmp-panel-onpage-active #modx-resource-main-columns .x-panel-body {
     width: 100% !important;
 }
 
