@@ -43,6 +43,7 @@ $_lang['magicpreview.draft_discarded'] = 'Kladde kasseret';
 $_lang['magicpreview.draft_banner_msg'] = 'En kladde fra [[+date]] er tilgængelig.';
 $_lang['magicpreview.draft_restore'] = 'Gendan';
 $_lang['magicpreview.draft_discard'] = 'Kassér';
+$_lang['magicpreview.draft_discard_live_confirm'] = 'Du har [[+count]] live-delingslink(s), der viser denne kladde. Hvis kladden kasseres, fjernes disse links også. Fortsætte?';
 
 // Kladde-indstillinger
 $_lang['setting_magicpreview.draft_ttl'] = 'Kladde-TTL';

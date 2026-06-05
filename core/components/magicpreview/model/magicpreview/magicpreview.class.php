@@ -467,6 +467,46 @@ class MagicPreview
     }
 
     /**
+     * Counts the user's working (non-expired) live share links for a
+     * resource — the links that would stop resolving if their draft were
+     * removed.
+     *
+     * @param int $resourceId
+     * @param int $userId
+     * @return int
+     */
+    public function countLiveShares(int $resourceId, int $userId): int
+    {
+        return (int) $this->modx->getCount('mpShare', [
+            'resource_id' => $resourceId,
+            'user_id' => $userId,
+            'type' => self::SHARE_TYPE_LIVE,
+            [
+                'expires_at' => 0,
+                'OR:expires_at:>' => time(),
+            ],
+        ]);
+    }
+
+    /**
+     * Removes the user's live share links for a resource (expired ones
+     * included). Called when the draft they resolve against is discarded.
+     *
+     * @param int $resourceId
+     * @param int $userId
+     * @return int The number of links removed.
+     */
+    public function removeLiveShares(int $resourceId, int $userId): int
+    {
+        $removed = $this->modx->removeCollection('mpShare', [
+            'resource_id' => $resourceId,
+            'user_id' => $userId,
+            'type' => self::SHARE_TYPE_LIVE,
+        ]);
+        return $removed === false ? 0 : (int) $removed;
+    }
+
+    /**
      * Builds the absolute public URL for a share token, using the target
      * context's site_url so multi-context sites link to the right host.
      *

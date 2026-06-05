@@ -570,9 +570,23 @@
     }
 
     /**
-     * Discards the saved draft for the current resource.
+     * Discards the saved draft for the current resource. When the editor has
+     * live share links resolving against the draft, the server reports them
+     * instead of discarding; a confirmation then explains that the links will
+     * be removed too before retrying with remove_shares set.
+     * @param {HTMLElement} [banner] - The draft banner, removed once discarded.
      */
-    function discardDraft() {
+    function discardDraft(banner) {
+        var finish = function() {
+            if (banner) {
+                banner.remove();
+            }
+            MODx.msg.status({
+                title: lexicon('draft_discarded'),
+                delay: 3
+            });
+        };
+
         MODx.Ajax.request({
             url: MagicPreviewConfig.assetsUrl + 'connector.php',
             params: {
@@ -581,11 +595,32 @@
             },
             listeners: {
                 success: {
-                    fn: function() {
-                        MODx.msg.status({
-                            title: lexicon('draft_discarded'),
-                            delay: 3
-                        });
+                    fn: function(r) {
+                        var obj = r.object || {};
+                        if (obj.discarded) {
+                            finish();
+                            return;
+                        }
+
+                        // The editor has live share links resolving against
+                        // this draft: removing it also removes those links,
+                        // so the server held off until they confirm.
+                        if (obj.live_shares > 0) {
+                            MODx.msg.confirm({
+                                title: lexicon('draft_discard'),
+                                text: lexicon('draft_discard_live_confirm')
+                                    .replace('[[+count]]', obj.live_shares),
+                                url: MagicPreviewConfig.assetsUrl + 'connector.php',
+                                params: {
+                                    action: 'resource/discard-draft',
+                                    id: MagicPreviewResource,
+                                    remove_shares: 1
+                                },
+                                listeners: {
+                                    success: { fn: finish }
+                                }
+                            });
+                        }
                     }
                 }
             }
@@ -665,8 +700,9 @@
             if (action === 'restore') {
                 restoreDraft();
             } else if (action === 'discard') {
-                discardDraft();
-                banner.remove();
+                // The banner is removed by discardDraft() once the draft is
+                // actually gone — discarding may first ask for confirmation.
+                discardDraft(banner);
             }
         });
     }

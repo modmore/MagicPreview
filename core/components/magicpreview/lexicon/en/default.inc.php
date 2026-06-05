@@ -43,6 +43,7 @@ $_lang['magicpreview.draft_discarded'] = 'Draft discarded';
 $_lang['magicpreview.draft_banner_msg'] = 'A draft from [[+date]] is available.';
 $_lang['magicpreview.draft_restore'] = 'Restore';
 $_lang['magicpreview.draft_discard'] = 'Discard';
+$_lang['magicpreview.draft_discard_live_confirm'] = 'You have [[+count]] live share link(s) showing this draft. Discarding the draft will also remove those links. Continue?';
 
 // Draft settings
 $_lang['setting_magicpreview.draft_ttl'] = 'Draft TTL';

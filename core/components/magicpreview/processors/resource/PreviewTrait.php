@@ -64,9 +64,13 @@ trait PreviewTrait
             if ($createShare) {
                 $type = (string) $this->getProperty('share_type', MagicPreview::SHARE_TYPE_SNAPSHOT);
 
-                // A live link renders the creator's current draft at view time,
-                // so make sure one exists matching what was just shared.
-                if ($type === MagicPreview::SHARE_TYPE_LIVE && !$saveDraft) {
+                // A live link renders the creator's current draft at view
+                // time, so make sure one exists — but never overwrite an
+                // existing draft: the editor may not have restored it into
+                // the form, and the submitted state would clobber their work.
+                if ($type === MagicPreview::SHARE_TYPE_LIVE && !$saveDraft
+                    && $service->getDraft((int) $this->object->get('id'), (int) $this->modx->user->get('id')) === null
+                ) {
                     $service->saveDraft(
                         $this->object->get('id'),
                         $this->modx->user->get('id'),

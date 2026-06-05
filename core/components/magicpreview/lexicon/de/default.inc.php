@@ -42,6 +42,7 @@ $_lang['magicpreview.draft_discarded'] = 'Entwurf verworfen';
 $_lang['magicpreview.draft_banner_msg'] = 'Ein Entwurf vom [[+date]] ist verfügbar.';
 $_lang['magicpreview.draft_restore'] = 'Wiederherstellen';
 $_lang['magicpreview.draft_discard'] = 'Verwerfen';
+$_lang['magicpreview.draft_discard_live_confirm'] = 'Sie haben [[+count]] Live-Freigabelink(s), die diesen Entwurf anzeigen. Beim Verwerfen des Entwurfs werden diese Links ebenfalls entfernt. Fortfahren?';
 
 // Entwurf-Einstellungen
 $_lang['setting_magicpreview.draft_ttl'] = 'Entwurf-TTL';
