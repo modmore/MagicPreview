@@ -33,14 +33,16 @@ trait PreviewTrait
         }
         $data = $this->object->toArray('', true);
 
-        // Use a deterministic hash of the data so identical content
-        // returns the same key. This allows the client-side auto-refresh
-        // to skip reloading the iframe when nothing has actually changed.
-        $key = substr(hash('sha256', json_encode($data)), 0, 24);
-        $this->modx->cacheManager->set($this->object->get('id') . '/' . $key, $data, 3600, [
-            xPDO::OPT_CACHE_KEY => 'magicpreview'
-        ]);
-        $this->previewHash = $key;
+        // Load the service ourselves: this processor may be invoked through
+        // a third-party connector (e.g. VersionX) that hasn't loaded it.
+        $corePath = $this->modx->getOption('magicpreview.core_path', null,
+            $this->modx->getOption('core_path') . 'components/magicpreview/');
+        /** @var MagicPreview $service */
+        $service = $this->modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
+
+        // Cache the preview data under a deterministic content hash for the
+        // ?show_preview= front-end render (see MagicPreview::cachePreviewData).
+        $this->previewHash = $service->cachePreviewData((int) $this->object->get('id'), $data);
 
         // Save a draft of the current form state so the user can restore
         // it later, even after closing the browser or losing the session.
@@ -48,13 +50,6 @@ trait PreviewTrait
         $saveDraft = (bool) $this->getProperty('save_draft', false);
         $createShare = (bool) $this->getProperty('create_share', false);
         if ($saveDraft || $createShare) {
-            // Load the service ourselves: this processor may be invoked through
-            // a third-party connector (e.g. VersionX) that hasn't loaded it.
-            $corePath = $this->modx->getOption('magicpreview.core_path', null,
-                $this->modx->getOption('core_path') . 'components/magicpreview/');
-            /** @var MagicPreview $service */
-            $service = $this->modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
-
             if ($saveDraft) {
                 $service->saveDraft(
                     $this->object->get('id'),

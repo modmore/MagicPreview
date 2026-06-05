@@ -230,6 +230,34 @@ class MagicPreview
     }
 
     /**
+     * Writes preview data into the short-lived preview cache and returns the
+     * cache hash, consumed by the front end as ?show_preview=<hash> (manager
+     * sessions only; see the OnLoadWebDocument handler in the plugin).
+     *
+     * The hash is a deterministic digest of the data, so identical content
+     * always yields the same key — this lets the client-side auto-refresh
+     * skip reloading the iframe when nothing has actually changed.
+     *
+     * @param int $resourceId
+     * @param array $data The resource snapshot (incl. flattened TVs).
+     * @return string|null The 24-character hash, or null if encoding failed.
+     */
+    public function cachePreviewData(int $resourceId, array $data): ?string
+    {
+        $encoded = json_encode($data);
+        if (!is_string($encoded)) {
+            $this->modx->log(modX::LOG_LEVEL_ERROR, 'Could not encode preview data for resource ' . $resourceId);
+            return null;
+        }
+
+        $hash = substr(hash('sha256', $encoded), 0, 24);
+        $this->modx->cacheManager->set($resourceId . '/' . $hash, $data, 3600, [
+            xPDO::OPT_CACHE_KEY => 'magicpreview',
+        ]);
+        return $hash;
+    }
+
+    /**
      * Creates a shareable public link to a draft of a resource.
      *
      * The raw token is returned ONCE here (embedded in the url) and is never
@@ -343,19 +371,8 @@ class MagicPreview
             return null;
         }
 
-        $expiresAt = (int) $share->get('expires_at');
-        if ($expiresAt > 0 && $expiresAt < time()) {
-            return null;
-        }
-
-        if ($share->get('type') === self::SHARE_TYPE_LIVE) {
-            // A live share renders whatever the creator's draft currently holds.
-            $draft = $this->getDraft((int) $share->get('resource_id'), (int) $share->get('user_id'));
-            $data = $draft !== null ? $draft['data'] : null;
-        } else {
-            $data = json_decode((string) $share->get('data'), true);
-        }
-        if (!is_array($data) || empty($data)) {
+        $resolved = $this->resolveShare($share);
+        if ($resolved === null) {
             return null;
         }
 
@@ -364,12 +381,30 @@ class MagicPreview
         $share->set('last_viewed_at', time());
         $share->save();
 
-        return [
-            'resource_id' => (int) $share->get('resource_id'),
-            'context_key' => (string) $share->get('context_key'),
-            'type' => (string) $share->get('type'),
-            'data' => $data,
-        ];
+        return $resolved;
+    }
+
+    /**
+     * Resolves a share link by id (optionally scoped to a resource) to a
+     * renderable draft — the same shape as getValidShare(), but for the
+     * manager side: no token needed and no view-count bump.
+     *
+     * @param int $shareId
+     * @param int|null $resourceId
+     * @return array|null ['resource_id' => int, 'context_key' => string, 'type' => string, 'data' => array]
+     */
+    public function getShareById(int $shareId, ?int $resourceId = null): ?array
+    {
+        $criteria = ['id' => $shareId];
+        if ($resourceId !== null) {
+            $criteria['resource_id'] = $resourceId;
+        }
+        /** @var mpShare|null $share */
+        $share = $this->modx->getObject('mpShare', $criteria);
+        if (!$share) {
+            return null;
+        }
+        return $this->resolveShare($share);
     }
 
     /**
@@ -458,6 +493,40 @@ class MagicPreview
         }
 
         return $assetsUrl . 'share.php?t=' . $token;
+    }
+
+    /**
+     * Resolves a share row to its renderable data: enforces expiry and
+     * decodes the snapshot — or, for live shares, fetches the creator's
+     * current draft.
+     *
+     * @param mpShare $share
+     * @return array|null ['resource_id' => int, 'context_key' => string, 'type' => string, 'data' => array]
+     */
+    private function resolveShare(mpShare $share): ?array
+    {
+        $expiresAt = (int) $share->get('expires_at');
+        if ($expiresAt > 0 && $expiresAt < time()) {
+            return null;
+        }
+
+        if ($share->get('type') === self::SHARE_TYPE_LIVE) {
+            // A live share renders whatever the creator's draft currently holds.
+            $draft = $this->getDraft((int) $share->get('resource_id'), (int) $share->get('user_id'));
+            $data = $draft !== null ? $draft['data'] : null;
+        } else {
+            $data = json_decode((string) $share->get('data'), true);
+        }
+        if (!is_array($data) || empty($data)) {
+            return null;
+        }
+
+        return [
+            'resource_id' => (int) $share->get('resource_id'),
+            'context_key' => (string) $share->get('context_key'),
+            'type' => (string) $share->get('type'),
+            'data' => $data,
+        ];
     }
 
     /**

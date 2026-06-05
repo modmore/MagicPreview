@@ -89,6 +89,7 @@ $_lang['magicpreview.share_col_type'] = 'Type';
 $_lang['magicpreview.share_col_views'] = 'Visninger';
 $_lang['magicpreview.share_type_snapshot'] = 'Øjebliksbillede';
 $_lang['magicpreview.share_type_live'] = 'Live';
+$_lang['magicpreview.share_view'] = 'Vis';
 $_lang['magicpreview.share_revoke'] = 'Tilbagekald';
 $_lang['magicpreview.share_revoke_confirm'] = 'Tilbagekald dette delingslink? Alle, der bruger det, mister adgangen med det samme.';
 $_lang['magicpreview.share_revoked'] = 'Delingslink tilbagekaldt';

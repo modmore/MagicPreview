@@ -151,6 +151,53 @@
         });
     }
 
+    /**
+     * Opens a manager-side preview of a share's content in a new tab via the
+     * standard mgr-only ?show_preview= mechanism — the public share URL can't
+     * be reconstructed (only the token's hash is stored), and the editor is
+     * logged in anyway. The previewshare processor writes the share's data
+     * into the preview cache and returns the hash.
+     *
+     * The tab is opened synchronously so popup blockers count it as part of
+     * the user's click; its location is set once the hash arrives.
+     * @param {number} shareId
+     */
+    function previewShare(shareId) {
+        if (!shareId) return;
+
+        var win = window.open('about:blank', 'mmmp-share-preview');
+
+        MODx.Ajax.request({
+            url: MagicPreviewConfig.assetsUrl + 'connector.php',
+            params: {
+                action: 'resource/previewshare',
+                id: MagicPreviewResource,
+                share_id: shareId
+            },
+            listeners: {
+                success: {
+                    fn: function(r) {
+                        var hash = (r.object && r.object.preview_hash) ? r.object.preview_hash : null;
+                        if (!hash) {
+                            if (win) win.close();
+                            return;
+                        }
+                        var base = MagicPreviewConfig.baseFrameUrl || '';
+                        var joiner = base.indexOf('?') === -1 ? '?' : '&';
+                        if (win) {
+                            win.location = base + joiner + 'show_preview=' + hash;
+                        }
+                    }
+                },
+                failure: {
+                    fn: function() {
+                        if (win) win.close();
+                    }
+                }
+            }
+        });
+    }
+
     // -- Grid: active share links for the current resource -------------------
 
     MagicPreview.grid.Shares = function(config) {
@@ -208,10 +255,11 @@
                 {
                     header: '',
                     dataIndex: 'id',
-                    width: 90,
+                    width: 120,
                     sortable: false,
                     renderer: function() {
-                        return '<a class="mmmp-share-revoke" href="javascript:;">' + _('magicpreview.share_revoke') + '</a>';
+                        return '<a class="mmmp-share-view" href="javascript:;">' + _('magicpreview.share_view') + '</a>'
+                            + ' <a class="mmmp-share-revoke" href="javascript:;">' + _('magicpreview.share_revoke') + '</a>';
                     }
                 }
             ],
@@ -227,13 +275,16 @@
     };
     Ext.extend(MagicPreview.grid.Shares, MODx.grid.Grid, {
         /**
-         * Triggers revoke only when the revoke link in the action column
-         * was clicked (so clicking elsewhere in the row does nothing).
+         * Triggers view/revoke only when the matching link in the action
+         * column was clicked (clicking elsewhere in the row does nothing).
          */
         onCellClick: function(grid, rowIndex, colIndex, e) {
-            if (!e.getTarget('.mmmp-share-revoke')) return;
             var rec = this.getStore().getAt(rowIndex);
-            if (rec) {
+            if (!rec) return;
+
+            if (e.getTarget('.mmmp-share-view')) {
+                previewShare(rec.get('id'));
+            } else if (e.getTarget('.mmmp-share-revoke')) {
                 revokeShare(rec.get('id'));
             }
         }
@@ -249,7 +300,7 @@
 
         Ext.applyIf(config, {
             title: _('magicpreview.share_title'),
-            width: 600,
+            width: 760,
             autoHeight: true,
             resizable: false,
             closeAction: 'hide',

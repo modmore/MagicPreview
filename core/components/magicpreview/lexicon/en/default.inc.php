@@ -89,6 +89,7 @@ $_lang['magicpreview.share_col_type'] = 'Type';
 $_lang['magicpreview.share_col_views'] = 'Views';
 $_lang['magicpreview.share_type_snapshot'] = 'Snapshot';
 $_lang['magicpreview.share_type_live'] = 'Live';
+$_lang['magicpreview.share_view'] = 'View';
 $_lang['magicpreview.share_revoke'] = 'Revoke';
 $_lang['magicpreview.share_revoke_confirm'] = 'Revoke this share link? Anyone using it will lose access immediately.';
 $_lang['magicpreview.share_revoked'] = 'Share link revoked';

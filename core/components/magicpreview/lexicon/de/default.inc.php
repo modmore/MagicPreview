@@ -88,6 +88,7 @@ $_lang['magicpreview.share_col_type'] = 'Typ';
 $_lang['magicpreview.share_col_views'] = 'Aufrufe';
 $_lang['magicpreview.share_type_snapshot'] = 'Momentaufnahme';
 $_lang['magicpreview.share_type_live'] = 'Live';
+$_lang['magicpreview.share_view'] = 'Ansehen';
 $_lang['magicpreview.share_revoke'] = 'Widerrufen';
 $_lang['magicpreview.share_revoke_confirm'] = 'Diesen Freigabelink widerrufen? Jeder, der ihn verwendet, verliert sofort den Zugriff.';
 $_lang['magicpreview.share_revoked'] = 'Freigabelink widerrufen';

@@ -514,6 +514,18 @@ body.magicpreview_modx3.mmmp-panel-onpage-active #modx-resource-main-right {
    Share window: revoke link + note tweaks layered on the native MODx.Window.
    -------------------------------------------------------------------------- */
 
+a.mmmp-share-view {
+    color: #234368;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-right: 0.5rem;
+}
+
+a.mmmp-share-view:hover,
+a.mmmp-share-view:focus {
+    color: #1a3350;
+}
+
 a.mmmp-share-revoke {
     color: #a94442;
     cursor: pointer;

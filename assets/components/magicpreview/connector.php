@@ -15,6 +15,7 @@ if (version_compare($modx->getOption('settings_version'), '3.0.0-alpha1') < 1) {
         'resource/discard-draft' => 'resource/discard-draft-v2',
         'resource/getshares'     => 'resource/getshares-v2',
         'resource/removeshare'   => 'resource/removeshare-v2',
+        'resource/previewshare'  => 'resource/previewshare-v2',
     ];
     $action = $_REQUEST['action'] ?? '';
     if (isset($v2Map[$action])) {
