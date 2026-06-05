@@ -17,6 +17,14 @@ class MagicPreviewGetSharesProcessor extends Processor
             return $this->failure('Invalid resource ID.');
         }
 
+        // Share links govern the resource's public exposure, so managing
+        // them requires edit rights on the resource itself.
+        /** @var modResource|null $resource */
+        $resource = $this->modx->getObject('modResource', $resourceId);
+        if (!$resource || !$resource->checkPolicy('save')) {
+            return $this->failure('Access denied.');
+        }
+
         $corePath = $this->modx->getOption('magicpreview.core_path', null,
             $this->modx->getOption('core_path') . 'components/magicpreview/');
         /** @var MagicPreview $service */
