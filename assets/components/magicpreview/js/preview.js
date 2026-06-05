@@ -7,7 +7,7 @@
  * auto-refresh timer, auto-preview on page load, and Preview button
  * injection into the MODX manager action bar.
  *
- * Load order: window.js -> panel.js -> preview.js (this file, last)
+ * Load order: window.js -> panel.js -> share.js -> preview.js (this file, last)
  *
  * @global {object}  MagicPreviewConfig   - Injected by PHP plugin
  * @global {number}  MagicPreviewResource - Injected by PHP plugin
@@ -61,28 +61,46 @@
             hasDraft: !!MagicPreviewConfig.hasDraft,
             draftSavedAt: MagicPreviewConfig.draftSavedAt ?? '',
             iconSaveDraft: MagicPreviewConfig.iconSaveDraft ?? '',
-            iconView: MagicPreviewConfig.iconView ?? ''
+            iconView: MagicPreviewConfig.iconView ?? '',
+            iconShare: MagicPreviewConfig.iconShare ?? ''
         };
 
         return _config;
     }
 
     /**
-     * Returns a lexicon string by key, falling back to the key itself.
+     * Returns a lexicon string by key. Handy for getting values in the preview.
+     * Resolves from the small PHP-injected
+     * map first (the preview window/panel strings), then from the manager's
+     * lexicon via the global _() helper — the magicpreview:default topic is
+     * registered with addLexiconTopic() in the plugin — and finally falls
+     * back to the key itself.
      * @param {string} key
      * @returns {string}
      */
     function lexicon(key) {
         var lex = config().lexicon;
-        return (lex && lex[key]) ? lex[key] : key;
+        if (lex && lex[key]) {
+            return lex[key];
+        }
+        if (typeof _ === 'function') {
+            var full = 'magicpreview.' + key;
+            var s = _(full);
+            if (s && s !== full) {
+                return s;
+            }
+        }
+        return key;
     }
 
     // =========================================================================
-    // References to sub-modules (set by window.js and panel.js before us)
+    // References to sub-modules (set by window.js, panel.js and share.js
+    // before us)
     // =========================================================================
 
     var _window = window.MagicPreview._window;
     var _panel = window.MagicPreview._panel;
+    var _share = window.MagicPreview._share;
 
     // =========================================================================
     // Panel state persistence (via MODX's Ext.state.Manager)
@@ -249,10 +267,12 @@
         var ta = Ext.get(panel.contentField);
         if (ta) {
             var hc = Ext.getCmp('hiddenContent');
-            if (hc) { hc.setValue(ta.dom.value); }
+            if (hc) {
+                hc.setValue(ta.dom.value); 
+            }
         }
 
-        // 2. Sync RTE editors (TinyMCE, CKEditor, etc.)
+        // 2. Sync RTE editors (Redactor, TinyMCE, etc.)
         if (panel.cleanupEditor) {
             panel.cleanupEditor();
         }
@@ -294,10 +314,14 @@
         var showLoading = options.showLoading !== false;
 
         var panel = Ext.getCmp('modx-panel-resource');
-        if (!panel) return;
+        if (!panel) {
+            return;
+        }
 
         var fm = panel.getForm();
-        if (!fm) return;
+        if (!fm) {
+            return;
+        }
 
         // Show loading state immediately (only for manual/initial previews)
         if (showLoading) {
@@ -447,10 +471,14 @@
      */
     function saveDraft() {
         var panel = Ext.getCmp('modx-panel-resource');
-        if (!panel) return;
+        if (!panel) {
+            return;
+        }
 
         var fm = panel.getForm();
-        if (!fm) return;
+        if (!fm) {
+            return;
+        }
 
         // Fire beforeSubmit so extras (ContentBlocks, etc.) prepare data
         var canSubmit = panel.fireEvent('beforeSubmit', {
@@ -458,7 +486,9 @@
             options: {},
             config: panel.config
         });
-        if (canSubmit === false) return;
+        if (canSubmit === false) {
+            return;
+        }
 
         var originalAction = fm.baseParams['action'];
         var originalUrl = fm.url;
@@ -563,18 +593,6 @@
     }
 
     /**
-     * Formats a Date object as 'YYYY-MM-DD HH:MM:SS' to match the PHP
-     * date('Y-m-d H:i:s') format used by the server.
-     * @param {Date} d
-     * @returns {string}
-     */
-    function formatDateTime(d) {
-        var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
-        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
-            + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
-    }
-
-    /**
      * Builds the banner message HTML for a given datetime string.
      * @param {string} dateStr
      * @returns {string}
@@ -590,7 +608,8 @@
      * banner if it doesn't exist yet (first save on this page load).
      */
     function updateDraftBanner() {
-        var dateStr = formatDateTime(new Date());
+        // PHP-style tokens, matching the server's date('Y-m-d H:i:s')
+        var dateStr = Ext.util.Format.date(new Date(), 'Y-m-d H:i:s');
         var banner = document.getElementById('mmmp-draft-banner');
 
         if (banner) {
@@ -615,10 +634,14 @@
      */
     function showDraftBanner() {
         var c = config();
-        if (!c.hasDraft) return;
+        if (!c.hasDraft) {
+            return;
+        }
 
         var container = document.getElementById('modx-panel-resource-div');
-        if (!container) return;
+        if (!container) {
+            return;
+        }
 
         var banner = document.createElement('div');
         banner.id = 'mmmp-draft-banner';
@@ -861,7 +884,16 @@
                 // If the View button doesn't exist, insert at the start
                 if (!hasViewBtn) btnView = 0;
 
-                // Save Draft icon button — sits between Preview and View
+                // Share icon button — sits between Save Draft and View
+                btns.splice(btnView, 0, {
+                    text: config().iconShare,
+                    id: 'modx-abtn-share',
+                    tooltip: lexicon('share_button_tooltip'),
+                    handler: function() { _share.openDialog(); },
+                    scope: this
+                });
+
+                // Save Draft icon button — sits between Preview and Share
                 btns.splice(btnView, 0, {
                     text: config().iconSaveDraft,
                     id: 'modx-abtn-save-draft',
@@ -880,7 +912,7 @@
 
                 // Replace the View button text with an icon
                 if (hasViewBtn) {
-                    btns[btnView + 2].text = config().iconView;
+                    btns[btnView + 3].text = config().iconView;
                 }
                 return btns;
             },
@@ -903,6 +935,7 @@
             var tooltips = {
                 'modx-abtn-real-preview': lexicon('preview_button_tooltip'),
                 'modx-abtn-save-draft': lexicon('save_draft'),
+                'modx-abtn-share': lexicon('share_button_tooltip'),
                 'modx-abtn-preview': lexicon('view_button_tooltip')
             };
             for (var id in tooltips) {

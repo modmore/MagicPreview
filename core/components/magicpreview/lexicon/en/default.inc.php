@@ -63,3 +63,41 @@ $_lang['magicpreview.resource_enabled'] = 'Use Magic Preview?';
 $_lang['magicpreview.resource_enabled_desc'] = 'Override the template filter for this resource. "Yes" forces the Preview button to appear even if the template is excluded by the system filter. "No" hides the button even if the template would otherwise allow it.';
 $_lang['magicpreview.system_default'] = 'System Default';
 
+// Share links
+$_lang['magicpreview.share_button_tooltip'] = 'Share a link to this draft';
+$_lang['magicpreview.share_title'] = 'Share draft';
+$_lang['magicpreview.share_label'] = 'Label';
+$_lang['magicpreview.share_label_emptytext'] = 'e.g. Homepage redesign';
+$_lang['magicpreview.share_expiry'] = 'Link expires';
+$_lang['magicpreview.share_expiry_default'] = 'Default (system setting)';
+$_lang['magicpreview.share_expiry_1day'] = '1 day';
+$_lang['magicpreview.share_expiry_1week'] = '1 week';
+$_lang['magicpreview.share_expiry_30days'] = '30 days';
+$_lang['magicpreview.share_expiry_never'] = 'Never';
+$_lang['magicpreview.share_live_label'] = 'Keep link in sync with my draft (live)';
+$_lang['magicpreview.share_create'] = 'Create link';
+$_lang['magicpreview.share_created'] = 'Share link created';
+$_lang['magicpreview.share_copy'] = 'Copy';
+$_lang['magicpreview.share_copied'] = 'Link copied to clipboard';
+$_lang['magicpreview.share_link_note'] = 'Copy it now — for security the link cannot be shown again.';
+$_lang['magicpreview.share_existing'] = 'Active links for this resource';
+$_lang['magicpreview.share_none'] = 'No active share links.';
+$_lang['magicpreview.share_col_label'] = 'Label';
+$_lang['magicpreview.share_col_created'] = 'Created';
+$_lang['magicpreview.share_col_expires'] = 'Expires';
+$_lang['magicpreview.share_col_type'] = 'Type';
+$_lang['magicpreview.share_col_views'] = 'Views';
+$_lang['magicpreview.share_type_snapshot'] = 'Snapshot';
+$_lang['magicpreview.share_type_live'] = 'Live';
+$_lang['magicpreview.share_revoke'] = 'Revoke';
+$_lang['magicpreview.share_revoke_confirm'] = 'Revoke this share link? Anyone using it will lose access immediately.';
+$_lang['magicpreview.share_revoked'] = 'Share link revoked';
+$_lang['magicpreview.share_failed'] = 'Could not create the share link.';
+$_lang['magicpreview.share_unavailable'] = 'This preview link has expired or is no longer available.';
+
+// Share settings
+$_lang['setting_magicpreview.share_link_ttl'] = 'Share Link TTL';
+$_lang['setting_magicpreview.share_link_ttl_desc'] = 'Default lifetime of draft share links, in seconds. Used when no expiry is picked while creating a link. Set to 0 for links that never expire. Default: 604800 (7 days).';
+$_lang['setting_magicpreview.icon_share'] = 'Share Icon';
+$_lang['setting_magicpreview.icon_share_desc'] = 'Icon for the Share button in the action bar. Enter a FontAwesome icon name (e.g. "icon-share-alt") or leave empty for the default icon.';
+

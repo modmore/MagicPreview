@@ -109,6 +109,11 @@ body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-action-buttons {
     padding-right: 0;
 }
 
+#modx-action-buttons .x-toolbar-cell:has(> #modx-abtn-share) {
+    padding-left: 0;
+    padding-right: 0;
+}
+
 .magicpreview_active #modx-action-buttons .x-toolbar-cell:has(> #modx-abtn-preview) {
     padding-left: 0;
 }
@@ -116,6 +121,7 @@ body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-action-buttons {
 /* -- MODX 2: eliminate margin between merged buttons --------------------- */
 
 .magicpreview_modx2 #modx-abtn-save-draft,
+.magicpreview_modx2 #modx-abtn-share,
 .magicpreview_active.magicpreview_modx2 #modx-abtn-preview {
     margin-left: 0 !important;
 }
@@ -133,6 +139,11 @@ body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-action-buttons {
 }
 
 #modx-abtn-save-draft {
+    border-radius: 0 !important;
+    border-right: 1px solid #E4E4E4 !important;
+}
+
+#modx-abtn-share {
     border-radius: 0 !important;
     border-right: 1px solid #E4E4E4 !important;
 }
@@ -497,4 +508,24 @@ body.magicpreview_modx3.mmmp-panel-onpage-active #modx-resource-main-right {
 @keyframes ellipsis3 {
     0% { transform: scale(1); }
     100% { transform: scale(0); }
+}
+
+/* --------------------------------------------------------------------------
+   Share window: revoke link + note tweaks layered on the native MODx.Window.
+   -------------------------------------------------------------------------- */
+
+a.mmmp-share-revoke {
+    color: #a94442;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+a.mmmp-share-revoke:hover,
+a.mmmp-share-revoke:focus {
+    color: #843534;
+}
+
+#mmmp-share-note {
+    color: #777;
+    font-size: 0.75rem;
 }

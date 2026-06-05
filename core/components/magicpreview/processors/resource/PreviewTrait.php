@@ -90,7 +90,8 @@ trait PreviewTrait
                     $data,
                     $this->object->get('context_key'),
                     $type,
-                    $ttl
+                    $ttl,
+                    (string) $this->getProperty('share_label', '')
                 );
             }
         }
