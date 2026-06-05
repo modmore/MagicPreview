@@ -5,8 +5,9 @@
  */
 trait PreviewTrait
 {
-    private $previewHash;
-    private $failedSuccessfully = false;
+    private ?string $previewHash = null;
+    private bool $failedSuccessfully = false;
+    private ?array $shareResult = null;
 
     public function fireBeforeSaveEvent()
     {
@@ -45,19 +46,53 @@ trait PreviewTrait
         // it later, even after closing the browser or losing the session.
         // One draft per resource per user, stored in the magicpreview_drafts table.
         $saveDraft = (bool) $this->getProperty('save_draft', false);
-        if ($saveDraft) {
+        $createShare = (bool) $this->getProperty('create_share', false);
+        if ($saveDraft || $createShare) {
             // Load the service ourselves: this processor may be invoked through
             // a third-party connector (e.g. VersionX) that hasn't loaded it.
             $corePath = $this->modx->getOption('magicpreview.core_path', null,
                 $this->modx->getOption('core_path') . 'components/magicpreview/');
             /** @var MagicPreview $service */
             $service = $this->modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
-            $service->saveDraft(
-                $this->object->get('id'),
-                $this->modx->user->get('id'),
-                $data,
-                $this->object->get('context_key')
-            );
+
+            if ($saveDraft) {
+                $service->saveDraft(
+                    $this->object->get('id'),
+                    $this->modx->user->get('id'),
+                    $data,
+                    $this->object->get('context_key')
+                );
+            }
+
+            // Create a shareable public link to this form state. The result
+            // (url with the one-time token) is returned to the client by failure().
+            if ($createShare) {
+                $type = (string) $this->getProperty('share_type', MagicPreview::SHARE_TYPE_SNAPSHOT);
+
+                // A live link renders the creator's current draft at view time,
+                // so make sure one exists matching what was just shared.
+                if ($type === MagicPreview::SHARE_TYPE_LIVE && !$saveDraft) {
+                    $service->saveDraft(
+                        $this->object->get('id'),
+                        $this->modx->user->get('id'),
+                        $data,
+                        $this->object->get('context_key')
+                    );
+                }
+
+                // Empty/missing TTL means "use the share_link_ttl system setting".
+                $ttl = $this->getProperty('share_ttl');
+                $ttl = ($ttl === null || $ttl === '') ? null : (int) $ttl;
+
+                $this->shareResult = $service->createShare(
+                    $this->object->get('id'),
+                    $this->modx->user->get('id'),
+                    $data,
+                    $this->object->get('context_key'),
+                    $type,
+                    $ttl
+                );
+            }
         }
 
         return false;
@@ -65,9 +100,14 @@ trait PreviewTrait
 
     public function failure($msg = '',$object = null) {
         if ($this->failedSuccessfully) {
-            return $this->success('', [
+            $response = [
                 'preview_hash' => $this->previewHash,
-            ]);
+            ];
+            // Only present when create_share was requested; null means creation failed.
+            if ((bool) $this->getProperty('create_share', false)) {
+                $response['share'] = $this->shareResult;
+            }
+            return $this->success('', $response);
         }
         return parent::failure($msg, $object);
     }

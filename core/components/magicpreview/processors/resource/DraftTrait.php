@@ -11,7 +11,7 @@ trait DraftTrait
      *
      * @return MagicPreview
      */
-    private function getMagicPreviewService()
+    private function getMagicPreviewService(): MagicPreview
     {
         $corePath = $this->modx->getOption('magicpreview.core_path', null,
             $this->modx->getOption('core_path') . 'components/magicpreview/');
@@ -23,7 +23,7 @@ trait DraftTrait
      *
      * @return array|null ['data' => array, 'saved_at' => int, 'user_id' => int, 'resource_id' => int]
      */
-    private function getDraft()
+    private function getDraft(): ?array
     {
         return $this->getMagicPreviewService()->getDraft(
             (int) $this->getProperty('id'),
@@ -36,7 +36,7 @@ trait DraftTrait
      *
      * @return void
      */
-    private function deleteDraft()
+    private function deleteDraft(): void
     {
         $this->getMagicPreviewService()->deleteDraft(
             (int) $this->getProperty('id'),
