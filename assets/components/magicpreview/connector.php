@@ -22,7 +22,7 @@ if (version_compare($modx->getOption('settings_version'), '3.0.0-alpha1') < 1) {
 
 /* handle request */
 $path = $modx->getOption('processorsPath', $modx->magicpreview->config,$corePath  .'processors/');
-$modx->request->handleRequest(array(
+$modx->request->handleRequest([
     'processors_path' => $path,
     'location' => '',
-));
+]);

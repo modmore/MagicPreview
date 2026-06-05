@@ -16,29 +16,29 @@ $modx->getService('error','error.modError', '', '');
 
 $componentPath = dirname(dirname(__FILE__));
 
-$MagicPreview = $modx->getService('magicpreview','MagicPreview', $componentPath.'/core/components/magicpreview/model/magicpreview/', array(
+$MagicPreview = $modx->getService('magicpreview','MagicPreview', $componentPath.'/core/components/magicpreview/model/magicpreview/', [
     'magicpreview.core_path' => $componentPath.'/core/components/magicpreview/',
-));
+]);
 
 
 /* Namespace */
-if (!createObject('modNamespace',array(
+if (!createObject('modNamespace',[
     'name' => 'magicpreview',
     'path' => $componentPath.'/core/components/magicpreview/',
     'assets_path' => $componentPath.'/assets/components/magicpreview/',
-),'name', true)) {
+],'name', true)) {
     echo "Error creating namespace magicpreview.\n";
 }
 
 /* Path settings */
-if (!createObject('modSystemSetting', array(
+if (!createObject('modSystemSetting', [
     'key' => 'magicpreview.core_path',
     'value' => $componentPath.'/core/components/magicpreview/',
     'xtype' => 'textfield',
     'namespace' => 'magicpreview',
     'area' => 'Paths',
     'editedon' => time(),
-), 'key', false)) {
+], 'key', false)) {
     echo "Error creating magicpreview.core_path setting.\n";
 }
 
@@ -56,14 +56,14 @@ $bootstrapPos = strpos($requestUri, '_bootstrap/');
 $requestUri = rtrim(substr($requestUri, 0, $bootstrapPos), '/').'/';
 $assetsUrl = "{$url}{$requestUri}assets/components/magicpreview/";
 
-if (!createObject('modSystemSetting', array(
+if (!createObject('modSystemSetting', [
     'key' => 'magicpreview.assets_url',
     'value' => $assetsUrl,
     'xtype' => 'textfield',
     'namespace' => 'magicpreview',
     'area' => 'Paths',
     'editedon' => time(),
-), 'key', false)) {
+], 'key', false)) {
     echo "Error creating magicpreview.assets_url setting.\n";
 }
 
@@ -88,41 +88,41 @@ foreach ($settings as $key => $opts) {
     }
 }
 
-if (!createObject('modPlugin', array(
+if (!createObject('modPlugin', [
     'name' => 'MagicPreview',
     'static' => true,
     'static_file' => $componentPath.'/core/components/magicpreview/elements/plugins/magicpreview.plugin.php',
-), 'name', true)) {
+], 'name', true)) {
     echo "Error creating MagicPreview Plugin.\n";
 }
-$vcPlugin = $modx->getObject('modPlugin', array('name' => 'MagicPreview'));
+$vcPlugin = $modx->getObject('modPlugin', ['name' => 'MagicPreview']);
 if ($vcPlugin) {
-    if (!createObject('modPluginEvent', array(
+    if (!createObject('modPluginEvent', [
         'pluginid' => $vcPlugin->get('id'),
         'event' => 'OnDocFormRender',
         'priority' => 0,
-    ), array('pluginid','event'), false)) {
+    ], ['pluginid','event'], false)) {
         echo "Error creating modPluginEvent.\n";
     }
-    if (!createObject('modPluginEvent', array(
+    if (!createObject('modPluginEvent', [
         'pluginid' => $vcPlugin->get('id'),
         'event' => 'OnLoadWebDocument',
         'priority' => 0,
-    ), array('pluginid','event'), false)) {
+    ], ['pluginid','event'], false)) {
         echo "Error creating modPluginEvent.\n";
     }
-    if (!createObject('modPluginEvent', array(
+    if (!createObject('modPluginEvent', [
         'pluginid' => $vcPlugin->get('id'),
         'event' => 'OnManagerPageBeforeRender',
         'priority' => 0,
-    ), array('pluginid','event'), false)) {
+    ], ['pluginid','event'], false)) {
         echo "Error creating modPluginEvent.\n";
     }
-    if (!createObject('modPluginEvent', array(
+    if (!createObject('modPluginEvent', [
         'pluginid' => $vcPlugin->get('id'),
         'event' => 'OnDocFormSave',
         'priority' => 0,
-    ), array('pluginid','event'), false)) {
+    ], ['pluginid','event'], false)) {
         echo "Error creating modPluginEvent.\n";
     }
 }
@@ -139,10 +139,10 @@ $event->set('service', 6);
 $event->save();
 
 // Create the tables
-$objectContainers = array(
+$objectContainers = [
     'mpDraft',
     'mpShare',
-);
+];
 echo "Creating tables...\n";
 $manager = $modx->getManager();
 foreach ($objectContainers as $oC) {
@@ -164,7 +164,7 @@ $modx->cacheManager->refresh();
  * @param bool $update
  * @return bool
  */
-function createObject ($className = '', array $data = array(), $primaryField = '', $update = true) {
+function createObject ($className = '', array $data = [], $primaryField = '', $update = true) {
     global $modx;
     /* @var xPDOObject $object */
     $object = null;
@@ -172,13 +172,13 @@ function createObject ($className = '', array $data = array(), $primaryField = '
     /* Attempt to get the existing object */
     if (!empty($primaryField)) {
         if (is_array($primaryField)) {
-            $condition = array();
+            $condition = [];
             foreach ($primaryField as $key) {
                 $condition[$key] = $data[$key];
             }
         }
         else {
-            $condition = array($primaryField => $data[$primaryField]);
+            $condition = [$primaryField => $data[$primaryField]];
         }
         $object = $modx->getObject($className, $condition);
         if ($object instanceof $className) {

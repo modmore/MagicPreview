@@ -7,7 +7,7 @@ class MagicPreviewPreviewProcessorV2 extends modResourceUpdateProcessor {
 
     use PreviewTrait;
 
-    public static function getInstance(modX &$modx, $className, $properties = array()) {
+    public static function getInstance(modX &$modx, $className, $properties = []) {
         return new self($modx, $properties);
     }
 }

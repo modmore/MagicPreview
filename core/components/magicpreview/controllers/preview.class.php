@@ -24,7 +24,7 @@ class MagicPreviewPreviewManagerController extends modExtraManagerController
         $this->setPlaceholder('mp_config', $this->magicpreview->config);
     }
 
-    public function process(array $scriptProperties = array())
+    public function process(array $scriptProperties = [])
     {
         $resourceId = (int)$this->modx->getOption('resource', $scriptProperties, 0);
         $resource = $this->modx->getObject('modResource', ['id' => $resourceId]);

@@ -25,10 +25,10 @@ if ($object->xpdo) {
             $manager = $modx->getManager();
             $loglevel = $modx->setLogLevel(modX::LOG_LEVEL_ERROR);
 
-            $objects = array(
+            $objects = [
                 'mpDraft',
                 'mpShare',
-            );
+            ];
             foreach ($objects as $obj) {
                 $manager->createObjectContainer($obj);
             }
