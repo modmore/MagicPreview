@@ -1,6 +1,6 @@
 <?php
 /** @var modX $modx */
-$modx =& $transport->xpdo;
+$modx = $transport->xpdo;
 $success = false;
 switch($options[xPDOTransport::PACKAGE_ACTION]) {
     case xPDOTransport::ACTION_INSTALL:

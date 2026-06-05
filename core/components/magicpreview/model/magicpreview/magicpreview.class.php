@@ -1,22 +1,20 @@
 <?php
+
 /**
- * MagicPreview
- *
- * Copyright 2018 by Mark Hamstra <support@modmore.com>
+ * MagicPreview main service class
  *
  * @package magicpreview
  */
-
 class MagicPreview
 {
     /**
      * @var modX|null $modx
      */
-    public $modx = null;
+    public ?modX $modx = null;
     /**
      * @var array
      */
-    public $config = [];
+    public array $config = [];
     /**
      * @var bool
      */
@@ -43,7 +41,7 @@ class MagicPreview
      */
     public function __construct(modX $modx, array $config = [])
     {
-        $this->modx =& $modx;
+        $this->modx = $modx;
 
         $corePath = $this->modx->getOption('magicpreview.core_path', $config,
             $this->modx->getOption('core_path') . 'components/magicpreview/');

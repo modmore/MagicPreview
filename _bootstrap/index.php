@@ -138,9 +138,10 @@ $event->set('groupname', 'Magic Preview');
 $event->set('service', 6);
 $event->save();
 
-/* Create the tables */
+// Create the tables
 $objectContainers = array(
-
+    'mpDraft',
+    'mpShare',
 );
 echo "Creating tables...\n";
 $manager = $modx->getManager();

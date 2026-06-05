@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    MagicPreview model schema.
+
+    Classic 1.1 (non-namespaced) xPDO model so the same generated tree loads on both
+    MODX 2.x and 3.x (MODX 3 keeps the xPDOObject / xPDOSimpleObject aliases).
+    Regenerate with: php _build/build.schema.php
+-->
+<model package="magicpreview" baseClass="xPDOObject" platform="mysql" defaultEngine="InnoDB" version="1.1">
+
+    <!-- A saved draft of an unsaved resource edit. One per (resource, user). -->
+    <object class="mpDraft" table="magicpreview_drafts" extends="xPDOSimpleObject">
+        <field key="resource_id" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="user_id" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="context_key" dbtype="varchar" precision="100" phptype="string" null="false" default="web" />
+        <!-- JSON-encoded resource snapshot (incl. flattened TVs); mediumtext, not text, so large resources don't truncate -->
+        <field key="data" dbtype="mediumtext" phptype="string" null="false" />
+        <field key="saved_at" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="expires_at" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="createdon" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="updatedon" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+
+        <index alias="resource_user" name="resource_user" primary="false" unique="true" type="BTREE">
+            <column key="resource_id" length="" collation="A" null="false" />
+            <column key="user_id" length="" collation="A" null="false" />
+        </index>
+        <index alias="expires_at" name="expires_at" primary="false" unique="false" type="BTREE">
+            <column key="expires_at" length="" collation="A" null="false" />
+        </index>
+    </object>
+
+    <!-- A shareable public link to a draft. Many per resource; identified by an unguessable token (stored hashed). -->
+    <object class="mpShare" table="magicpreview_shares" extends="xPDOSimpleObject">
+        <field key="token_hash" dbtype="varchar" precision="64" phptype="string" null="false" />
+        <field key="resource_id" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="user_id" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="context_key" dbtype="varchar" precision="100" phptype="string" null="false" default="web" />
+        <!-- 'snapshot' (frozen copy stored in data) or 'live' (renders the current draft at view time) -->
+        <field key="type" dbtype="varchar" precision="20" phptype="string" null="false" default="snapshot" />
+        <field key="data" dbtype="mediumtext" phptype="string" null="true" />
+        <field key="label" dbtype="varchar" precision="190" phptype="string" null="false" default="" />
+        <!-- Reserved for optional password-protected links; no UI in v1 -->
+        <field key="password_hash" dbtype="varchar" precision="255" phptype="string" null="true" />
+        <field key="createdon" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="expires_at" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="last_viewed_at" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="views" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+
+        <index alias="token_hash" name="token_hash" primary="false" unique="true" type="BTREE">
+            <column key="token_hash" length="" collation="A" null="false" />
+        </index>
+        <index alias="resource_id" name="resource_id" primary="false" unique="false" type="BTREE">
+            <column key="resource_id" length="" collation="A" null="false" />
+        </index>
+        <index alias="expires_at" name="expires_at" primary="false" unique="false" type="BTREE">
+            <column key="expires_at" length="" collation="A" null="false" />
+        </index>
+    </object>
+
+</model>

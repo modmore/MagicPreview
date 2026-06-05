@@ -83,6 +83,10 @@ $builder->package->put(
         'resolve' => [
             [
                 'type' => 'php',
+                'source' => $sources['resolvers'] . 'tables.resolver.php',
+            ],
+            [
+                'type' => 'php',
                 'source' => $sources['resolvers'] . 'customevents.resolver.php',
             ],
         ]
