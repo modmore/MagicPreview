@@ -135,13 +135,10 @@ switch ($modx->event->name) {
             ];
 
             // Check for a saved draft for this resource + user
-            $draftKey = MagicPreview::getDraftCacheKey($resource->get('id'), $modx->user->get('id'));
-            $draft = $modx->cacheManager->get($draftKey, [
-                xPDO::OPT_CACHE_KEY => 'magicpreview_drafts',
-            ]);
-            if (!empty($draft) && is_array($draft) && !empty($draft['data'])) {
+            $draft = $service->getDraft($resource->get('id'), $modx->user->get('id'));
+            if ($draft !== null) {
                 $jsConfig['hasDraft'] = true;
-                $jsConfig['draftSavedAt'] = date('Y-m-d H:i:s', isset($draft['saved_at']) ? (int) $draft['saved_at'] : time());
+                $jsConfig['draftSavedAt'] = date('Y-m-d H:i:s', $draft['saved_at']);
             }
             // Build icon HTML for the Save Draft and View action bar buttons.
             // Empty setting = default SVG; otherwise treat as FA class name.

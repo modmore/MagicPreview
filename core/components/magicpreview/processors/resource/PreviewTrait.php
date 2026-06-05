@@ -43,21 +43,21 @@ trait PreviewTrait
 
         // Save a draft of the current form state so the user can restore
         // it later, even after closing the browser or losing the session.
-        // The draft is keyed by resource ID and user ID (one per user per resource).
+        // One draft per resource per user, stored in the magicpreview_drafts table.
         $saveDraft = (bool) $this->getProperty('save_draft', false);
         if ($saveDraft) {
-            $draftTtl = (int) $this->modx->getOption('magicpreview.draft_ttl', null, 0);
-            $draftKey = MagicPreview::getDraftCacheKey($this->object->get('id'), $this->modx->user->get('id'));
-
-            $draftData = [
-                'data' => $data,
-                'saved_at' => time(),
-                'user_id' => $this->modx->user->get('id'),
-                'resource_id' => $this->object->get('id'),
-            ];
-            $this->modx->cacheManager->set($draftKey, $draftData, $draftTtl, [
-                xPDO::OPT_CACHE_KEY => 'magicpreview_drafts',
-            ]);
+            // Load the service ourselves: this processor may be invoked through
+            // a third-party connector (e.g. VersionX) that hasn't loaded it.
+            $corePath = $this->modx->getOption('magicpreview.core_path', null,
+                $this->modx->getOption('core_path') . 'components/magicpreview/');
+            /** @var MagicPreview $service */
+            $service = $this->modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
+            $service->saveDraft(
+                $this->object->get('id'),
+                $this->modx->user->get('id'),
+                $data,
+                $this->object->get('context_key')
+            );
         }
 
         return false;

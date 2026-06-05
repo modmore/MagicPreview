@@ -6,43 +6,41 @@
 trait DraftTrait
 {
     /**
-     * Returns the cache key for the current resource + user draft.
+     * Returns the MagicPreview service, loading it if needed (the processor
+     * may be invoked through a third-party connector that hasn't loaded it).
      *
-     * @return string
+     * @return MagicPreview
      */
-    private function getDraftCacheKey()
+    private function getMagicPreviewService()
     {
-        return MagicPreview::getDraftCacheKey(
+        $corePath = $this->modx->getOption('magicpreview.core_path', null,
+            $this->modx->getOption('core_path') . 'components/magicpreview/');
+        return $this->modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
+    }
+
+    /**
+     * Returns the draft for the current resource + user, or null if none exists.
+     *
+     * @return array|null ['data' => array, 'saved_at' => int, 'user_id' => int, 'resource_id' => int]
+     */
+    private function getDraft()
+    {
+        return $this->getMagicPreviewService()->getDraft(
             (int) $this->getProperty('id'),
             $this->modx->user->get('id')
         );
     }
 
     /**
-     * Returns the draft data from the cache, or null if none exists.
-     *
-     * @return array|null
-     */
-    private function getDraft()
-    {
-        $data = $this->modx->cacheManager->get($this->getDraftCacheKey(), [
-            xPDO::OPT_CACHE_KEY => 'magicpreview_drafts',
-        ]);
-        if (!empty($data) && is_array($data) && !empty($data['data'])) {
-            return $data;
-        }
-        return null;
-    }
-
-    /**
-     * Deletes the draft from the cache.
+     * Deletes the draft for the current resource + user.
      *
      * @return void
      */
     private function deleteDraft()
     {
-        $this->modx->cacheManager->delete($this->getDraftCacheKey(), [
-            xPDO::OPT_CACHE_KEY => 'magicpreview_drafts',
-        ]);
+        $this->getMagicPreviewService()->deleteDraft(
+            (int) $this->getProperty('id'),
+            $this->modx->user->get('id')
+        );
     }
 }
