@@ -138,6 +138,11 @@ switch ($modx->event->name) {
             if ($draft !== null) {
                 $jsConfig['hasDraft'] = true;
                 $jsConfig['draftSavedAt'] = date('Y-m-d H:i:s', $draft['saved_at']);
+                // Shown in the draft banner: the user's non-expired share links.
+                $jsConfig['draftShareCount'] = $service->shares()->countLiveShares(
+                    (int) $resource->get('id'),
+                    (int) $modx->user->get('id')
+                );
             }
             // Build icon HTML for the Save Draft and View action bar buttons.
             // Empty setting = default SVG; otherwise treat as FA class name.

@@ -281,6 +281,23 @@
             }
         });
         MagicPreview.grid.Shares.superclass.constructor.call(this, config);
+
+        // Keep the draft banner's share count in sync: recount the current
+        // user's links on every grid load (dialog open, create, revoke).
+        // The admin view can contain other editors' links, so filter by user.
+        this.getStore().on('load', function(store) {
+            if (!window.MagicPreview || typeof MagicPreview.setDraftShareCount !== 'function') {
+                return;
+            }
+            var userId = (MODx.user && MODx.user.id) ? parseInt(MODx.user.id, 10) : 0;
+            var count = 0;
+            store.each(function(record) {
+                if (parseInt(record.get('user_id'), 10) === userId) {
+                    count++;
+                }
+            });
+            MagicPreview.setDraftShareCount(count);
+        });
     };
     Ext.extend(MagicPreview.grid.Shares, MODx.grid.Grid, {
         /**

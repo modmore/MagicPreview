@@ -62,6 +62,7 @@
             lexicon: MagicPreviewConfig.lexicon ?? {},
             hasDraft: !!MagicPreviewConfig.hasDraft,
             draftSavedAt: MagicPreviewConfig.draftSavedAt ?? '',
+            draftShareCount: parseInt(MagicPreviewConfig.draftShareCount, 10) || 0,
             iconSaveDraft: MagicPreviewConfig.iconSaveDraft ?? '',
             iconView: MagicPreviewConfig.iconView ?? ''
         };
@@ -648,6 +649,33 @@
     }
 
     /**
+     * Builds the banner Share button label, appending the user's count of
+     * non-expired share links when there are any: "Share (2)".
+     * @param {number} count
+     * @returns {string}
+     */
+    function shareButtonText(count) {
+        var label = lexicon('draft_share');
+        if (count > 0) {
+            label += ' (' + count + ')';
+        }
+        return label;
+    }
+
+    /**
+     * Updates the share count on the banner's Share button, if present.
+     * Called by the share dialog (share.js) whenever its grid reloads, so
+     * the count stays accurate after links are created or revoked.
+     * @param {number} count
+     */
+    window.MagicPreview.setDraftShareCount = function(count) {
+        var btn = document.querySelector('#mmmp-draft-banner .mmmp-draft-banner__btn--share');
+        if (btn) {
+            btn.textContent = shareButtonText(count);
+        }
+    };
+
+    /**
      * Updates the draft banner's datetime to now, or creates the
      * banner if it doesn't exist yet (first save on this page load).
      */
@@ -739,7 +767,7 @@
             + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--view" data-action="view">'
             + lexicon('draft_view') + '</button>'
             + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--share" data-action="share">'
-            + lexicon('draft_share') + '</button>'
+            + shareButtonText(c.draftShareCount) + '</button>'
             + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--restore" data-action="restore">'
             + lexicon('draft_restore') + '</button>'
             + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--discard" data-action="discard">'
