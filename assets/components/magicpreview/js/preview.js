@@ -41,7 +41,9 @@
      * @returns {object}
      */
     function config() {
-        if (_config) return _config;
+        if (_config) {
+            return _config;
+        }
 
         var baseFrameUrl = MagicPreviewConfig.baseFrameUrl ?? '';
         _config = {
@@ -433,12 +435,20 @@
         stopAutoRefresh();
 
         var interval = config().autoRefreshInterval;
-        if (interval <= 0) return;
-        if (config().previewMode !== MODE_PANEL) return;
-        if (!MagicPreview.isOpen()) return;
+        if (interval <= 0) {
+            return;
+        }
+        if (config().previewMode !== MODE_PANEL) {
+            return;
+        }
+        if (!MagicPreview.isOpen()) {
+            return;
+        }
 
         autoRefreshTimer = setInterval(function() {
-            if (submitInFlight) return;
+            if (submitInFlight) {
+                return;
+            }
 
             if (!MagicPreview.isOpen()) {
                 stopAutoRefresh();
@@ -680,7 +690,9 @@
                     fn: function(r) {
                         var hash = (r.object && r.object.preview_hash) ? r.object.preview_hash : null;
                         if (!hash) {
-                            if (win) win.close();
+                            if (win) {
+                                win.close();
+                            }
                             return;
                         }
                         var base = MagicPreviewConfig.baseFrameUrl || '';
@@ -692,7 +704,9 @@
                 },
                 failure: {
                     fn: function() {
-                        if (win) win.close();
+                        if (win) {
+                            win.close();
+                        }
                     }
                 }
             }
@@ -737,7 +751,9 @@
         // Delegate click events from the banner's buttons
         banner.addEventListener('click', function(e) {
             var target = e.target.closest('[data-action]');
-            if (!target) return;
+            if (!target) {
+                return;
+            }
 
             var action = target.getAttribute('data-action');
             if (action === 'view') {
@@ -965,7 +981,9 @@
                 var btnView = btns.map(function(btn) { return btn.id; }).indexOf('modx-abtn-preview');
                 var hasViewBtn = btnView !== -1;
                 // If the View button doesn't exist, insert at the start
-                if (!hasViewBtn) btnView = 0;
+                if (!hasViewBtn) {
+                    btnView = 0;
+                }
 
                 // Save Draft icon button — sits between Preview and View
                 btns.splice(btnView, 0, {
@@ -1053,20 +1071,26 @@
          */
         document.addEventListener('keydown', function(e) {
             var ctrlOrCmd = e.ctrlKey || e.metaKey;
-            if (!ctrlOrCmd) return;
+            if (!ctrlOrCmd) {
+                return;
+            }
 
             // Ctrl+Shift+S  —  Save Draft
             if (e.shiftKey && (e.key === 'S' || e.key === 's')) {
                 e.preventDefault();
                 e.stopPropagation();
-                if (!e.repeat) saveDraft();
+                if (!e.repeat) {
+                    saveDraft();
+                }
                 return;
             }
 
             // Ctrl+P  —  Preview
             if (!e.shiftKey && !e.altKey && (e.key === 'P' || e.key === 'p')) {
                 e.preventDefault();
-                if (!e.repeat) submitPreview();
+                if (!e.repeat) {
+                    submitPreview();
+                }
                 return;
             }
         }, true);

@@ -240,7 +240,9 @@
          * was clicked (clicking elsewhere in the row does nothing).
          */
         onCellClick: function(grid, rowIndex, colIndex, e) {
-            if (!e.getTarget('.mmmp-share-revoke')) return;
+            if (!e.getTarget('.mmmp-share-revoke')) {
+                return;
+            }
             var rec = this.getStore().getAt(rowIndex);
             if (rec) {
                 revokeShare(rec.get('id'));
@@ -362,11 +364,15 @@
                 ttl: ttl ? ttl.getValue() : '',
                 label: label ? label.getValue() : ''
             }, function(share) {
-                if (btn) btn.enable();
+                if (btn) {
+                    btn.enable();
+                }
                 if (share && share.url) {
                     // The label belongs to the link just created — clear it
                     // so the next link doesn't inherit it accidentally.
-                    if (label) label.setValue('');
+                    if (label) {
+                        label.setValue('');
+                    }
                     self.shareGrid.refresh();
                     // The URL is shown once, in its own small modal on top, so
                     // the share window's height stays constant on small viewports.
@@ -428,7 +434,9 @@
         /** Copy-link handler: copies the generated URL to the clipboard. */
         onCopy: function() {
             var f = Ext.getCmp('mmmp-share-url');
-            if (!f || !f.getValue()) return;
+            if (!f || !f.getValue()) {
+                return;
+            }
             copyToClipboard(f.getValue(), function() {
                 MODx.msg.status({ title: _('magicpreview.share_copied'), delay: 3 });
             });
@@ -464,7 +472,9 @@
         // Reset the label from a previous open (the one-time URL lives in
         // its own ShareResult window and is set fresh on each creation)
         var label = Ext.getCmp('mmmp-share-label');
-        if (label) label.setValue('');
+        if (label) {
+            label.setValue('');
+        }
 
         _shareWindow.show();
         // The grid auto-loads on first render; refresh on subsequent opens.

@@ -70,7 +70,9 @@
      * The panel is hidden by default (no .mmmp-panel--open class).
      */
     function createPanel() {
-        if (panelEl) return;
+        if (panelEl) {
+            return;
+        }
 
         panelEl = document.createElement('div');
         panelEl.id = 'mmmp-panel';
@@ -152,12 +154,16 @@
 
         // Reload button: delegates to the orchestrator's onReload callback
         panelEl.querySelector('.mmmp-panel__reload').addEventListener('click', function() {
-            if (_cfg.onReload) _cfg.onReload();
+            if (_cfg.onReload) {
+                _cfg.onReload();
+            }
         });
 
         // Save Draft button: delegates to the orchestrator's onSaveDraft callback
         panelEl.querySelector('.mmmp-panel__save-draft').addEventListener('click', function() {
-            if (_cfg.onSaveDraft) _cfg.onSaveDraft();
+            if (_cfg.onSaveDraft) {
+                _cfg.onSaveDraft();
+            }
         });
 
         // Breakpoint buttons
@@ -182,7 +188,9 @@
      * @param {string} bp - Breakpoint key: 'full', 'desktop', 'tablet', 'mobile'
      */
     function setBreakpoint(bp) {
-        if (!panelEl) return;
+        if (!panelEl) {
+            return;
+        }
 
         var frameWrapper = panelEl.querySelector('.mmmp-panel__frame-wrapper');
         var width;
@@ -208,10 +216,14 @@
      * Shows the loading state in the panel.
      */
     function showLoading() {
-        if (!panelIframeA || !panelLoading) return;
+        if (!panelIframeA || !panelLoading) {
+            return;
+        }
         panelIframeA.parentElement.style.display = 'none';
         panelLoading.style.display = 'flex';
-        if (panelIdle) panelIdle.style.display = 'none';
+        if (panelIdle) {
+            panelIdle.style.display = 'none';
+        }
         panelIframeA.src = '';
         panelIframeB.src = '';
 
@@ -224,7 +236,9 @@
      * Shows the idle/placeholder state in the panel (no preview yet).
      */
     function showIdle() {
-        if (!panelIframeA || !panelIdle) return;
+        if (!panelIframeA || !panelIdle) {
+            return;
+        }
         panelIframeA.parentElement.style.display = 'none';
         panelLoading.style.display = 'none';
         panelIdle.style.display = 'flex';
@@ -250,9 +264,13 @@
      * @param {string} url - The full preview URL to load into the iframe
      */
     function showPreview(url) {
-        if (!panelIframeA || !panelIframeB || !panelLoading) return;
+        if (!panelIframeA || !panelIframeB || !panelLoading) {
+            return;
+        }
         panelLoading.style.display = 'none';
-        if (panelIdle) panelIdle.style.display = 'none';
+        if (panelIdle) {
+            panelIdle.style.display = 'none';
+        }
 
         // Determine which iframe is currently active (visible) and
         // which is staging (hidden). Active has the --active class.
@@ -342,7 +360,9 @@
      * Closes the panel and restores the editor layout.
      */
     function close() {
-        if (!panelEl) return;
+        if (!panelEl) {
+            return;
+        }
         panelEl.classList.remove('mmmp-panel--open');
         document.body.classList.remove('mmmp-panel-onpage-active');
         syncActionButtonsOffset();
@@ -402,8 +422,12 @@
 
             // Disable iframe pointer events during drag so mousemove
             // isn't swallowed by the iframe
-            if (panelIframeA) panelIframeA.style.pointerEvents = 'none';
-            if (panelIframeB) panelIframeB.style.pointerEvents = 'none';
+            if (panelIframeA) {
+                panelIframeA.style.pointerEvents = 'none';
+            }
+            if (panelIframeB) {
+                panelIframeB.style.pointerEvents = 'none';
+            }
 
             document.body.style.cursor = 'col-resize';
             document.body.style.userSelect = 'none';
@@ -429,8 +453,12 @@
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
 
-            if (panelIframeA) panelIframeA.style.pointerEvents = '';
-            if (panelIframeB) panelIframeB.style.pointerEvents = '';
+            if (panelIframeA) {
+                panelIframeA.style.pointerEvents = '';
+            }
+            if (panelIframeB) {
+                panelIframeB.style.pointerEvents = '';
+            }
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
 
@@ -459,7 +487,9 @@
      */
     function syncActionButtonsOffset() {
         var actionBar = document.getElementById('modx-action-buttons');
-        if (!actionBar) return;
+        if (!actionBar) {
+            return;
+        }
 
         if (_cfg.panelLayout === LAYOUT_ONPAGE && document.body.classList.contains('mmmp-panel-onpage-active')) {
             actionBar.style.right = getPanelWidth() + 'px';
@@ -484,7 +514,9 @@
      */
     function relayoutModx() {
         var layout = Ext.getCmp('modx-layout');
-        if (!layout) return;
+        if (!layout) {
+            return;
+        }
 
         var panelIsOpen = document.body.classList.contains('mmmp-panel-onpage-active');
 
@@ -536,8 +568,12 @@
      * user clicks Preview — open() handles everything at that point.
      */
     function initOnpage() {
-        if (_cfg.panelLayout !== LAYOUT_ONPAGE) return;
-        if (!_cfg.panelOpen) return;
+        if (_cfg.panelLayout !== LAYOUT_ONPAGE) {
+            return;
+        }
+        if (!_cfg.panelOpen) {
+            return;
+        }
 
         createPanel();
         panelEl.classList.add('mmmp-panel--open');
