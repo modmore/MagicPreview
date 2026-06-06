@@ -362,47 +362,48 @@ class MagicPreview
     }
 
     /**
-     * Resolves a share link by id (optionally scoped to a resource) to a
-     * renderable draft — the same shape as getValidShare(), but for the
-     * manager side: no token needed and no view-count bump.
+     * Whether the current user may see and manage every share link on a
+     * resource rather than only their own: sudo users and members of the
+     * Administrator group get the oversight (and kill-switch) view.
      *
-     * @param int $shareId
-     * @param int|null $resourceId
-     * @return array|null ['resource_id' => int, 'context_key' => string, 'data' => array]
+     * @return bool
      */
-    public function getShareById(int $shareId, ?int $resourceId = null): ?array
+    public function currentUserSeesAllShares(): bool
     {
-        $criteria = ['id' => $shareId];
-        if ($resourceId !== null) {
-            $criteria['resource_id'] = $resourceId;
+        $user = $this->modx->user;
+        if (!$user) {
+            return false;
         }
-        /** @var mpShare|null $share */
-        $share = $this->modx->getObject('mpShare', $criteria);
-        if (!$share) {
-            return null;
-        }
-        return $this->resolveShare($share);
+        return (bool) $user->get('sudo') || $user->isMember('Administrator');
     }
 
     /**
      * Returns the active (non-expired) share links for a resource, newest
-     * first. Neither the token hash nor the snapshot data are included — the
-     * raw token is shown once at creation and cannot be reconstructed, so the
+     * first — limited to a single creator unless $userId is null (the
+     * admin oversight view, which includes each creator's username).
+     * Neither the token hash nor any draft data are included — the raw
+     * token is shown once at creation and cannot be reconstructed, so the
      * listing is metadata only.
      *
      * @param int $resourceId
+     * @param int|null $userId Limit to this creator's links; null = all users.
      * @return array
      */
-    public function listSharesForResource(int $resourceId): array
+    public function listSharesForResource(int $resourceId, ?int $userId = null): array
     {
-        $query = $this->modx->newQuery('mpShare');
-        $query->where([
+        $where = [
             'resource_id' => $resourceId,
             [
                 'expires_at' => 0,
                 'OR:expires_at:>' => time(),
             ],
-        ]);
+        ];
+        if ($userId !== null) {
+            $where['user_id'] = $userId;
+        }
+
+        $query = $this->modx->newQuery('mpShare');
+        $query->where($where);
         $query->sortby('createdon', 'DESC');
 
         $shares = [];
@@ -418,22 +419,42 @@ class MagicPreview
                 'views' => (int) $share->get('views'),
             ];
         }
+
+        // Resolve creator usernames in one query. The model declares no
+        // aggregates, so this avoids cross-package join quirks on 2.x/3.x.
+        if (!empty($shares)) {
+            $names = [];
+            $userIds = array_unique(array_column($shares, 'user_id'));
+            foreach ($this->modx->getCollection('modUser', ['id:IN' => $userIds]) as $user) {
+                $names[(int) $user->get('id')] = (string) $user->get('username');
+            }
+            foreach ($shares as &$row) {
+                $row['username'] = $names[$row['user_id']] ?? '';
+            }
+            unset($row);
+        }
+
         return $shares;
     }
 
     /**
      * Revokes (deletes) a share link by id, optionally constrained to a
-     * resource so callers can't reach across to another resource's links.
+     * resource and/or creator so callers can't reach across to another
+     * resource's — or another user's — links.
      *
      * @param int $shareId
      * @param int|null $resourceId
+     * @param int|null $userId Require this creator; null = any (admin view).
      * @return bool
      */
-    public function revokeShare(int $shareId, ?int $resourceId = null): bool
+    public function revokeShare(int $shareId, ?int $resourceId = null, ?int $userId = null): bool
     {
         $criteria = ['id' => $shareId];
         if ($resourceId !== null) {
             $criteria['resource_id'] = $resourceId;
+        }
+        if ($userId !== null) {
+            $criteria['user_id'] = $userId;
         }
         $share = $this->modx->getObject('mpShare', $criteria);
         if (!$share) {
