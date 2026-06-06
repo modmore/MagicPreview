@@ -67,12 +67,18 @@
     background: #1a3350;
 }
 
+.mmmp-draft-banner__btn--view,
+.mmmp-draft-banner__btn--share,
 .mmmp-draft-banner__btn--discard {
     background: #fff;
     color: #515151;
     box-shadow: 0 0 0 1px #E4E4E4;
 }
 
+.mmmp-draft-banner__btn--view:hover,
+.mmmp-draft-banner__btn--view:focus,
+.mmmp-draft-banner__btn--share:hover,
+.mmmp-draft-banner__btn--share:focus,
 .mmmp-draft-banner__btn--discard:hover,
 .mmmp-draft-banner__btn--discard:focus {
     background: #E4E4E4;
@@ -109,11 +115,6 @@ body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-action-buttons {
     padding-right: 0;
 }
 
-#modx-action-buttons .x-toolbar-cell:has(> #modx-abtn-share) {
-    padding-left: 0;
-    padding-right: 0;
-}
-
 .magicpreview_active #modx-action-buttons .x-toolbar-cell:has(> #modx-abtn-preview) {
     padding-left: 0;
 }
@@ -121,7 +122,6 @@ body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-action-buttons {
 /* -- MODX 2: eliminate margin between merged buttons --------------------- */
 
 .magicpreview_modx2 #modx-abtn-save-draft,
-.magicpreview_modx2 #modx-abtn-share,
 .magicpreview_active.magicpreview_modx2 #modx-abtn-preview {
     margin-left: 0 !important;
 }
@@ -139,11 +139,6 @@ body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-action-buttons {
 }
 
 #modx-abtn-save-draft {
-    border-radius: 0 !important;
-    border-right: 1px solid #E4E4E4 !important;
-}
-
-#modx-abtn-share {
     border-radius: 0 !important;
     border-right: 1px solid #E4E4E4 !important;
 }
@@ -513,18 +508,6 @@ body.magicpreview_modx3.mmmp-panel-onpage-active #modx-resource-main-right {
 /* --------------------------------------------------------------------------
    Share window: revoke link + note tweaks layered on the native MODx.Window.
    -------------------------------------------------------------------------- */
-
-a.mmmp-share-view {
-    color: #234368;
-    cursor: pointer;
-    text-decoration: underline;
-    margin-right: 0.5rem;
-}
-
-a.mmmp-share-view:hover,
-a.mmmp-share-view:focus {
-    color: #1a3350;
-}
 
 a.mmmp-share-revoke {
     color: #a94442;

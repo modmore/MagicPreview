@@ -43,6 +43,8 @@ $_lang['magicpreview.draft_banner_msg'] = 'Ein Entwurf vom [[+date]] ist verfüg
 $_lang['magicpreview.draft_restore'] = 'Wiederherstellen';
 $_lang['magicpreview.draft_discard'] = 'Verwerfen';
 $_lang['magicpreview.draft_discard_live_confirm'] = 'Sie haben [[+count]] Live-Freigabelink(s), die diesen Entwurf anzeigen. Beim Verwerfen des Entwurfs werden diese Links ebenfalls entfernt. Fortfahren?';
+$_lang['magicpreview.draft_view'] = 'Ansehen';
+$_lang['magicpreview.draft_share'] = 'Teilen';
 
 // Entwurf-Einstellungen
 $_lang['setting_magicpreview.draft_ttl'] = 'Entwurf-TTL';
@@ -64,7 +66,6 @@ $_lang['magicpreview.resource_enabled_desc'] = 'Überschreibt den Vorlagenfilter
 $_lang['magicpreview.system_default'] = 'Systemstandard';
 
 // Freigabelinks
-$_lang['magicpreview.share_button_tooltip'] = 'Einen Link zu diesem Entwurf teilen';
 $_lang['magicpreview.share_title'] = 'Entwurf teilen';
 $_lang['magicpreview.share_label'] = 'Bezeichnung';
 $_lang['magicpreview.share_label_emptytext'] = 'z.B. Startseiten-Relaunch';
@@ -81,11 +82,11 @@ $_lang['magicpreview.share_copied'] = 'Link in die Zwischenablage kopiert';
 $_lang['magicpreview.share_link_note'] = 'Jetzt kopieren — aus Sicherheitsgründen kann der Link nicht erneut angezeigt werden.';
 $_lang['magicpreview.share_existing'] = 'Aktive Links für diese Ressource';
 $_lang['magicpreview.share_none'] = 'Keine aktiven Freigabelinks.';
+$_lang['magicpreview.share_col_user'] = 'Geteilt von';
 $_lang['magicpreview.share_col_label'] = 'Bezeichnung';
 $_lang['magicpreview.share_col_created'] = 'Erstellt';
 $_lang['magicpreview.share_col_expires'] = 'Läuft ab';
 $_lang['magicpreview.share_col_views'] = 'Aufrufe';
-$_lang['magicpreview.share_view'] = 'Ansehen';
 $_lang['magicpreview.share_revoke'] = 'Widerrufen';
 $_lang['magicpreview.share_revoke_confirm'] = 'Diesen Freigabelink widerrufen? Jeder, der ihn verwendet, verliert sofort den Zugriff.';
 $_lang['magicpreview.share_revoked'] = 'Freigabelink widerrufen';
@@ -95,5 +96,3 @@ $_lang['magicpreview.share_unavailable'] = 'Dieser Vorschau-Link ist abgelaufen 
 // Freigabe-Einstellungen
 $_lang['setting_magicpreview.share_link_ttl'] = 'Freigabelink-TTL';
 $_lang['setting_magicpreview.share_link_ttl_desc'] = 'Standard-Lebensdauer von Entwurf-Freigabelinks, in Sekunden. Wird verwendet, wenn beim Erstellen eines Links keine Ablaufzeit gewählt wird. Auf 0 setzen für Links, die nie ablaufen. Standard: 604800 (7 Tage).';
-$_lang['setting_magicpreview.icon_share'] = 'Teilen-Symbol';
-$_lang['setting_magicpreview.icon_share_desc'] = 'Symbol für den Teilen-Button in der Aktionsleiste. Geben Sie einen FontAwesome-Symbolnamen ein (z.B. "icon-share-alt") oder lassen Sie es leer für das Standard-Symbol.';

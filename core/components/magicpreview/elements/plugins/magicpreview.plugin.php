@@ -128,26 +128,27 @@ switch ($modx->event->name) {
                 $jsConfig['lexicon'][$lexKey] = $modx->lexicon('magicpreview.' . $lexKey);
             }
 
+            // Sudo/Administrator users see every share link on the resource
+            // (with creator usernames); editors see only their own. Display
+            // flag only — the getshares processor enforces the scoping.
+            $jsConfig['shareShowUser'] = $service->currentUserSeesAllShares();
+
             // Check for a saved draft for this resource + user
             $draft = $service->getDraft($resource->get('id'), $modx->user->get('id'));
             if ($draft !== null) {
                 $jsConfig['hasDraft'] = true;
                 $jsConfig['draftSavedAt'] = date('Y-m-d H:i:s', $draft['saved_at']);
             }
-            // Build icon HTML for the Save Draft, Share and View action bar buttons.
+            // Build icon HTML for the Save Draft and View action bar buttons.
             // Empty setting = default SVG; otherwise treat as FA class name.
             $iconSaveDraft = trim($modx->getOption('magicpreview.icon_save_draft', null, ''));
             $iconView = trim($modx->getOption('magicpreview.icon_view', null, ''));
-            $iconShare = trim($modx->getOption('magicpreview.icon_share', null, ''));
             $jsConfig['iconSaveDraft'] = $iconSaveDraft !== ''
                 ? '<i class="icon ' . htmlspecialchars($iconSaveDraft, ENT_QUOTES, 'UTF-8') . '" aria-hidden="true"></i>'
                 : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" class="mmmp-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0z" /></svg>';
             $jsConfig['iconView'] = $iconView !== ''
                 ? '<i class="icon ' . htmlspecialchars($iconView, ENT_QUOTES, 'UTF-8') . '" aria-hidden="true"></i>'
                 : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" class="mmmp-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>';
-            $jsConfig['iconShare'] = $iconShare !== ''
-                ? '<i class="icon ' . htmlspecialchars($iconShare, ENT_QUOTES, 'UTF-8') . '" aria-hidden="true"></i>'
-                : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" class="mmmp-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>';
 
             // Expose the full lexicon topic to manager-side JS via the global
             // _() helper (MODx.lang). Strings beyond the jsConfig lexicon map

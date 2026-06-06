@@ -148,57 +148,66 @@
         });
     }
 
-    /**
-     * Opens a manager-side preview of a share's content in a new tab via the
-     * standard mgr-only ?show_preview= mechanism — the public share URL can't
-     * be reconstructed (only the token's hash is stored), and the editor is
-     * logged in anyway. The previewshare processor writes the share's data
-     * into the preview cache and returns the hash.
-     *
-     * The tab is opened synchronously so popup blockers count it as part of
-     * the user's click; its location is set once the hash arrives.
-     * @param {number} shareId
-     */
-    function previewShare(shareId) {
-        if (!shareId) return;
-
-        var win = window.open('about:blank', 'mmmp-share-preview');
-
-        MODx.Ajax.request({
-            url: MagicPreviewConfig.assetsUrl + 'connector.php',
-            params: {
-                action: 'resource/previewshare',
-                id: MagicPreviewResource,
-                share_id: shareId
-            },
-            listeners: {
-                success: {
-                    fn: function(r) {
-                        var hash = (r.object && r.object.preview_hash) ? r.object.preview_hash : null;
-                        if (!hash) {
-                            if (win) win.close();
-                            return;
-                        }
-                        var base = MagicPreviewConfig.baseFrameUrl || '';
-                        var joiner = base.indexOf('?') === -1 ? '?' : '&';
-                        if (win) {
-                            win.location = base + joiner + 'show_preview=' + hash;
-                        }
-                    }
-                },
-                failure: {
-                    fn: function() {
-                        if (win) win.close();
-                    }
-                }
-            }
-        });
-    }
-
     // -- Grid: active share links for the current resource -------------------
 
     MagicPreview.grid.Shares = function(config) {
         config = config || {};
+
+        var columns = [
+            {
+                header: _('magicpreview.share_col_label'),
+                dataIndex: 'label',
+                width: 150,
+                sortable: false,
+                renderer: function(v) { return v ? Ext.util.Format.htmlEncode(v) : ''; }
+            },
+            {
+                header: _('magicpreview.share_col_created'),
+                dataIndex: 'createdon',
+                width: 130,
+                sortable: false,
+                renderer: function(v) { return v ? Ext.util.Format.date(new Date(v * 1000), 'Y-m-d H:i:s') : ''; }
+            },
+            {
+                header: _('magicpreview.share_col_expires'),
+                dataIndex: 'expires_at',
+                width: 130,
+                sortable: false,
+                renderer: function(v) { return v > 0 ? Ext.util.Format.date(new Date(v * 1000), 'Y-m-d H:i:s') : _('magicpreview.share_expiry_never'); }
+            },
+            {
+                header: _('magicpreview.share_col_views'),
+                dataIndex: 'views',
+                width: 60,
+                sortable: false
+            },
+            {
+                header: '',
+                dataIndex: 'id',
+                width: 90,
+                sortable: false,
+                renderer: function() {
+                    return '<a class="mmmp-share-revoke" href="javascript:;">' + _('magicpreview.share_revoke') + '</a>';
+                }
+            }
+        ];
+
+        // Admin oversight view (sudo / Administrator group): the server also
+        // returns other editors' links, so offer a column showing who created
+        // each one. Hidden by default to keep the grid quiet — admins can
+        // enable it from the column header menu when hunting for a link. The
+        // flag is display-only — the getshares processor enforces scoping.
+        if (typeof MagicPreviewConfig !== 'undefined' && MagicPreviewConfig.shareShowUser) {
+            columns.splice(1, 0, {
+                header: _('magicpreview.share_col_user'),
+                dataIndex: 'username',
+                width: 110,
+                sortable: false,
+                hidden: true,
+                renderer: function(v) { return v ? Ext.util.Format.htmlEncode(v) : ''; }
+            });
+        }
+
         Ext.applyIf(config, {
             id: 'mmmp-share-grid',
             url: MagicPreviewConfig.assetsUrl + 'connector.php',
@@ -206,7 +215,7 @@
                 action: 'resource/getshares',
                 id: MagicPreviewResource
             },
-            fields: ['id', 'label', 'user_id', 'createdon', 'expires_at', 'last_viewed_at', 'views'],
+            fields: ['id', 'label', 'user_id', 'username', 'createdon', 'expires_at', 'last_viewed_at', 'views'],
             paging: false,
             remoteSort: false,
             showActionsColumn: false,
@@ -214,45 +223,7 @@
             height: 200,
             anchor: '100%',
             hideLabel: true,
-            columns: [
-                {
-                    header: _('magicpreview.share_col_label'),
-                    dataIndex: 'label',
-                    width: 150,
-                    sortable: false,
-                    renderer: function(v) { return v ? Ext.util.Format.htmlEncode(v) : ''; }
-                },
-                {
-                    header: _('magicpreview.share_col_created'),
-                    dataIndex: 'createdon',
-                    width: 130,
-                    sortable: false,
-                    renderer: function(v) { return v ? Ext.util.Format.date(new Date(v * 1000), 'Y-m-d H:i:s') : ''; }
-                },
-                {
-                    header: _('magicpreview.share_col_expires'),
-                    dataIndex: 'expires_at',
-                    width: 130,
-                    sortable: false,
-                    renderer: function(v) { return v > 0 ? Ext.util.Format.date(new Date(v * 1000), 'Y-m-d H:i:s') : _('magicpreview.share_expiry_never'); }
-                },
-                {
-                    header: _('magicpreview.share_col_views'),
-                    dataIndex: 'views',
-                    width: 60,
-                    sortable: false
-                },
-                {
-                    header: '',
-                    dataIndex: 'id',
-                    width: 120,
-                    sortable: false,
-                    renderer: function() {
-                        return '<a class="mmmp-share-view" href="javascript:;">' + _('magicpreview.share_view') + '</a>'
-                            + ' <a class="mmmp-share-revoke" href="javascript:;">' + _('magicpreview.share_revoke') + '</a>';
-                    }
-                }
-            ],
+            columns: columns,
             viewConfig: {
                 forceFit: true,
                 emptyText: _('magicpreview.share_none')
@@ -265,16 +236,13 @@
     };
     Ext.extend(MagicPreview.grid.Shares, MODx.grid.Grid, {
         /**
-         * Triggers view/revoke only when the matching link in the action
-         * column was clicked (clicking elsewhere in the row does nothing).
+         * Triggers revoke only when the revoke link in the action column
+         * was clicked (clicking elsewhere in the row does nothing).
          */
         onCellClick: function(grid, rowIndex, colIndex, e) {
+            if (!e.getTarget('.mmmp-share-revoke')) return;
             var rec = this.getStore().getAt(rowIndex);
-            if (!rec) return;
-
-            if (e.getTarget('.mmmp-share-view')) {
-                previewShare(rec.get('id'));
-            } else if (e.getTarget('.mmmp-share-revoke')) {
+            if (rec) {
                 revokeShare(rec.get('id'));
             }
         }

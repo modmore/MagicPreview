@@ -61,8 +61,7 @@
             hasDraft: !!MagicPreviewConfig.hasDraft,
             draftSavedAt: MagicPreviewConfig.draftSavedAt ?? '',
             iconSaveDraft: MagicPreviewConfig.iconSaveDraft ?? '',
-            iconView: MagicPreviewConfig.iconView ?? '',
-            iconShare: MagicPreviewConfig.iconShare ?? ''
+            iconView: MagicPreviewConfig.iconView ?? ''
         };
 
         return _config;
@@ -662,10 +661,50 @@
     }
 
     /**
+     * Opens a manager-side preview of the user's saved draft in a new tab
+     * via the standard mgr-only ?show_preview= mechanism. The previewdraft
+     * processor writes the draft data into the preview cache and returns
+     * the hash.
+     */
+    function previewDraft() {
+        var win = window.open('about:blank', 'mmmp-draft-preview');
+
+        MODx.Ajax.request({
+            url: MagicPreviewConfig.assetsUrl + 'connector.php',
+            params: {
+                action: 'resource/previewdraft',
+                id: MagicPreviewResource
+            },
+            listeners: {
+                success: {
+                    fn: function(r) {
+                        var hash = (r.object && r.object.preview_hash) ? r.object.preview_hash : null;
+                        if (!hash) {
+                            if (win) win.close();
+                            return;
+                        }
+                        var base = MagicPreviewConfig.baseFrameUrl || '';
+                        var joiner = base.indexOf('?') === -1 ? '?' : '&';
+                        if (win) {
+                            win.location = base + joiner + 'show_preview=' + hash;
+                        }
+                    }
+                },
+                failure: {
+                    fn: function() {
+                        if (win) win.close();
+                    }
+                }
+            }
+        });
+    }
+
+    /**
      * Shows a draft banner above the resource panel. Appended to the
      * #modx-panel-resource-div container which sits directly above the
-     * ExtJS-rendered resource panel in the DOM. Stays visible until
-     * the user clicks Restore or Discard.
+     * ExtJS-rendered resource panel in the DOM. Offers View, Share,
+     * Restore and Discard for the saved draft; stays visible until the
+     * draft is restored or discarded.
      */
     function showDraftBanner() {
         var c = config();
@@ -683,6 +722,10 @@
         banner.className = 'mmmp-draft-banner';
         banner.innerHTML = '<span class="mmmp-draft-banner__msg">' + bannerMsgHtml(c.draftSavedAt) + '</span>'
             + '<span class="mmmp-draft-banner__actions">'
+            + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--view" data-action="view">'
+            + lexicon('draft_view') + '</button>'
+            + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--share" data-action="share">'
+            + lexicon('draft_share') + '</button>'
             + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--restore" data-action="restore">'
             + lexicon('draft_restore') + '</button>'
             + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--discard" data-action="discard">'
@@ -697,7 +740,11 @@
             if (!target) return;
 
             var action = target.getAttribute('data-action');
-            if (action === 'restore') {
+            if (action === 'view') {
+                previewDraft();
+            } else if (action === 'share') {
+                _share.openDialog();
+            } else if (action === 'restore') {
                 restoreDraft();
             } else if (action === 'discard') {
                 // The banner is removed by discardDraft() once the draft is
@@ -920,16 +967,7 @@
                 // If the View button doesn't exist, insert at the start
                 if (!hasViewBtn) btnView = 0;
 
-                // Share icon button — sits between Save Draft and View
-                btns.splice(btnView, 0, {
-                    text: config().iconShare,
-                    id: 'modx-abtn-share',
-                    tooltip: lexicon('share_button_tooltip'),
-                    handler: function() { _share.openDialog(); },
-                    scope: this
-                });
-
-                // Save Draft icon button — sits between Preview and Share
+                // Save Draft icon button — sits between Preview and View
                 btns.splice(btnView, 0, {
                     text: config().iconSaveDraft,
                     id: 'modx-abtn-save-draft',
@@ -948,7 +986,7 @@
 
                 // Replace the View button text with an icon
                 if (hasViewBtn) {
-                    btns[btnView + 3].text = config().iconView;
+                    btns[btnView + 2].text = config().iconView;
                 }
                 return btns;
             },
@@ -971,7 +1009,6 @@
             var tooltips = {
                 'modx-abtn-real-preview': lexicon('preview_button_tooltip'),
                 'modx-abtn-save-draft': lexicon('save_draft'),
-                'modx-abtn-share': lexicon('share_button_tooltip'),
                 'modx-abtn-preview': lexicon('view_button_tooltip')
             };
             for (var id in tooltips) {

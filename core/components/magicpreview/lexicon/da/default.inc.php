@@ -44,6 +44,8 @@ $_lang['magicpreview.draft_banner_msg'] = 'En kladde fra [[+date]] er tilgængel
 $_lang['magicpreview.draft_restore'] = 'Gendan';
 $_lang['magicpreview.draft_discard'] = 'Kassér';
 $_lang['magicpreview.draft_discard_live_confirm'] = 'Du har [[+count]] live-delingslink(s), der viser denne kladde. Hvis kladden kasseres, fjernes disse links også. Fortsætte?';
+$_lang['magicpreview.draft_view'] = 'Vis';
+$_lang['magicpreview.draft_share'] = 'Del';
 
 // Kladde-indstillinger
 $_lang['setting_magicpreview.draft_ttl'] = 'Kladde-TTL';
@@ -65,7 +67,6 @@ $_lang['magicpreview.resource_enabled_desc'] = 'Tilsidesæt skabelonfilteret for
 $_lang['magicpreview.system_default'] = 'Systemstandard';
 
 // Delingslinks
-$_lang['magicpreview.share_button_tooltip'] = 'Del et link til denne kladde';
 $_lang['magicpreview.share_title'] = 'Del kladde';
 $_lang['magicpreview.share_label'] = 'Etiket';
 $_lang['magicpreview.share_label_emptytext'] = 'f.eks. Forside-redesign';
@@ -82,11 +83,11 @@ $_lang['magicpreview.share_copied'] = 'Link kopieret til udklipsholderen';
 $_lang['magicpreview.share_link_note'] = 'Kopiér det nu — af sikkerhedshensyn kan linket ikke vises igen.';
 $_lang['magicpreview.share_existing'] = 'Aktive links for denne ressource';
 $_lang['magicpreview.share_none'] = 'Ingen aktive delingslinks.';
+$_lang['magicpreview.share_col_user'] = 'Delt af';
 $_lang['magicpreview.share_col_label'] = 'Etiket';
 $_lang['magicpreview.share_col_created'] = 'Oprettet';
 $_lang['magicpreview.share_col_expires'] = 'Udløber';
 $_lang['magicpreview.share_col_views'] = 'Visninger';
-$_lang['magicpreview.share_view'] = 'Vis';
 $_lang['magicpreview.share_revoke'] = 'Tilbagekald';
 $_lang['magicpreview.share_revoke_confirm'] = 'Tilbagekald dette delingslink? Alle, der bruger det, mister adgangen med det samme.';
 $_lang['magicpreview.share_revoked'] = 'Delingslink tilbagekaldt';
@@ -96,5 +97,3 @@ $_lang['magicpreview.share_unavailable'] = 'Dette forhåndsvisningslink er udlø
 // Delingsindstillinger
 $_lang['setting_magicpreview.share_link_ttl'] = 'Delingslink-TTL';
 $_lang['setting_magicpreview.share_link_ttl_desc'] = 'Standardlevetid for kladde-delingslinks, i sekunder. Bruges, når der ikke vælges en udløbstid ved oprettelse af et link. Sæt til 0 for links, der aldrig udløber. Standard: 604800 (7 dage).';
-$_lang['setting_magicpreview.icon_share'] = 'Del-ikon';
-$_lang['setting_magicpreview.icon_share_desc'] = 'Ikon til Del-knappen i handlingslinjen. Indtast et FontAwesome-ikonnavn (f.eks. "icon-share-alt") eller lad det være tomt for standardikonet.';

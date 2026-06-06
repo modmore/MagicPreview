@@ -44,6 +44,8 @@ $_lang['magicpreview.draft_banner_msg'] = 'A draft from [[+date]] is available.'
 $_lang['magicpreview.draft_restore'] = 'Restore';
 $_lang['magicpreview.draft_discard'] = 'Discard';
 $_lang['magicpreview.draft_discard_live_confirm'] = 'You have [[+count]] live share link(s) showing this draft. Discarding the draft will also remove those links. Continue?';
+$_lang['magicpreview.draft_view'] = 'View';
+$_lang['magicpreview.draft_share'] = 'Share';
 
 // Draft settings
 $_lang['setting_magicpreview.draft_ttl'] = 'Draft TTL';
@@ -65,7 +67,6 @@ $_lang['magicpreview.resource_enabled_desc'] = 'Override the template filter for
 $_lang['magicpreview.system_default'] = 'System Default';
 
 // Share links
-$_lang['magicpreview.share_button_tooltip'] = 'Share a link to this draft';
 $_lang['magicpreview.share_title'] = 'Share draft';
 $_lang['magicpreview.share_label'] = 'Label';
 $_lang['magicpreview.share_label_emptytext'] = 'e.g. Homepage redesign';
@@ -82,11 +83,11 @@ $_lang['magicpreview.share_copied'] = 'Link copied to clipboard';
 $_lang['magicpreview.share_link_note'] = 'Copy it now — for security the link cannot be shown again.';
 $_lang['magicpreview.share_existing'] = 'Active links for this resource';
 $_lang['magicpreview.share_none'] = 'No active share links.';
+$_lang['magicpreview.share_col_user'] = 'Shared by';
 $_lang['magicpreview.share_col_label'] = 'Label';
 $_lang['magicpreview.share_col_created'] = 'Created';
 $_lang['magicpreview.share_col_expires'] = 'Expires';
 $_lang['magicpreview.share_col_views'] = 'Views';
-$_lang['magicpreview.share_view'] = 'View';
 $_lang['magicpreview.share_revoke'] = 'Revoke';
 $_lang['magicpreview.share_revoke_confirm'] = 'Revoke this share link? Anyone using it will lose access immediately.';
 $_lang['magicpreview.share_revoked'] = 'Share link revoked';
@@ -96,6 +97,4 @@ $_lang['magicpreview.share_unavailable'] = 'This preview link has expired or is 
 // Share settings
 $_lang['setting_magicpreview.share_link_ttl'] = 'Share Link TTL';
 $_lang['setting_magicpreview.share_link_ttl_desc'] = 'Default lifetime of draft share links, in seconds. Used when no expiry is picked while creating a link. Set to 0 for links that never expire. Default: 604800 (7 days).';
-$_lang['setting_magicpreview.icon_share'] = 'Share Icon';
-$_lang['setting_magicpreview.icon_share_desc'] = 'Icon for the Share button in the action bar. Enter a FontAwesome icon name (e.g. "icon-share-alt") or leave empty for the default icon.';
 
