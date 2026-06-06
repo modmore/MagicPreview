@@ -5,6 +5,9 @@
  * The model is the classic (non-namespaced) xPDO tree under
  * core/components/magicpreview/model/, so the same code runs on MODX 2.x and 3.x.
  *
+ * There is deliberately NO uninstall case: the tables (drafts and share
+ * links) are left in place so nothing is lost if the extra is reinstalled.
+ *
  * @var modX|\MODX\Revolution\modX $modx
  * @var xPDOTransport|\xPDO\Transport\xPDOTransport $object
  * @var array $options

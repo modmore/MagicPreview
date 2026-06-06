@@ -36,7 +36,8 @@ class MagicPreviewShares
      * @param string $contextKey
      * @param int|null $ttl Lifetime in seconds; null or negative = the magicpreview.share_link_ttl setting, 0 = never expires.
      * @param string $label
-     * @return array|null ['id' => int, 'token' => string, 'url' => string, 'expires_at' => int], or null on failure.
+     * @return array|null ['url' => string], or null on failure. The url embeds
+     *         the raw token — shown this once, never reconstructable.
      */
     public function createShare(
         int $resourceId,
@@ -93,10 +94,7 @@ class MagicPreviewShares
         $this->magicpreview->garbageCollectExpired();
 
         return [
-            'id' => (int) $share->get('id'),
-            'token' => $token,
             'url' => $this->buildShareUrl($token, $contextKey),
-            'expires_at' => (int) $share->get('expires_at'),
         ];
     }
 
@@ -104,12 +102,12 @@ class MagicPreviewShares
      * Resolves a raw share token to a renderable draft, or null if the token
      * is unknown or expired — or if the creator's draft no longer exists.
      *
-     * Deliberately performs no writes on misses, so probing random tokens
-     * can't generate database load; the view counter is only bumped for
-     * valid shares.
+     * Performs no writes at all — token misses can't generate database load,
+     * and view tracking is the caller's explicit step via recordView() once
+     * the share actually rendered.
      *
      * @param string $token The raw token from the share URL.
-     * @return array|null ['resource_id' => int, 'context_key' => string, 'data' => array]
+     * @return array|null ['share_id' => int, 'resource_id' => int, 'context_key' => string, 'data' => array]
      */
     public function getValidShare(string $token): ?array
     {
@@ -123,17 +121,27 @@ class MagicPreviewShares
             return null;
         }
 
-        $resolved = $this->resolveShare($share);
-        if ($resolved === null) {
-            return null;
-        }
+        return $this->resolveShare($share);
+    }
 
-        // Best-effort view tracking.
+    /**
+     * Best-effort view tracking, called by the share endpoint only after the
+     * shared draft passed every render gate — so failed renders (missing
+     * context/resource) don't count as views.
+     *
+     * @param int $shareId
+     * @return void
+     */
+    public function recordView(int $shareId): void
+    {
+        /** @var mpShare|null $share */
+        $share = $this->modx->getObject('mpShare', ['id' => $shareId]);
+        if (!$share) {
+            return;
+        }
         $share->set('views', (int) $share->get('views') + 1);
         $share->set('last_viewed_at', time());
         $share->save();
-
-        return $resolved;
     }
 
     /**
@@ -165,21 +173,6 @@ class MagicPreviewShares
     }
 
     /**
-     * The xPDO criteria group matching non-expired rows: never-expiring
-     * (expires_at = 0) or not yet past their expiry. The single definition
-     * of "active" for listing and counting.
-     *
-     * @return array
-     */
-    private static function notExpiredCriteria(): array
-    {
-        return [
-            'expires_at' => 0,
-            'OR:expires_at:>' => time(),
-        ];
-    }
-
-    /**
      * Returns the active (non-expired) share links for a resource, newest
      * first — limited to a single creator unless $userId is null (the
      * admin oversight view, which includes each creator's username).
@@ -195,7 +188,7 @@ class MagicPreviewShares
     {
         $where = [
             'resource_id' => $resourceId,
-            self::notExpiredCriteria(),
+            MagicPreview::notExpiredCriteria(),
         ];
         if ($userId !== null) {
             $where['user_id'] = $userId;
@@ -275,7 +268,7 @@ class MagicPreviewShares
         return (int) $this->modx->getCount('mpShare', [
             'resource_id' => $resourceId,
             'user_id' => $userId,
-            self::notExpiredCriteria(),
+            MagicPreview::notExpiredCriteria(),
         ]);
     }
 
@@ -336,10 +329,7 @@ class MagicPreviewShares
         // removeCollection() returns false on failure; normalise to 0 so the
         // return type stays a plain int (union types would require PHP 8.0,
         // and the project floor is 7.4).
-        $removed = $this->modx->removeCollection('mpShare', [
-            'expires_at:>' => 0,
-            'expires_at:<' => time(),
-        ]);
+        $removed = $this->modx->removeCollection('mpShare', MagicPreview::expiredCriteria());
         return $removed === false ? 0 : (int) $removed;
     }
 
@@ -349,12 +339,11 @@ class MagicPreviewShares
      * renders whatever that draft holds at view time.
      *
      * @param mpShare $share
-     * @return array|null ['resource_id' => int, 'context_key' => string, 'data' => array]
+     * @return array|null ['share_id' => int, 'resource_id' => int, 'context_key' => string, 'data' => array]
      */
     private function resolveShare(mpShare $share): ?array
     {
-        $expiresAt = (int) $share->get('expires_at');
-        if ($expiresAt > 0 && $expiresAt < time()) {
+        if (MagicPreview::isExpired((int) $share->get('expires_at'))) {
             return null;
         }
 
@@ -367,6 +356,7 @@ class MagicPreviewShares
         }
 
         return [
+            'share_id' => (int) $share->get('id'),
             'resource_id' => (int) $share->get('resource_id'),
             'context_key' => (string) $share->get('context_key'),
             'data' => $draft['data'],

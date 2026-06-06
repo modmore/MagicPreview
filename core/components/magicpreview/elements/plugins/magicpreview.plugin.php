@@ -247,11 +247,13 @@ switch ($modx->event->name) {
         ]);
 
         if (is_array($data)) {
-            $modx->resource->fromArray($data, '', true, true);
-            $modx->resource->set('cacheable', false);
-            $modx->resource->setProcessed(false);
-            // The in-memory element cache needs to be wiped, otherwise placeholder values will show the existing cached value.
-            $modx->elementCache = null;
+            $corePath = $modx->getOption('magicpreview.core_path', null,
+                $modx->getOption('core_path') . 'components/magicpreview/');
+            /** @var MagicPreview $service */
+            $service = $modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
+            // Same recipe as the public share endpoint — one definition of
+            // how an in-memory resource is primed for an overridden render.
+            $service->applyPreviewData($modx->resource, $data);
         }
         break;
 

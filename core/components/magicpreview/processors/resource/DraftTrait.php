@@ -21,17 +21,4 @@ trait DraftTrait
             $this->modx->user->get('id')
         );
     }
-
-    /**
-     * Deletes the draft for the current resource + user.
-     *
-     * @return void
-     */
-    private function deleteDraft(): void
-    {
-        $this->getMagicPreviewService()->drafts()->deleteDraft(
-            (int) $this->getProperty('id'),
-            $this->modx->user->get('id')
-        );
-    }
 }

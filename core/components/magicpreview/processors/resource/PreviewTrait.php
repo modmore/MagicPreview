@@ -12,6 +12,7 @@ trait PreviewTrait
     private ?string $previewHash = null;
     private bool $failedSuccessfully = false;
     private ?array $shareResult = null;
+    private ?string $draftSavedAt = null;
 
     public function fireBeforeSaveEvent()
     {
@@ -60,6 +61,11 @@ trait PreviewTrait
                     $data,
                     $this->object->get('context_key')
                 );
+                if ($draftAvailable) {
+                    // Server-formatted so the client banner shows the same
+                    // timestamp (and timezone) it will see after a reload.
+                    $this->draftSavedAt = date('Y-m-d H:i:s');
+                }
             }
 
             // Create a shareable public link. The result (url with the
@@ -68,15 +74,16 @@ trait PreviewTrait
                 // A link renders the creator's current draft at view time,
                 // so make sure one exists — but never overwrite an existing
                 // draft: the editor may not have restored it into the form,
-                // and the submitted state would clobber their work.
-                if (!$saveDraft
-                    && $service->drafts()->getDraft((int) $this->object->get('id'), (int) $this->modx->user->get('id')) === null
-                ) {
+                // and the submitted state would clobber their work
+                // (keepExisting leaves any existing draft untouched).
+                if (!$saveDraft) {
                     $draftAvailable = $service->drafts()->saveDraft(
                         $this->object->get('id'),
                         $this->modx->user->get('id'),
                         $data,
-                        $this->object->get('context_key')
+                        $this->object->get('context_key'),
+                        null,
+                        true
                     );
                 }
 
@@ -106,6 +113,11 @@ trait PreviewTrait
             $response = [
                 'preview_hash' => $this->previewHash,
             ];
+            // Set when a draft was explicitly saved; the client banner uses
+            // this server-side timestamp instead of the browser clock.
+            if ($this->draftSavedAt !== null) {
+                $response['draft_saved_at'] = $this->draftSavedAt;
+            }
             // Only present when create_share was requested; null means creation
             // failed. The client only needs the link itself — the raw token is
             // already embedded in it, so don't ship the rest of the row.

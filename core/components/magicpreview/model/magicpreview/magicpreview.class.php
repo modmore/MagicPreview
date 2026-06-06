@@ -82,6 +82,47 @@ class MagicPreview
     }
 
     /**
+     * The single definition of expiry for drafts and share links: a row is
+     * expired iff it has an expiry (expires_at > 0) that has passed.
+     * 0 always means "never expires".
+     *
+     * @param int $expiresAt Unix timestamp; 0 = never expires.
+     * @return bool
+     */
+    public static function isExpired(int $expiresAt): bool
+    {
+        return $expiresAt > 0 && $expiresAt < time();
+    }
+
+    /**
+     * The xPDO criteria group matching non-expired rows — the query form of
+     * isExpired()'s negation, for listing/counting active rows.
+     *
+     * @return array
+     */
+    public static function notExpiredCriteria(): array
+    {
+        return [
+            'expires_at' => 0,
+            'OR:expires_at:>' => time(),
+        ];
+    }
+
+    /**
+     * The xPDO criteria matching expired rows — the query form of
+     * isExpired(), for garbage collection.
+     *
+     * @return array
+     */
+    public static function expiredCriteria(): array
+    {
+        return [
+            'expires_at:>' => 0,
+            'expires_at:<' => time(),
+        ];
+    }
+
+    /**
      * Deletes expired drafts and share links. Cheap thanks to the expires_at
      * indexes; called opportunistically on writes since there's no cron by default.
      * Runs at most once per request — a single request can hit several
@@ -96,6 +137,68 @@ class MagicPreview
         }
         $this->garbageCollected = true;
         return $this->drafts()->garbageCollect() + $this->shares()->garbageCollect();
+    }
+
+    /**
+     * Discards a user's draft, coordinating its dependent share links: live
+     * links resolve the draft at view time, so they must be removed with it.
+     * Unless $removeShares is set, an existing link blocks the discard so
+     * the caller can ask the user to confirm first.
+     *
+     * @param int $resourceId
+     * @param int $userId
+     * @param bool $removeShares Confirmed: also remove the user's share links.
+     * @return array ['discarded' => bool, 'live_shares' => int]
+     */
+    public function discardDraft(int $resourceId, int $userId, bool $removeShares = false): array
+    {
+        $liveShares = $this->shares()->countLiveShares($resourceId, $userId);
+        if ($liveShares > 0 && !$removeShares) {
+            return ['discarded' => false, 'live_shares' => $liveShares];
+        }
+
+        if ($liveShares > 0) {
+            $this->shares()->removeLiveShares($resourceId, $userId);
+        }
+        $this->drafts()->deleteDraft($resourceId, $userId);
+
+        return ['discarded' => true, 'live_shares' => 0];
+    }
+
+    /**
+     * Removes a user's draft unless live share links still depend on it —
+     * used after a restore, which consumes the draft only when nothing
+     * public resolves against it anymore.
+     *
+     * @param int $resourceId
+     * @param int $userId
+     * @return void
+     */
+    public function deleteDraftIfUnshared(int $resourceId, int $userId): void
+    {
+        if ($this->shares()->countLiveShares($resourceId, $userId) === 0) {
+            $this->drafts()->deleteDraft($resourceId, $userId);
+        }
+    }
+
+    /**
+     * Applies cached preview / draft data to an in-memory resource for an
+     * overridden render: nothing is saved, cacheable=false keeps the result
+     * out of the real resource cache, and the in-memory element cache is
+     * wiped so placeholders don't show the live cached values. Shared by the
+     * manager preview render (plugin OnLoadWebDocument) and the public share
+     * endpoint (share.php).
+     *
+     * @param modResource $resource
+     * @param array $data The resource snapshot (incl. flattened TVs).
+     * @return void
+     */
+    public function applyPreviewData($resource, array $data): void
+    {
+        $resource->fromArray($data, '', true, true);
+        $resource->set('cacheable', false);
+        $resource->setProcessed(false);
+        $this->modx->elementCache = null;
     }
 
     /**

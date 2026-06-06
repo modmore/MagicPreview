@@ -511,7 +511,7 @@
                 'Powered-By': 'MODx',
                 'modAuth': MODx.siteId
             },
-            success: function() {
+            success: function(form, action) {
                 fm.baseParams['action'] = originalAction;
                 fm.url = originalUrl;
                 delete fm.baseParams['save_draft'];
@@ -521,9 +521,12 @@
                 panel.clearDirty();
                 panel.warnUnsavedChanges = false;
 
-                // Update the banner date, or show a new banner if
-                // this is the first draft save on this page load.
-                updateDraftBanner();
+                // Update the banner date, or show a new banner if this is
+                // the first draft save on this page load. Prefer the
+                // server-formatted timestamp so the banner shows the same
+                // time (and timezone) it will after a reload.
+                var result = action ? action.result : null;
+                updateDraftBanner((result && result.object) ? result.object.draft_saved_at : null);
 
                 MODx.msg.status({
                     title: lexicon('draft_saved'),
@@ -618,8 +621,10 @@
                         if (obj.live_shares > 0) {
                             MODx.msg.confirm({
                                 title: lexicon('draft_discard'),
+                                // split/join replaces every occurrence — a
+                                // plain string replace() would only do the first.
                                 text: lexicon('draft_discard_live_confirm')
-                                    .replace('[[+count]]', obj.live_shares),
+                                    .split('[[+count]]').join(obj.live_shares),
                                 url: MagicPreviewConfig.assetsUrl + 'connector.php',
                                 params: {
                                     action: 'resource/discard-draft',
@@ -630,7 +635,19 @@
                                     success: { fn: finish }
                                 }
                             });
+                            return;
                         }
+
+                        // Unexpected response shape — surface it rather than
+                        // silently leaving the banner up.
+                        MODx.msg.alert(lexicon('draft_discard'), lexicon('draft_discard_failed'));
+                    }
+                },
+                // Presence of a failure listener makes the core JS show the
+                // processor's error message (it suppresses the toast otherwise).
+                failure: {
+                    fn: function() {
+                        return;
                     }
                 }
             }
@@ -676,12 +693,16 @@
     };
 
     /**
-     * Updates the draft banner's datetime to now, or creates the
-     * banner if it doesn't exist yet (first save on this page load).
+     * Updates the draft banner's datetime, or creates the banner if it
+     * doesn't exist yet (first save on this page load).
+     * @param {string} [dateStr] - Server-formatted save time ('Y-m-d H:i:s');
+     *   falls back to the browser clock when the response didn't carry one.
      */
-    function updateDraftBanner() {
-        // PHP-style tokens, matching the server's date('Y-m-d H:i:s')
-        var dateStr = Ext.util.Format.date(new Date(), 'Y-m-d H:i:s');
+    function updateDraftBanner(dateStr) {
+        if (!dateStr) {
+            // PHP-style tokens, matching the server's date('Y-m-d H:i:s')
+            dateStr = Ext.util.Format.date(new Date(), 'Y-m-d H:i:s');
+        }
         var banner = document.getElementById('mmmp-draft-banner');
 
         if (banner) {

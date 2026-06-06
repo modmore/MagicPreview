@@ -47,6 +47,7 @@ class MagicPreviewDrafts
      * @param array $data The resource snapshot (incl. flattened TVs), as built by the preview processor.
      * @param string $contextKey
      * @param int|null $savedAt Original save time to preserve when migrating; null = now.
+     * @param bool $keepExisting Leave an existing draft untouched (and report success) instead of overwriting it.
      * @return bool
      */
     public function saveDraft(
@@ -54,9 +55,16 @@ class MagicPreviewDrafts
         int $userId,
         array $data,
         string $contextKey = 'web',
-        ?int $savedAt = null)
+        ?int $savedAt = null,
+        bool $keepExisting = false)
     : bool
     {
+        // getDraft() rather than a bare row check so a pre-1.7 cache-resident
+        // draft counts as existing (and is migrated) instead of being clobbered.
+        if ($keepExisting && $this->getDraft($resourceId, $userId) !== null) {
+            return true;
+        }
+
         $now = time();
         $savedAt = $savedAt !== null ? (int) $savedAt : $now;
         $ttl = (int) $this->modx->getOption('magicpreview.draft_ttl', null, 0);
@@ -131,8 +139,7 @@ class MagicPreviewDrafts
         }
 
         // Enforce expiry on read.
-        $expiresAt = (int) $draft->get('expires_at');
-        if ($expiresAt > 0 && $expiresAt < time()) {
+        if (MagicPreview::isExpired((int) $draft->get('expires_at'))) {
             $draft->remove();
             return null;
         }
@@ -189,10 +196,7 @@ class MagicPreviewDrafts
         // removeCollection() returns false on failure; normalise to 0 so the
         // return type stays a plain int (union types would require PHP 8.0,
         // and the project floor is 7.4).
-        $removed = $this->modx->removeCollection('mpDraft', [
-            'expires_at:>' => 0,
-            'expires_at:<' => time(),
-        ]);
+        $removed = $this->modx->removeCollection('mpDraft', MagicPreview::expiredCriteria());
         return $removed === false ? 0 : (int) $removed;
     }
 
@@ -220,7 +224,7 @@ class MagicPreviewDrafts
         // Already older than the current draft lifetime (e.g. the draft_ttl
         // setting changed since it was written): treat as expired and clean up.
         $ttl = (int) $this->modx->getOption('magicpreview.draft_ttl', null, 0);
-        if ($ttl > 0 && $savedAt + $ttl < time()) {
+        if (MagicPreview::isExpired($ttl > 0 ? $savedAt + $ttl : 0)) {
             $this->modx->cacheManager->delete(self::getDraftCacheKey($resourceId, $userId), [
                 xPDO::OPT_CACHE_KEY => 'magicpreview_drafts',
             ]);

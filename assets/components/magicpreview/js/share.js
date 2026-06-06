@@ -355,7 +355,6 @@
                             items: [{
                                 xtype: 'textfield',
                                 id: 'mmmp-share-label',
-                                name: 'share_label',
                                 fieldLabel: _('magicpreview.share_label'),
                                 emptyText: _('magicpreview.share_label_emptytext'),
                                 maxLength: 190,
@@ -369,7 +368,6 @@
                             items: [{
                                 xtype: 'combo',
                                 id: 'mmmp-share-ttl',
-                                name: 'share_ttl',
                                 fieldLabel: _('magicpreview.share_col_expires'),
                                 mode: 'local',
                                 triggerAction: 'all',

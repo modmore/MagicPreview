@@ -3,18 +3,38 @@
  * MagicPreview — public share-link endpoint.
  *
  * Renders a shared draft preview for ANONYMOUS visitors. The token from the
- * URL is looked up by its sha256 hash; the matching draft snapshot (or, for
- * live shares, the creator's current draft) is applied to the in-memory
- * resource, which is then rendered through MODX's normal response pipeline.
+ * URL is looked up by its sha256 hash; the creator's current draft is applied
+ * to the in-memory resource, which is then rendered through MODX's normal
+ * response pipeline.
  *
  * modRequest::getResource() — and with it the published/permission gate — is
  * never called, so the only thing an anonymous visitor can ever see through
- * this endpoint is the single resource that was deliberately shared. Nothing
- * is written: the resource is forced non-cacheable and never saved.
+ * this endpoint is the single resource that was deliberately shared. The
+ * resource itself is never saved and is forced non-cacheable; the only
+ * writes a request can cause are view tracking on the share row and, at
+ * most once per draft, the lazy migration of a pre-1.7 cache-stored draft
+ * into the drafts table.
  *
- * Read-only by design: only GET/HEAD are accepted, so no form handler or
- * processor side effects can be triggered through a share link.
+ * Only GET/HEAD are accepted, so no form handler or processor side effects
+ * can be triggered through a share link.
  */
+
+// This is the one anonymous entry point: never leak PHP errors (and the
+// absolute paths in them) to visitors, whatever the host's INI says.
+ini_set('display_errors', '0');
+
+/**
+ * Sends the endpoint's hardening headers: share links must never be
+ * indexed, cached by shared caches, or leak their token via the referrer.
+ *
+ * @return void
+ */
+function mpShareHeaders(): void
+{
+    header('X-Robots-Tag: noindex, nofollow, noarchive');
+    header('Cache-Control: no-store, private');
+    header('Referrer-Policy: no-referrer');
+}
 
 /**
  * Sends a minimal, non-cacheable, non-indexable error page and stops.
@@ -26,9 +46,7 @@
 function mpShareAbort(int $code, string $message): void
 {
     http_response_code($code);
-    header('X-Robots-Tag: noindex, nofollow, noarchive');
-    header('Cache-Control: no-store, private');
-    header('Referrer-Policy: no-referrer');
+    mpShareHeaders();
     header('Content-Type: text/html; charset=utf-8');
     $safe = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
     echo '<!DOCTYPE html><html><head><meta name="robots" content="noindex, nofollow"><title>'
@@ -83,25 +101,22 @@ if (!$resource) {
     mpShareAbort(410, $goneMessage);
 }
 
-// Apply the draft to the in-memory resource only — nothing is saved, and
-// cacheable=false keeps the rendered draft out of the real resource cache.
-$resource->fromArray($share['data'], '', true, true);
+// Apply the draft to the in-memory resource only (never saved, never
+// cached — see MagicPreview::applyPreviewData), forced visible since the
+// whole point is previewing unpublished work through the token gate.
+$service->applyPreviewData($resource, $share['data']);
 $resource->set('id', (int) $share['resource_id']);
 $resource->set('published', true);
 $resource->set('deleted', false);
-$resource->set('cacheable', false);
-$resource->setProcessed(false);
-// The in-memory element cache needs to be wiped, otherwise placeholder values
-// would show the live cached values instead of the draft's.
-$modx->elementCache = null;
 
 $modx->resource = $resource;
 $modx->resourceIdentifier = (int) $share['resource_id'];
 $modx->resourceMethod = 'id';
 
-header('X-Robots-Tag: noindex, nofollow, noarchive');
-header('Cache-Control: no-store, private');
-header('Referrer-Policy: no-referrer');
+// Every render gate has passed — count the view.
+$service->shares()->recordView((int) $share['share_id']);
+
+mpShareHeaders();
 header('X-Frame-Options: SAMEORIGIN');
 
 // Send the Content-Type ourselves and disable MODX's own header pass:

@@ -39,6 +39,7 @@ $_lang['setting_magicpreview.template_filter_ids_desc'] = 'Komma-separierte List
 $_lang['magicpreview.save_draft'] = 'Entwurf speichern';
 $_lang['magicpreview.draft_saved'] = 'Entwurf gespeichert';
 $_lang['magicpreview.draft_discarded'] = 'Entwurf verworfen';
+$_lang['magicpreview.draft_discard_failed'] = 'Der Entwurf konnte nicht verworfen werden.';
 $_lang['magicpreview.draft_banner_msg'] = 'Ein Entwurf vom [[+date]] ist verfügbar';
 $_lang['magicpreview.draft_restore'] = 'Wiederherstellen';
 $_lang['magicpreview.draft_discard'] = 'Verwerfen';

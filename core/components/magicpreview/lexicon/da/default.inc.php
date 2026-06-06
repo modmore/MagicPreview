@@ -40,6 +40,7 @@ $_lang['setting_magicpreview.template_filter_ids_desc'] = 'Komma-separeret liste
 $_lang['magicpreview.save_draft'] = 'Gem kladde';
 $_lang['magicpreview.draft_saved'] = 'Kladde gemt';
 $_lang['magicpreview.draft_discarded'] = 'Kladde kasseret';
+$_lang['magicpreview.draft_discard_failed'] = 'Kladden kunne ikke kasseres.';
 $_lang['magicpreview.draft_banner_msg'] = 'En kladde fra [[+date]] er tilgængelig';
 $_lang['magicpreview.draft_restore'] = 'Gendan';
 $_lang['magicpreview.draft_discard'] = 'Kassér';
