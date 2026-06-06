@@ -2,7 +2,7 @@
 
 use MODX\Revolution\Processors\Processor;
 
-require __DIR__ . '/DraftTrait.php';
+require_once __DIR__ . '/DraftTrait.php';
 
 /**
  * Restores a saved draft by injecting its data into the MODX reload

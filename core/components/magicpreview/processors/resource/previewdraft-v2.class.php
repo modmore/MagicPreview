@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/DraftTrait.php';
+require_once __DIR__ . '/DraftTrait.php';
 
 /**
  * Prepares a manager-side preview of the user's saved draft: writes the

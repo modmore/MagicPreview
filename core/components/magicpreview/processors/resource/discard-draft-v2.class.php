@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/DraftTrait.php';
+require_once __DIR__ . '/DraftTrait.php';
 
 /**
  * Discards a saved draft for the given resource.

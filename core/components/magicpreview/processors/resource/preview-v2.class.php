@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/PreviewTrait.php';
+require_once __DIR__ . '/PreviewTrait.php';
 require_once MODX_PROCESSORS_PATH . 'resource/update.class.php';
 
 class MagicPreviewPreviewProcessorV2 extends modResourceUpdateProcessor {

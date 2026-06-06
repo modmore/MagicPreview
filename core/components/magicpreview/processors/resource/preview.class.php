@@ -2,7 +2,7 @@
 
 use MODX\Revolution\Processors\Resource\Update;
 
-require __DIR__ . '/PreviewTrait.php';
+require_once __DIR__ . '/PreviewTrait.php';
 
 class MagicPreviewPreviewProcessor extends Update {
 
