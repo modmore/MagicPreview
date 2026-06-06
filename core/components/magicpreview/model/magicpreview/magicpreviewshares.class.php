@@ -34,7 +34,7 @@ class MagicPreviewShares
      * @param int $resourceId
      * @param int $userId The user creating the share.
      * @param string $contextKey
-     * @param int|null $ttl Lifetime in seconds; null = the magicpreview.share_link_ttl setting, 0 = never expires.
+     * @param int|null $ttl Lifetime in seconds; null or negative = the magicpreview.share_link_ttl setting, 0 = never expires.
      * @param string $label
      * @return array|null ['id' => int, 'token' => string, 'url' => string, 'expires_at' => int], or null on failure.
      */
@@ -46,8 +46,14 @@ class MagicPreviewShares
         string $label = ''
     ): ?array
     {
-        if ($ttl === null) {
+        // A negative TTL — whether from a crafted request or a misconfigured
+        // setting — must not slip through as "never expires" (only an
+        // explicit 0 means that), so fall back to the default lifetime.
+        if ($ttl === null || $ttl < 0) {
             $ttl = (int) $this->modx->getOption('magicpreview.share_link_ttl', null, 604800);
+        }
+        if ($ttl < 0) {
+            $ttl = 604800;
         }
         $now = time();
 
