@@ -19,8 +19,6 @@ $xpdo_meta_map['mpShare']= array (
     'resource_id' => 0,
     'user_id' => 0,
     'context_key' => 'web',
-    'type' => 'snapshot',
-    'data' => NULL,
     'label' => '',
     'password_hash' => NULL,
     'createdon' => 0,
@@ -62,20 +60,6 @@ $xpdo_meta_map['mpShare']= array (
       'phptype' => 'string',
       'null' => false,
       'default' => 'web',
-    ),
-    'type' =>
-    array (
-      'dbtype' => 'varchar',
-      'precision' => '20',
-      'phptype' => 'string',
-      'null' => false,
-      'default' => 'snapshot',
-    ),
-    'data' =>
-    array (
-      'dbtype' => 'mediumtext',
-      'phptype' => 'string',
-      'null' => true,
     ),
     'label' =>
     array (

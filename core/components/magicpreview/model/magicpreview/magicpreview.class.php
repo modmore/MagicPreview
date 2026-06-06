@@ -13,10 +13,6 @@ class MagicPreview
 
     const VERSION = '1.6.0-pl';
 
-    /** Share link types: a frozen copy taken at share time, or the live draft. */
-    const SHARE_TYPE_SNAPSHOT = 'snapshot';
-    const SHARE_TYPE_LIVE = 'live';
-
     /**
      * Returns the LEGACY (pre-1.7) cache key for a resource draft, scoped by user.
      *
@@ -258,7 +254,9 @@ class MagicPreview
     }
 
     /**
-     * Creates a shareable public link to a draft of a resource.
+     * Creates a shareable public link to a draft of a resource. The link is
+     * live: at view time it renders whatever the creator's draft for the
+     * resource currently holds (see resolveShare()).
      *
      * The raw token is returned ONCE here (embedded in the url) and is never
      * stored — only its sha256 hash is persisted, so a database leak can't be
@@ -266,10 +264,7 @@ class MagicPreview
      *
      * @param int $resourceId
      * @param int $userId The user creating the share.
-     * @param array $data The resource snapshot for snapshot shares; ignored for live shares.
      * @param string $contextKey
-     * @param string $type self::SHARE_TYPE_SNAPSHOT (frozen copy taken now) or
-     *                     self::SHARE_TYPE_LIVE (renders the creator's current draft at view time).
      * @param int|null $ttl Lifetime in seconds; null = the magicpreview.share_link_ttl setting, 0 = never expires.
      * @param string $label
      * @return array|null ['id' => int, 'token' => string, 'url' => string, 'expires_at' => int], or null on failure.
@@ -277,26 +272,11 @@ class MagicPreview
     public function createShare(
         int $resourceId,
         int $userId,
-        array $data,
         string $contextKey = 'web',
-        string $type = self::SHARE_TYPE_SNAPSHOT,
         ?int $ttl = null,
         string $label = ''
     ): ?array
     {
-        if (!in_array($type, [self::SHARE_TYPE_SNAPSHOT, self::SHARE_TYPE_LIVE], true)) {
-            return null;
-        }
-
-        $encoded = null;
-        if ($type === self::SHARE_TYPE_SNAPSHOT) {
-            $encoded = json_encode($data);
-            if (empty($data) || !is_string($encoded)) {
-                $this->modx->log(modX::LOG_LEVEL_ERROR, 'Could not encode share data for resource ' . $resourceId);
-                return null;
-            }
-        }
-
         if ($ttl === null) {
             $ttl = (int) $this->modx->getOption('magicpreview.share_link_ttl', null, 604800);
         }
@@ -327,8 +307,6 @@ class MagicPreview
             'resource_id' => $resourceId,
             'user_id' => $userId,
             'context_key' => $contextKey,
-            'type' => $type,
-            'data' => $encoded,
             'label' => $label,
             'createdon' => $now,
             'expires_at' => $ttl > 0 ? $now + $ttl : 0,
@@ -349,15 +327,14 @@ class MagicPreview
 
     /**
      * Resolves a raw share token to a renderable draft, or null if the token
-     * is unknown or expired — or, for live shares, if the creator's draft no
-     * longer exists.
+     * is unknown or expired — or if the creator's draft no longer exists.
      *
      * Deliberately performs no writes on misses, so probing random tokens
      * can't generate database load; the view counter is only bumped for
      * valid shares.
      *
      * @param string $token The raw token from the share URL.
-     * @return array|null ['resource_id' => int, 'context_key' => string, 'type' => string, 'data' => array]
+     * @return array|null ['resource_id' => int, 'context_key' => string, 'data' => array]
      */
     public function getValidShare(string $token): ?array
     {
@@ -391,7 +368,7 @@ class MagicPreview
      *
      * @param int $shareId
      * @param int|null $resourceId
-     * @return array|null ['resource_id' => int, 'context_key' => string, 'type' => string, 'data' => array]
+     * @return array|null ['resource_id' => int, 'context_key' => string, 'data' => array]
      */
     public function getShareById(int $shareId, ?int $resourceId = null): ?array
     {
@@ -433,7 +410,6 @@ class MagicPreview
         foreach ($this->modx->getCollection('mpShare', $query) as $share) {
             $shares[] = [
                 'id' => (int) $share->get('id'),
-                'type' => (string) $share->get('type'),
                 'label' => (string) $share->get('label'),
                 'user_id' => (int) $share->get('user_id'),
                 'createdon' => (int) $share->get('createdon'),
@@ -467,9 +443,9 @@ class MagicPreview
     }
 
     /**
-     * Counts the user's working (non-expired) live share links for a
-     * resource — the links that would stop resolving if their draft were
-     * removed.
+     * Counts the user's working (non-expired) share links for a resource —
+     * every link is live, so all of them would stop resolving if their
+     * draft were removed.
      *
      * @param int $resourceId
      * @param int $userId
@@ -480,7 +456,6 @@ class MagicPreview
         return (int) $this->modx->getCount('mpShare', [
             'resource_id' => $resourceId,
             'user_id' => $userId,
-            'type' => self::SHARE_TYPE_LIVE,
             [
                 'expires_at' => 0,
                 'OR:expires_at:>' => time(),
@@ -489,8 +464,8 @@ class MagicPreview
     }
 
     /**
-     * Removes the user's live share links for a resource (expired ones
-     * included). Called when the draft they resolve against is discarded.
+     * Removes the user's share links for a resource (expired ones included).
+     * Called when the draft they resolve against is discarded.
      *
      * @param int $resourceId
      * @param int $userId
@@ -501,7 +476,6 @@ class MagicPreview
         $removed = $this->modx->removeCollection('mpShare', [
             'resource_id' => $resourceId,
             'user_id' => $userId,
-            'type' => self::SHARE_TYPE_LIVE,
         ]);
         return $removed === false ? 0 : (int) $removed;
     }
@@ -537,11 +511,11 @@ class MagicPreview
 
     /**
      * Resolves a share row to its renderable data: enforces expiry and
-     * decodes the snapshot — or, for live shares, fetches the creator's
-     * current draft.
+     * fetches the creator's current draft — every share link is live, so it
+     * renders whatever that draft holds at view time.
      *
      * @param mpShare $share
-     * @return array|null ['resource_id' => int, 'context_key' => string, 'type' => string, 'data' => array]
+     * @return array|null ['resource_id' => int, 'context_key' => string, 'data' => array]
      */
     private function resolveShare(mpShare $share): ?array
     {
@@ -550,22 +524,15 @@ class MagicPreview
             return null;
         }
 
-        if ($share->get('type') === self::SHARE_TYPE_LIVE) {
-            // A live share renders whatever the creator's draft currently holds.
-            $draft = $this->getDraft((int) $share->get('resource_id'), (int) $share->get('user_id'));
-            $data = $draft !== null ? $draft['data'] : null;
-        } else {
-            $data = json_decode((string) $share->get('data'), true);
-        }
-        if (!is_array($data) || empty($data)) {
+        $draft = $this->getDraft((int) $share->get('resource_id'), (int) $share->get('user_id'));
+        if ($draft === null || !is_array($draft['data']) || empty($draft['data'])) {
             return null;
         }
 
         return [
             'resource_id' => (int) $share->get('resource_id'),
             'context_key' => (string) $share->get('context_key'),
-            'type' => (string) $share->get('type'),
-            'data' => $data,
+            'data' => $draft['data'],
         ];
     }
 

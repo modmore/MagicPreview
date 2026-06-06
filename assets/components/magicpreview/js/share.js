@@ -61,7 +61,6 @@
      * result.object.share — or null when creation failed.
      *
      * @param {object} opts
-     * @param {string} opts.type - 'snapshot' or 'live'
      * @param {string} opts.ttl - Lifetime in seconds; '' = system default
      * @param {string} opts.label - Optional label identifying the link
      * @param {function} onDone - Called with the share object or null
@@ -91,7 +90,6 @@
         var originalUrl = fm.url;
         fm.baseParams['action'] = 'resource/preview';
         fm.baseParams['create_share'] = '1';
-        fm.baseParams['share_type'] = opts.type || 'snapshot';
         fm.baseParams['share_ttl'] = opts.ttl;
         fm.baseParams['share_label'] = opts.label || '';
         fm.url = MagicPreviewConfig.assetsUrl + 'connector.php';
@@ -100,7 +98,6 @@
             fm.baseParams['action'] = originalAction;
             fm.url = originalUrl;
             delete fm.baseParams['create_share'];
-            delete fm.baseParams['share_type'];
             delete fm.baseParams['share_ttl'];
             delete fm.baseParams['share_label'];
         };
@@ -209,7 +206,7 @@
                 action: 'resource/getshares',
                 id: MagicPreviewResource
             },
-            fields: ['id', 'type', 'label', 'user_id', 'createdon', 'expires_at', 'last_viewed_at', 'views'],
+            fields: ['id', 'label', 'user_id', 'createdon', 'expires_at', 'last_viewed_at', 'views'],
             paging: false,
             remoteSort: false,
             showActionsColumn: false,
@@ -238,13 +235,6 @@
                     width: 130,
                     sortable: false,
                     renderer: function(v) { return v > 0 ? Ext.util.Format.date(new Date(v * 1000), 'Y-m-d H:i:s') : _('magicpreview.share_expiry_never'); }
-                },
-                {
-                    header: _('magicpreview.share_col_type'),
-                    dataIndex: 'type',
-                    width: 80,
-                    sortable: false,
-                    renderer: function(v) { return _('magicpreview.share_type_' + v); }
                 },
                 {
                     header: _('magicpreview.share_col_views'),
@@ -359,12 +349,6 @@
                     ]
                 },
                 {
-                    xtype: 'checkbox',
-                    id: 'mmmp-share-live',
-                    hideLabel: true,
-                    boxLabel: _('magicpreview.share_live_label')
-                },
-                {
                     xtype: 'displayfield',
                     hideLabel: true,
                     style: 'margin-top:10px;font-weight:600;',
@@ -401,14 +385,12 @@
         onCreate: function(btn) {
             var self = this;
             var ttl = Ext.getCmp('mmmp-share-ttl');
-            var live = Ext.getCmp('mmmp-share-live');
             var label = Ext.getCmp('mmmp-share-label');
             if (btn) {
                 btn.disable();
             }
 
             createShareLink({
-                type: (live && live.getValue()) ? 'live' : 'snapshot',
                 ttl: ttl ? ttl.getValue() : '',
                 label: label ? label.getValue() : ''
             }, function(share) {

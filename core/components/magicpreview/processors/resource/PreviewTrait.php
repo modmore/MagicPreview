@@ -59,16 +59,14 @@ trait PreviewTrait
                 );
             }
 
-            // Create a shareable public link to this form state. The result
-            // (url with the one-time token) is returned to the client by failure().
+            // Create a shareable public link. The result (url with the
+            // one-time token) is returned to the client by failure().
             if ($createShare) {
-                $type = (string) $this->getProperty('share_type', MagicPreview::SHARE_TYPE_SNAPSHOT);
-
-                // A live link renders the creator's current draft at view
-                // time, so make sure one exists — but never overwrite an
-                // existing draft: the editor may not have restored it into
-                // the form, and the submitted state would clobber their work.
-                if ($type === MagicPreview::SHARE_TYPE_LIVE && !$saveDraft
+                // A link renders the creator's current draft at view time,
+                // so make sure one exists — but never overwrite an existing
+                // draft: the editor may not have restored it into the form,
+                // and the submitted state would clobber their work.
+                if (!$saveDraft
                     && $service->getDraft((int) $this->object->get('id'), (int) $this->modx->user->get('id')) === null
                 ) {
                     $service->saveDraft(
@@ -86,9 +84,7 @@ trait PreviewTrait
                 $this->shareResult = $service->createShare(
                     $this->object->get('id'),
                     $this->modx->user->get('id'),
-                    $data,
                     $this->object->get('context_key'),
-                    $type,
                     $ttl,
                     (string) $this->getProperty('share_label', '')
                 );
