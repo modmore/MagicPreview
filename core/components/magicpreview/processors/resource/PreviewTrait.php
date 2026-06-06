@@ -49,8 +49,12 @@ trait PreviewTrait
         $saveDraft = (bool) $this->getProperty('save_draft', false);
         $createShare = (bool) $this->getProperty('create_share', false);
         if ($saveDraft || $createShare) {
+            // Tracks whether the draft a share link would resolve against
+            // actually exists — a failed draft write must not mint a link
+            // that could only ever respond 410.
+            $draftAvailable = true;
             if ($saveDraft) {
-                $service->drafts()->saveDraft(
+                $draftAvailable = $service->drafts()->saveDraft(
                     $this->object->get('id'),
                     $this->modx->user->get('id'),
                     $data,
@@ -68,7 +72,7 @@ trait PreviewTrait
                 if (!$saveDraft
                     && $service->drafts()->getDraft((int) $this->object->get('id'), (int) $this->modx->user->get('id')) === null
                 ) {
-                    $service->drafts()->saveDraft(
+                    $draftAvailable = $service->drafts()->saveDraft(
                         $this->object->get('id'),
                         $this->modx->user->get('id'),
                         $data,
@@ -76,17 +80,21 @@ trait PreviewTrait
                     );
                 }
 
-                // Empty/missing TTL means "use the share_link_ttl system setting".
-                $ttl = $this->getProperty('share_ttl');
-                $ttl = ($ttl === null || $ttl === '') ? null : (int) $ttl;
+                if ($draftAvailable) {
+                    // Empty/missing TTL means "use the share_link_ttl system setting".
+                    $ttl = $this->getProperty('share_ttl');
+                    $ttl = ($ttl === null || $ttl === '') ? null : (int) $ttl;
 
-                $this->shareResult = $service->shares()->createShare(
-                    $this->object->get('id'),
-                    $this->modx->user->get('id'),
-                    $this->object->get('context_key'),
-                    $ttl,
-                    (string) $this->getProperty('share_label', '')
-                );
+                    $this->shareResult = $service->shares()->createShare(
+                        $this->object->get('id'),
+                        $this->modx->user->get('id'),
+                        $this->object->get('context_key'),
+                        $ttl,
+                        (string) $this->getProperty('share_label', '')
+                    );
+                }
+                // shareResult stays null when the draft write failed; the
+                // client reports that as a failed link creation.
             }
         }
 
