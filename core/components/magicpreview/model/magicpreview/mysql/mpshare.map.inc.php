@@ -20,7 +20,6 @@ $xpdo_meta_map['mpShare']= array (
     'user_id' => 0,
     'context_key' => 'web',
     'label' => '',
-    'password_hash' => NULL,
     'createdon' => 0,
     'expires_at' => 0,
     'last_viewed_at' => 0,
@@ -68,13 +67,6 @@ $xpdo_meta_map['mpShare']= array (
       'phptype' => 'string',
       'null' => false,
       'default' => '',
-    ),
-    'password_hash' =>
-    array (
-      'dbtype' => 'varchar',
-      'precision' => '255',
-      'phptype' => 'string',
-      'null' => true,
     ),
     'createdon' =>
     array (

@@ -37,8 +37,6 @@
         <field key="user_id" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
         <field key="context_key" dbtype="varchar" precision="100" phptype="string" null="false" default="web" />
         <field key="label" dbtype="varchar" precision="190" phptype="string" null="false" default="" />
-        <!-- Reserved for optional password-protected links; no UI in v1 -->
-        <field key="password_hash" dbtype="varchar" precision="255" phptype="string" null="true" />
         <field key="createdon" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
         <field key="expires_at" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
         <field key="last_viewed_at" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
