@@ -2,7 +2,7 @@
 
 use MODX\Revolution\Processors\Processor;
 
-require __DIR__ . '/DraftTrait.php';
+require_once __DIR__ . '/DraftTrait.php';
 
 /**
  * Restores a saved draft by injecting its data into the MODX reload
@@ -62,8 +62,10 @@ class MagicPreviewRestoreDraftProcessor extends Processor
 
         // Delete the draft now that it has been written to the reload
         // registry — prevents the restore prompt from appearing again
-        // after the page redirects.
-        $this->deleteDraft();
+        // after the page redirects. Kept when the editor has live share
+        // links resolving against it, so those links keep working; the
+        // draft banner simply reappears after the reload.
+        $this->getMagicPreviewService()->deleteDraftIfUnshared($resourceId, (int) $this->modx->user->get('id'));
 
         // Determine context_key and class_key from the draft data,
         // falling back to sensible defaults.

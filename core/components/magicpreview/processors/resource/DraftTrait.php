@@ -1,48 +1,24 @@
 <?php
 
+require_once __DIR__ . '/ServiceTrait.php';
+
 /**
  * Shared draft utilities for the restore and discard processors.
  */
 trait DraftTrait
 {
+    use ServiceTrait;
+
     /**
-     * Returns the cache key for the current resource + user draft.
+     * Returns the draft for the current resource + user, or null if none exists.
      *
-     * @return string
+     * @return array|null ['data' => array, 'saved_at' => int, 'user_id' => int, 'resource_id' => int]
      */
-    private function getDraftCacheKey()
+    private function getDraft(): ?array
     {
-        return MagicPreview::getDraftCacheKey(
+        return $this->getMagicPreviewService()->drafts()->getDraft(
             (int) $this->getProperty('id'),
             $this->modx->user->get('id')
         );
-    }
-
-    /**
-     * Returns the draft data from the cache, or null if none exists.
-     *
-     * @return array|null
-     */
-    private function getDraft()
-    {
-        $data = $this->modx->cacheManager->get($this->getDraftCacheKey(), [
-            xPDO::OPT_CACHE_KEY => 'magicpreview_drafts',
-        ]);
-        if (!empty($data) && is_array($data) && !empty($data['data'])) {
-            return $data;
-        }
-        return null;
-    }
-
-    /**
-     * Deletes the draft from the cache.
-     *
-     * @return void
-     */
-    private function deleteDraft()
-    {
-        $this->modx->cacheManager->delete($this->getDraftCacheKey(), [
-            xPDO::OPT_CACHE_KEY => 'magicpreview_drafts',
-        ]);
     }
 }

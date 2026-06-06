@@ -1,6 +1,6 @@
 <?php
 /** @var modX $modx */
-$modx =& $transport->xpdo;
+$modx = $transport->xpdo;
 $success = false;
 switch($options[xPDOTransport::PACKAGE_ACTION]) {
     case xPDOTransport::ACTION_INSTALL:
@@ -17,11 +17,11 @@ switch($options[xPDOTransport::PACKAGE_ACTION]) {
         $modx->log($level, '- MODX Revolution 2.6.5+: ' . $modxVersion['full_version']);
 
         $level = xPDO::LOG_LEVEL_INFO;
-        if (version_compare(PHP_VERSION, '7.0.0') < 0) {
+        if (version_compare(PHP_VERSION, '7.4.0') < 0) {
             $level = xPDO::LOG_LEVEL_ERROR;
             $success = false;
         }
-        $modx->log($level, '- PHP version 7.0+: ' . PHP_VERSION);
+        $modx->log($level, '- PHP version 7.4+: ' . PHP_VERSION);
 
         if ($success) {
             $modx->log(xPDO::LOG_LEVEL_INFO, 'Requirements look good!');

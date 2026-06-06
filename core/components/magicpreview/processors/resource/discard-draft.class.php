@@ -2,7 +2,7 @@
 
 use MODX\Revolution\Processors\Processor;
 
-require __DIR__ . '/DraftTrait.php';
+require_once __DIR__ . '/DraftTrait.php';
 
 /**
  * Discards a saved draft for the given resource.
@@ -20,9 +20,16 @@ class MagicPreviewDiscardDraftProcessor extends Processor
             return $this->failure('Invalid resource ID.');
         }
 
-        $this->deleteDraft();
+        // The user's live share links resolve against this draft, so they
+        // stop working when it goes. The service reports them instead of
+        // discarding until the client confirms with remove_shares set.
+        $result = $this->getMagicPreviewService()->discardDraft(
+            $resourceId,
+            (int) $this->modx->user->get('id'),
+            (bool) $this->getProperty('remove_shares', false)
+        );
 
-        return $this->success();
+        return $this->success('', $result);
     }
 }
 

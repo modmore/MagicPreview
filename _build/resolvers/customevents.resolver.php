@@ -5,7 +5,7 @@
  * @var array $options
  */
 if ($transport->xpdo) {
-    $modx =& $transport->xpdo;
+    $modx = $transport->xpdo;
 
     $events = [
         'OnResourceMagicPreview',

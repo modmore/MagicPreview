@@ -67,12 +67,18 @@
     background: #1a3350;
 }
 
+.mmmp-draft-banner__btn--view,
+.mmmp-draft-banner__btn--share,
 .mmmp-draft-banner__btn--discard {
     background: #fff;
     color: #515151;
     box-shadow: 0 0 0 1px #E4E4E4;
 }
 
+.mmmp-draft-banner__btn--view:hover,
+.mmmp-draft-banner__btn--view:focus,
+.mmmp-draft-banner__btn--share:hover,
+.mmmp-draft-banner__btn--share:focus,
 .mmmp-draft-banner__btn--discard:hover,
 .mmmp-draft-banner__btn--discard:focus {
     background: #E4E4E4;
@@ -497,4 +503,19 @@ body.magicpreview_modx3.mmmp-panel-onpage-active #modx-resource-main-right {
 @keyframes ellipsis3 {
     0% { transform: scale(1); }
     100% { transform: scale(0); }
+}
+
+/* --------------------------------------------------------------------------
+   Share window: revoke link + note tweaks layered on the native MODx.Window.
+   -------------------------------------------------------------------------- */
+
+a.mmmp-share-revoke {
+    color: #a94442;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+a.mmmp-share-revoke:hover,
+a.mmmp-share-revoke:focus {
+    color: #843534;
 }

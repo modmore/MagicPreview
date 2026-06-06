@@ -106,42 +106,43 @@ switch ($modx->event->name) {
                 'tablet' => $modx->getOption('magicpreview.breakpoint_tablet', null, '768px'),
                 'mobile' => $modx->getOption('magicpreview.breakpoint_mobile', null, '320px'),
             ];
+            // JS lexicon map for the preview window/panel UI; each short key
+            // is looked up as 'magicpreview.<key>'. Strings beyond this map
+            // (e.g. the share dialog's) resolve in JS via the
+            // magicpreview:default topic registered below and the _() helper.
             $jsConfig['lexicon'] = [
-                'preview_button' => $modx->lexicon('magicpreview.preview_button'),
-                'preview_button_tooltip' => $modx->lexicon('magicpreview.preview_button_tooltip'),
-                'view_button_tooltip' => $modx->lexicon('magicpreview.view_button_tooltip'),
-                'preparing_preview' => $modx->lexicon('magicpreview.preparing_preview'),
-                'idle_message' => $modx->lexicon('magicpreview.idle_message'),
-                'reload_preview' => $modx->lexicon('magicpreview.reload_preview'),
-                'close_panel' => $modx->lexicon('magicpreview.close_panel'),
-                'bp_full' => $modx->lexicon('magicpreview.bp_full'),
-                'bp_desktop' => $modx->lexicon('magicpreview.bp_desktop'),
-                'bp_tablet' => $modx->lexicon('magicpreview.bp_tablet'),
-                'bp_mobile' => $modx->lexicon('magicpreview.bp_mobile'),
-                'save_draft' => $modx->lexicon('magicpreview.save_draft'),
-                'draft_saved' => $modx->lexicon('magicpreview.draft_saved'),
-                'draft_discarded' => $modx->lexicon('magicpreview.draft_discarded'),
-                'draft_banner_msg' => $modx->lexicon('magicpreview.draft_banner_msg'),
-                'draft_restore' => $modx->lexicon('magicpreview.draft_restore'),
-                'draft_discard' => $modx->lexicon('magicpreview.draft_discard'),
                 'magicpreview' => $modx->lexicon('magicpreview'),
-                'resource_preview_mode' => $modx->lexicon('magicpreview.resource_preview_mode'),
-                'resource_preview_mode_desc' => $modx->lexicon('magicpreview.resource_preview_mode_desc'),
-                'resource_panel_layout' => $modx->lexicon('magicpreview.resource_panel_layout'),
-                'resource_panel_layout_desc' => $modx->lexicon('magicpreview.resource_panel_layout_desc'),
-                'resource_enabled' => $modx->lexicon('magicpreview.resource_enabled'),
-                'resource_enabled_desc' => $modx->lexicon('magicpreview.resource_enabled_desc'),
-                'system_default' => $modx->lexicon('magicpreview.system_default'),
             ];
+            $jsLexiconKeys = [
+                'preview_button', 'preview_button_tooltip', 'view_button_tooltip',
+                'preparing_preview', 'idle_message', 'reload_preview', 'close_panel',
+                'bp_full', 'bp_desktop', 'bp_tablet', 'bp_mobile',
+                'save_draft', 'draft_saved', 'draft_discarded',
+                'draft_banner_msg', 'draft_restore', 'draft_discard',
+                'resource_preview_mode', 'resource_preview_mode_desc',
+                'resource_panel_layout', 'resource_panel_layout_desc',
+                'resource_enabled', 'resource_enabled_desc',
+                'system_default',
+            ];
+            foreach ($jsLexiconKeys as $lexKey) {
+                $jsConfig['lexicon'][$lexKey] = $modx->lexicon('magicpreview.' . $lexKey);
+            }
+
+            // Sudo/Administrator users see every share link on the resource
+            // (with creator usernames); editors see only their own. Display
+            // flag only — the getshares processor enforces the scoping.
+            $jsConfig['shareShowUser'] = $service->shares()->currentUserSeesAllShares();
 
             // Check for a saved draft for this resource + user
-            $draftKey = MagicPreview::getDraftCacheKey($resource->get('id'), $modx->user->get('id'));
-            $draft = $modx->cacheManager->get($draftKey, [
-                xPDO::OPT_CACHE_KEY => 'magicpreview_drafts',
-            ]);
-            if (!empty($draft) && is_array($draft) && !empty($draft['data'])) {
+            $draft = $service->drafts()->getDraft($resource->get('id'), $modx->user->get('id'));
+            if ($draft !== null) {
                 $jsConfig['hasDraft'] = true;
-                $jsConfig['draftSavedAt'] = date('Y-m-d H:i:s', isset($draft['saved_at']) ? (int) $draft['saved_at'] : time());
+                $jsConfig['draftSavedAt'] = date('Y-m-d H:i:s', $draft['saved_at']);
+                // Shown in the draft banner: the user's non-expired share links.
+                $jsConfig['draftShareCount'] = $service->shares()->countLiveShares(
+                    (int) $resource->get('id'),
+                    (int) $modx->user->get('id')
+                );
             }
             // Build icon HTML for the Save Draft and View action bar buttons.
             // Empty setting = default SVG; otherwise treat as FA class name.
@@ -154,8 +155,14 @@ switch ($modx->event->name) {
                 ? '<i class="icon ' . htmlspecialchars($iconView, ENT_QUOTES, 'UTF-8') . '" aria-hidden="true"></i>'
                 : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" class="mmmp-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>';
 
+            // Expose the full lexicon topic to manager-side JS via the global
+            // _() helper (MODx.lang). Strings beyond the jsConfig lexicon map
+            // above — e.g. the share dialog's — resolve as _('magicpreview.<key>').
+            $modx->controller->addLexiconTopic('magicpreview:default');
+
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/window.js?v=' . $service::VERSION);
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/panel.js?v=' . $service::VERSION);
+            $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/share.js?v=' . $service::VERSION);
             $modx->controller->addJavascript($service->config['assetsUrl'] . 'js/preview.js?v=' . $service::VERSION);
 
             // When onpage panel is active, the panel will be visible
@@ -240,11 +247,13 @@ switch ($modx->event->name) {
         ]);
 
         if (is_array($data)) {
-            $modx->resource->fromArray($data, '', true, true);
-            $modx->resource->set('cacheable', false);
-            $modx->resource->setProcessed(false);
-            // The in-memory element cache needs to be wiped, otherwise placeholder values will show the existing cached value.
-            $modx->elementCache = null;
+            $corePath = $modx->getOption('magicpreview.core_path', null,
+                $modx->getOption('core_path') . 'components/magicpreview/');
+            /** @var MagicPreview $service */
+            $service = $modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
+            // Same recipe as the public share endpoint — one definition of
+            // how an in-memory resource is primed for an overridden render.
+            $service->applyPreviewData($modx->resource, $data);
         }
         break;
 

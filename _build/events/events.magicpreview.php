@@ -1,21 +1,21 @@
 <?php
 
-$events = array();
+$events = [];
 
-$e = array(
+$e = [
     'OnDocFormRender',
     'OnDocFormSave',
     'OnLoadWebDocument',
     'OnManagerPageBeforeRender',
-);
+];
 
 foreach ($e as $ev) {
     $events[$ev] = $modx->newObject('modPluginEvent');
-    $events[$ev]->fromArray(array(
+    $events[$ev]->fromArray([
         'event' => $ev,
         'priority' => 0,
         'propertyset' => 0
-    ),'',true,true);
+    ],'',true,true);
 }
 
 return $events;

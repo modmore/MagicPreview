@@ -7,7 +7,7 @@
  * auto-refresh timer, auto-preview on page load, and Preview button
  * injection into the MODX manager action bar.
  *
- * Load order: window.js -> panel.js -> preview.js (this file, last)
+ * Load order: window.js -> panel.js -> share.js -> preview.js (this file, last)
  *
  * @global {object}  MagicPreviewConfig   - Injected by PHP plugin
  * @global {number}  MagicPreviewResource - Injected by PHP plugin
@@ -41,7 +41,9 @@
      * @returns {object}
      */
     function config() {
-        if (_config) return _config;
+        if (_config) {
+            return _config;
+        }
 
         var baseFrameUrl = MagicPreviewConfig.baseFrameUrl ?? '';
         _config = {
@@ -60,6 +62,7 @@
             lexicon: MagicPreviewConfig.lexicon ?? {},
             hasDraft: !!MagicPreviewConfig.hasDraft,
             draftSavedAt: MagicPreviewConfig.draftSavedAt ?? '',
+            draftShareCount: parseInt(MagicPreviewConfig.draftShareCount, 10) || 0,
             iconSaveDraft: MagicPreviewConfig.iconSaveDraft ?? '',
             iconView: MagicPreviewConfig.iconView ?? ''
         };
@@ -68,21 +71,38 @@
     }
 
     /**
-     * Returns a lexicon string by key, falling back to the key itself.
+     * Returns a lexicon string by key. Handy for getting values in the preview.
+     * Resolves from the small PHP-injected
+     * map first (the preview window/panel strings), then from the manager's
+     * lexicon via the global _() helper — the magicpreview:default topic is
+     * registered with addLexiconTopic() in the plugin — and finally falls
+     * back to the key itself.
      * @param {string} key
      * @returns {string}
      */
     function lexicon(key) {
         var lex = config().lexicon;
-        return (lex && lex[key]) ? lex[key] : key;
+        if (lex && lex[key]) {
+            return lex[key];
+        }
+        if (typeof _ === 'function') {
+            var full = 'magicpreview.' + key;
+            var s = _(full);
+            if (s && s !== full) {
+                return s;
+            }
+        }
+        return key;
     }
 
     // =========================================================================
-    // References to sub-modules (set by window.js and panel.js before us)
+    // References to sub-modules (set by window.js, panel.js and share.js
+    // before us)
     // =========================================================================
 
     var _window = window.MagicPreview._window;
     var _panel = window.MagicPreview._panel;
+    var _share = window.MagicPreview._share;
 
     // =========================================================================
     // Panel state persistence (via MODX's Ext.state.Manager)
@@ -249,10 +269,12 @@
         var ta = Ext.get(panel.contentField);
         if (ta) {
             var hc = Ext.getCmp('hiddenContent');
-            if (hc) { hc.setValue(ta.dom.value); }
+            if (hc) {
+                hc.setValue(ta.dom.value); 
+            }
         }
 
-        // 2. Sync RTE editors (TinyMCE, CKEditor, etc.)
+        // 2. Sync RTE editors (Redactor, TinyMCE, etc.)
         if (panel.cleanupEditor) {
             panel.cleanupEditor();
         }
@@ -294,10 +316,14 @@
         var showLoading = options.showLoading !== false;
 
         var panel = Ext.getCmp('modx-panel-resource');
-        if (!panel) return;
+        if (!panel) {
+            return;
+        }
 
         var fm = panel.getForm();
-        if (!fm) return;
+        if (!fm) {
+            return;
+        }
 
         // Show loading state immediately (only for manual/initial previews)
         if (showLoading) {
@@ -410,12 +436,20 @@
         stopAutoRefresh();
 
         var interval = config().autoRefreshInterval;
-        if (interval <= 0) return;
-        if (config().previewMode !== MODE_PANEL) return;
-        if (!MagicPreview.isOpen()) return;
+        if (interval <= 0) {
+            return;
+        }
+        if (config().previewMode !== MODE_PANEL) {
+            return;
+        }
+        if (!MagicPreview.isOpen()) {
+            return;
+        }
 
         autoRefreshTimer = setInterval(function() {
-            if (submitInFlight) return;
+            if (submitInFlight) {
+                return;
+            }
 
             if (!MagicPreview.isOpen()) {
                 stopAutoRefresh();
@@ -447,10 +481,14 @@
      */
     function saveDraft() {
         var panel = Ext.getCmp('modx-panel-resource');
-        if (!panel) return;
+        if (!panel) {
+            return;
+        }
 
         var fm = panel.getForm();
-        if (!fm) return;
+        if (!fm) {
+            return;
+        }
 
         // Fire beforeSubmit so extras (ContentBlocks, etc.) prepare data
         var canSubmit = panel.fireEvent('beforeSubmit', {
@@ -458,7 +496,9 @@
             options: {},
             config: panel.config
         });
-        if (canSubmit === false) return;
+        if (canSubmit === false) {
+            return;
+        }
 
         var originalAction = fm.baseParams['action'];
         var originalUrl = fm.url;
@@ -471,7 +511,7 @@
                 'Powered-By': 'MODx',
                 'modAuth': MODx.siteId
             },
-            success: function() {
+            success: function(form, action) {
                 fm.baseParams['action'] = originalAction;
                 fm.url = originalUrl;
                 delete fm.baseParams['save_draft'];
@@ -481,9 +521,12 @@
                 panel.clearDirty();
                 panel.warnUnsavedChanges = false;
 
-                // Update the banner date, or show a new banner if
-                // this is the first draft save on this page load.
-                updateDraftBanner();
+                // Update the banner date, or show a new banner if this is
+                // the first draft save on this page load. Prefer the
+                // server-formatted timestamp so the banner shows the same
+                // time (and timezone) it will after a reload.
+                var result = action ? action.result : null;
+                updateDraftBanner((result && result.object) ? result.object.draft_saved_at : null);
 
                 MODx.msg.status({
                     title: lexicon('draft_saved'),
@@ -540,9 +583,23 @@
     }
 
     /**
-     * Discards the saved draft for the current resource.
+     * Discards the saved draft for the current resource. When the editor has
+     * live share links resolving against the draft, the server reports them
+     * instead of discarding; a confirmation then explains that the links will
+     * be removed too before retrying with remove_shares set.
+     * @param {HTMLElement} [banner] - The draft banner, removed once discarded.
      */
-    function discardDraft() {
+    function discardDraft(banner) {
+        var finish = function() {
+            if (banner) {
+                banner.remove();
+            }
+            MODx.msg.status({
+                title: lexicon('draft_discarded'),
+                delay: 3
+            });
+        };
+
         MODx.Ajax.request({
             url: MagicPreviewConfig.assetsUrl + 'connector.php',
             params: {
@@ -551,27 +608,50 @@
             },
             listeners: {
                 success: {
+                    fn: function(r) {
+                        var obj = r.object || {};
+                        if (obj.discarded) {
+                            finish();
+                            return;
+                        }
+
+                        // The editor has live share links resolving against
+                        // this draft: removing it also removes those links,
+                        // so the server held off until they confirm.
+                        if (obj.live_shares > 0) {
+                            MODx.msg.confirm({
+                                title: lexicon('draft_discard'),
+                                // split/join replaces every occurrence — a
+                                // plain string replace() would only do the first.
+                                text: lexicon('draft_discard_live_confirm')
+                                    .split('[[+count]]').join(obj.live_shares),
+                                url: MagicPreviewConfig.assetsUrl + 'connector.php',
+                                params: {
+                                    action: 'resource/discard-draft',
+                                    id: MagicPreviewResource,
+                                    remove_shares: 1
+                                },
+                                listeners: {
+                                    success: { fn: finish }
+                                }
+                            });
+                            return;
+                        }
+
+                        // Unexpected response shape — surface it rather than
+                        // silently leaving the banner up.
+                        MODx.msg.alert(lexicon('draft_discard'), lexicon('draft_discard_failed'));
+                    }
+                },
+                // Presence of a failure listener makes the core JS show the
+                // processor's error message (it suppresses the toast otherwise).
+                failure: {
                     fn: function() {
-                        MODx.msg.status({
-                            title: lexicon('draft_discarded'),
-                            delay: 3
-                        });
+                        return;
                     }
                 }
             }
         });
-    }
-
-    /**
-     * Formats a Date object as 'YYYY-MM-DD HH:MM:SS' to match the PHP
-     * date('Y-m-d H:i:s') format used by the server.
-     * @param {Date} d
-     * @returns {string}
-     */
-    function formatDateTime(d) {
-        var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
-        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
-            + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
     }
 
     /**
@@ -586,11 +666,43 @@
     }
 
     /**
-     * Updates the draft banner's datetime to now, or creates the
-     * banner if it doesn't exist yet (first save on this page load).
+     * Builds the banner Share button label, appending the user's count of
+     * non-expired share links when there are any: "Share (2)".
+     * @param {number} count
+     * @returns {string}
      */
-    function updateDraftBanner() {
-        var dateStr = formatDateTime(new Date());
+    function shareButtonText(count) {
+        var label = lexicon('draft_share');
+        if (count > 0) {
+            label += ' (' + count + ')';
+        }
+        return label;
+    }
+
+    /**
+     * Updates the share count on the banner's Share button, if present.
+     * Called by the share dialog (share.js) whenever its grid reloads, so
+     * the count stays accurate after links are created or revoked.
+     * @param {number} count
+     */
+    window.MagicPreview.setDraftShareCount = function(count) {
+        var btn = document.querySelector('#mmmp-draft-banner .mmmp-draft-banner__btn--share');
+        if (btn) {
+            btn.textContent = shareButtonText(count);
+        }
+    };
+
+    /**
+     * Updates the draft banner's datetime, or creates the banner if it
+     * doesn't exist yet (first save on this page load).
+     * @param {string} [dateStr] - Server-formatted save time ('Y-m-d H:i:s');
+     *   falls back to the browser clock when the response didn't carry one.
+     */
+    function updateDraftBanner(dateStr) {
+        if (!dateStr) {
+            // PHP-style tokens, matching the server's date('Y-m-d H:i:s')
+            dateStr = Ext.util.Format.date(new Date(), 'Y-m-d H:i:s');
+        }
         var banner = document.getElementById('mmmp-draft-banner');
 
         if (banner) {
@@ -608,23 +720,73 @@
     }
 
     /**
+     * Opens a manager-side preview of the user's saved draft in a new tab
+     * via the standard mgr-only ?show_preview= mechanism. The previewdraft
+     * processor writes the draft data into the preview cache and returns
+     * the hash.
+     */
+    function previewDraft() {
+        var win = window.open('about:blank', 'mmmp-draft-preview');
+
+        MODx.Ajax.request({
+            url: MagicPreviewConfig.assetsUrl + 'connector.php',
+            params: {
+                action: 'resource/previewdraft',
+                id: MagicPreviewResource
+            },
+            listeners: {
+                success: {
+                    fn: function(r) {
+                        var hash = (r.object && r.object.preview_hash) ? r.object.preview_hash : null;
+                        if (!hash) {
+                            if (win) {
+                                win.close();
+                            }
+                            return;
+                        }
+                        if (win) {
+                            win.location = previewFrameUrl(hash);
+                        }
+                    }
+                },
+                failure: {
+                    fn: function() {
+                        if (win) {
+                            win.close();
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    /**
      * Shows a draft banner above the resource panel. Appended to the
      * #modx-panel-resource-div container which sits directly above the
-     * ExtJS-rendered resource panel in the DOM. Stays visible until
-     * the user clicks Restore or Discard.
+     * ExtJS-rendered resource panel in the DOM. Offers View, Share,
+     * Restore and Discard for the saved draft; stays visible until the
+     * draft is restored or discarded.
      */
     function showDraftBanner() {
         var c = config();
-        if (!c.hasDraft) return;
+        if (!c.hasDraft) {
+            return;
+        }
 
         var container = document.getElementById('modx-panel-resource-div');
-        if (!container) return;
+        if (!container) {
+            return;
+        }
 
         var banner = document.createElement('div');
         banner.id = 'mmmp-draft-banner';
         banner.className = 'mmmp-draft-banner';
         banner.innerHTML = '<span class="mmmp-draft-banner__msg">' + bannerMsgHtml(c.draftSavedAt) + '</span>'
             + '<span class="mmmp-draft-banner__actions">'
+            + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--view" data-action="view">'
+            + lexicon('draft_view') + '</button>'
+            + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--share" data-action="share">'
+            + shareButtonText(c.draftShareCount) + '</button>'
             + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--restore" data-action="restore">'
             + lexicon('draft_restore') + '</button>'
             + '<button type="button" class="mmmp-draft-banner__btn mmmp-draft-banner__btn--discard" data-action="discard">'
@@ -636,14 +798,21 @@
         // Delegate click events from the banner's buttons
         banner.addEventListener('click', function(e) {
             var target = e.target.closest('[data-action]');
-            if (!target) return;
+            if (!target) {
+                return;
+            }
 
             var action = target.getAttribute('data-action');
-            if (action === 'restore') {
+            if (action === 'view') {
+                previewDraft();
+            } else if (action === 'share') {
+                _share.openDialog();
+            } else if (action === 'restore') {
                 restoreDraft();
             } else if (action === 'discard') {
-                discardDraft();
-                banner.remove();
+                // The banner is removed by discardDraft() once the draft is
+                // actually gone — discarding may first ask for confirmation.
+                discardDraft(banner);
             }
         });
     }
@@ -818,11 +987,18 @@
             }
         });
 
+        // Show the draft banner whenever a saved draft exists — even when the
+        // Preview button is hidden below: drafts and their live share links
+        // outlive a template-filter or per-resource visibility change, and the
+        // banner is the only UI to view, share, restore or discard them.
+        showDraftBanner();
+
         // If the Preview button is hidden for this resource (via the system
         // template filter or a per-resource override), skip button injection,
-        // tooltips, panel onpage init, draft banner, auto-preview, and
-        // keyboard shortcuts. The Settings-tab combos above remain active so
-        // editors can flip the override back on without leaving the page.
+        // tooltips, panel onpage init, auto-preview, and keyboard shortcuts.
+        // The Settings-tab combos and the draft banner above remain active so
+        // editors can flip the override back on — and keep managing existing
+        // drafts/share links — without leaving the page.
         if (hidden) {
             return;
         }
@@ -859,7 +1035,9 @@
                 var btnView = btns.map(function(btn) { return btn.id; }).indexOf('modx-abtn-preview');
                 var hasViewBtn = btnView !== -1;
                 // If the View button doesn't exist, insert at the start
-                if (!hasViewBtn) btnView = 0;
+                if (!hasViewBtn) {
+                    btnView = 0;
+                }
 
                 // Save Draft icon button — sits between Preview and View
                 btns.splice(btnView, 0, {
@@ -922,9 +1100,6 @@
             _panel.initOnpage();
         }
 
-        // Check for a saved draft and show restore/discard banner
-        showDraftBanner();
-
         // Auto-preview is triggered from the panel's 'afterrender' event,
         // wired up in the Ext.override(MODx.panel.Resource) block above.
 
@@ -947,20 +1122,26 @@
          */
         document.addEventListener('keydown', function(e) {
             var ctrlOrCmd = e.ctrlKey || e.metaKey;
-            if (!ctrlOrCmd) return;
+            if (!ctrlOrCmd) {
+                return;
+            }
 
             // Ctrl+Shift+S  —  Save Draft
             if (e.shiftKey && (e.key === 'S' || e.key === 's')) {
                 e.preventDefault();
                 e.stopPropagation();
-                if (!e.repeat) saveDraft();
+                if (!e.repeat) {
+                    saveDraft();
+                }
                 return;
             }
 
             // Ctrl+P  —  Preview
             if (!e.shiftKey && !e.altKey && (e.key === 'P' || e.key === 'p')) {
                 e.preventDefault();
-                if (!e.repeat) submitPreview();
+                if (!e.repeat) {
+                    submitPreview();
+                }
                 return;
             }
         }, true);

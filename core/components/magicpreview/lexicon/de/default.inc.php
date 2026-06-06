@@ -39,9 +39,13 @@ $_lang['setting_magicpreview.template_filter_ids_desc'] = 'Komma-separierte List
 $_lang['magicpreview.save_draft'] = 'Entwurf speichern';
 $_lang['magicpreview.draft_saved'] = 'Entwurf gespeichert';
 $_lang['magicpreview.draft_discarded'] = 'Entwurf verworfen';
-$_lang['magicpreview.draft_banner_msg'] = 'Ein Entwurf vom [[+date]] ist verfügbar.';
+$_lang['magicpreview.draft_discard_failed'] = 'Der Entwurf konnte nicht verworfen werden.';
+$_lang['magicpreview.draft_banner_msg'] = 'Ein Entwurf vom [[+date]] ist verfügbar';
 $_lang['magicpreview.draft_restore'] = 'Wiederherstellen';
 $_lang['magicpreview.draft_discard'] = 'Verwerfen';
+$_lang['magicpreview.draft_discard_live_confirm'] = 'Sie haben [[+count]] Live-Freigabelink(s), die diesen Entwurf anzeigen. Beim Verwerfen des Entwurfs werden diese Links ebenfalls entfernt. Fortfahren?';
+$_lang['magicpreview.draft_view'] = 'Ansehen';
+$_lang['magicpreview.draft_share'] = 'Teilen';
 
 // Entwurf-Einstellungen
 $_lang['setting_magicpreview.draft_ttl'] = 'Entwurf-TTL';
@@ -61,3 +65,42 @@ $_lang['magicpreview.resource_panel_layout_desc'] = 'Überschreibt das systemwei
 $_lang['magicpreview.resource_enabled'] = 'Magic Preview verwenden?';
 $_lang['magicpreview.resource_enabled_desc'] = 'Überschreibt den Vorlagenfilter für diese Ressource. "Ja" erzwingt, dass der Vorschau-Button erscheint, auch wenn die Vorlage durch den Systemfilter ausgeschlossen ist. "Nein" blendet den Button auch dann aus, wenn die Vorlage ihn sonst zulassen würde.';
 $_lang['magicpreview.system_default'] = 'Systemstandard';
+
+// Freigabelinks
+$_lang['magicpreview.share_title'] = 'Entwurf teilen';
+$_lang['magicpreview.share_label'] = 'Bezeichnung';
+$_lang['magicpreview.share_label_emptytext'] = 'z.B. Startseiten-Relaunch';
+$_lang['magicpreview.share_expiry_default'] = 'Standard (Systemeinstellung)';
+$_lang['magicpreview.share_expiry_1day'] = '1 Tag';
+$_lang['magicpreview.share_expiry_1week'] = '1 Woche';
+$_lang['magicpreview.share_expiry_30days'] = '30 Tage';
+$_lang['magicpreview.share_expiry_never'] = 'Nie';
+$_lang['magicpreview.share_create'] = 'Link erstellen';
+$_lang['magicpreview.share_created'] = 'Freigabelink erstellt';
+$_lang['magicpreview.share_copy'] = 'Kopieren';
+$_lang['magicpreview.share_copied'] = 'Link in die Zwischenablage kopiert';
+$_lang['magicpreview.share_link_note'] = 'Jetzt kopieren — aus Sicherheitsgründen kann der Link nicht erneut angezeigt werden.';
+$_lang['magicpreview.share_existing'] = 'Aktive Links für diese Ressource';
+$_lang['magicpreview.share_none'] = 'Keine aktiven Freigabelinks.';
+$_lang['magicpreview.share_col_user'] = 'Geteilt von';
+$_lang['magicpreview.share_col_label'] = 'Bezeichnung';
+$_lang['magicpreview.share_col_created'] = 'Erstellt';
+$_lang['magicpreview.share_col_expires'] = 'Läuft ab';
+$_lang['magicpreview.share_col_expires_in'] = 'Verbleibend';
+$_lang['magicpreview.share_expired'] = 'Abgelaufen';
+$_lang['magicpreview.share_time_minute'] = '1 Minute';
+$_lang['magicpreview.share_time_minutes'] = '[[+n]] Minuten';
+$_lang['magicpreview.share_time_hour'] = '1 Stunde';
+$_lang['magicpreview.share_time_hours'] = '[[+n]] Stunden';
+$_lang['magicpreview.share_time_day'] = '1 Tag';
+$_lang['magicpreview.share_time_days'] = '[[+n]] Tage';
+$_lang['magicpreview.share_col_views'] = 'Aufrufe';
+$_lang['magicpreview.share_revoke'] = 'Widerrufen';
+$_lang['magicpreview.share_revoke_confirm'] = 'Diesen Freigabelink widerrufen? Jeder, der ihn verwendet, verliert sofort den Zugriff.';
+$_lang['magicpreview.share_revoked'] = 'Freigabelink widerrufen';
+$_lang['magicpreview.share_failed'] = 'Der Freigabelink konnte nicht erstellt werden.';
+$_lang['magicpreview.share_unavailable'] = 'Dieser Vorschau-Link ist abgelaufen oder nicht mehr verfügbar.';
+
+// Freigabe-Einstellungen
+$_lang['setting_magicpreview.share_link_ttl'] = 'Freigabelink-TTL';
+$_lang['setting_magicpreview.share_link_ttl_desc'] = 'Standard-Lebensdauer von Entwurf-Freigabelinks, in Sekunden. Wird verwendet, wenn beim Erstellen eines Links keine Ablaufzeit gewählt wird. Auf 0 setzen für Links, die nie ablaufen. Standard: 604800 (7 Tage).';

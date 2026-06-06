@@ -13,6 +13,9 @@ if (version_compare($modx->getOption('settings_version'), '3.0.0-alpha1') < 1) {
         'resource/preview'       => 'resource/preview-v2',
         'resource/restore-draft' => 'resource/restore-draft-v2',
         'resource/discard-draft' => 'resource/discard-draft-v2',
+        'resource/getshares'     => 'resource/getshares-v2',
+        'resource/removeshare'   => 'resource/removeshare-v2',
+        'resource/previewdraft'  => 'resource/previewdraft-v2',
     ];
     $action = $_REQUEST['action'] ?? '';
     if (isset($v2Map[$action])) {
@@ -22,7 +25,7 @@ if (version_compare($modx->getOption('settings_version'), '3.0.0-alpha1') < 1) {
 
 /* handle request */
 $path = $modx->getOption('processorsPath', $modx->magicpreview->config,$corePath  .'processors/');
-$modx->request->handleRequest(array(
+$modx->request->handleRequest([
     'processors_path' => $path,
     'location' => '',
-));
+]);
