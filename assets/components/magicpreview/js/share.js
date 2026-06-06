@@ -148,6 +148,47 @@
         });
     }
 
+    /**
+     * Formats the time remaining until a unix timestamp in fuzzy, human
+     * readable units: minutes when under an hour, hours when under a day,
+     * otherwise days (plus hours when they matter).
+     * @param {number} expiresAt - Unix timestamp; 0 = never expires.
+     * @returns {string}
+     */
+    function fuzzyTimeLeft(expiresAt) {
+        if (!expiresAt) {
+            return _('magicpreview.share_expiry_never');
+        }
+
+        var diff = expiresAt - Math.floor(Date.now() / 1000);
+        if (diff <= 0) {
+            return _('magicpreview.share_expired');
+        }
+
+        var days = Math.floor(diff / 86400);
+        var hours = Math.floor((diff % 86400) / 3600);
+        var minutes = Math.floor((diff % 3600) / 60);
+
+        var unit = function(n, singular, plural) {
+            if (n === 1) {
+                return _('magicpreview.' + singular);
+            }
+            return _('magicpreview.' + plural, { n: n });
+        };
+
+        if (days > 0) {
+            var s = unit(days, 'share_time_day', 'share_time_days');
+            if (hours > 0) {
+                s += ', ' + unit(hours, 'share_time_hour', 'share_time_hours');
+            }
+            return s;
+        }
+        if (hours > 0) {
+            return unit(hours, 'share_time_hour', 'share_time_hours');
+        }
+        return unit(Math.max(1, minutes), 'share_time_minute', 'share_time_minutes');
+    }
+
     // -- Grid: active share links for the current resource -------------------
 
     MagicPreview.grid.Shares = function(config) {
@@ -174,6 +215,13 @@
                 width: 130,
                 sortable: false,
                 renderer: function(v) { return v > 0 ? Ext.util.Format.date(new Date(v * 1000), 'Y-m-d H:i:s') : _('magicpreview.share_expiry_never'); }
+            },
+            {
+                header: _('magicpreview.share_col_expires_in'),
+                dataIndex: 'expires_at',
+                width: 110,
+                sortable: false,
+                renderer: fuzzyTimeLeft
             },
             {
                 header: _('magicpreview.share_col_views'),
@@ -260,7 +308,7 @@
 
         Ext.applyIf(config, {
             title: _('magicpreview.share_title'),
-            width: 760,
+            width: 800,
             autoHeight: true,
             resizable: false,
             closeAction: 'hide',
