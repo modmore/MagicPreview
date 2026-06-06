@@ -19,6 +19,7 @@ class MagicPreview
 
     private ?MagicPreviewDrafts $drafts = null;
     private ?MagicPreviewShares $shares = null;
+    private bool $garbageCollected = false;
 
     /**
      * @param \modX $modx
@@ -82,12 +83,18 @@ class MagicPreview
 
     /**
      * Deletes expired drafts and share links. Cheap thanks to the expires_at
-     * indexes; called opportunistically on writes since there is no cron in MODX.
+     * indexes; called opportunistically on writes since there's no cron by default.
+     * Runs at most once per request — a single request can hit several
+     * write paths (e.g. save draft + create share) and one sweep covers all.
      *
      * @return int The number of rows removed.
      */
     public function garbageCollectExpired(): int
     {
+        if ($this->garbageCollected) {
+            return 0;
+        }
+        $this->garbageCollected = true;
         return $this->drafts()->garbageCollect() + $this->shares()->garbageCollect();
     }
 

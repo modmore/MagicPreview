@@ -1,10 +1,14 @@
 <?php
 
+require_once __DIR__ . '/ServiceTrait.php';
+
 /**
  * This trait includes overridden update processor methods that both 2.x and 3.x processors need.
  */
 trait PreviewTrait
 {
+    use ServiceTrait;
+
     private ?string $previewHash = null;
     private bool $failedSuccessfully = false;
     private ?array $shareResult = null;
@@ -33,12 +37,7 @@ trait PreviewTrait
         }
         $data = $this->object->toArray('', true);
 
-        // Load the service ourselves: this processor may be invoked through
-        // a third-party connector (e.g. VersionX) that hasn't loaded it.
-        $corePath = $this->modx->getOption('magicpreview.core_path', null,
-            $this->modx->getOption('core_path') . 'components/magicpreview/');
-        /** @var MagicPreview $service */
-        $service = $this->modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
+        $service = $this->getMagicPreviewService();
 
         // Cache the preview data under a deterministic content hash for the
         // ?show_preview= front-end render (see MagicPreview::cachePreviewData).
@@ -99,9 +98,13 @@ trait PreviewTrait
             $response = [
                 'preview_hash' => $this->previewHash,
             ];
-            // Only present when create_share was requested; null means creation failed.
+            // Only present when create_share was requested; null means creation
+            // failed. The client only needs the link itself — the raw token is
+            // already embedded in it, so don't ship the rest of the row.
             if ((bool) $this->getProperty('create_share', false)) {
-                $response['share'] = $this->shareResult;
+                $response['share'] = $this->shareResult !== null
+                    ? ['url' => $this->shareResult['url']]
+                    : null;
             }
             return $this->success('', $response);
         }

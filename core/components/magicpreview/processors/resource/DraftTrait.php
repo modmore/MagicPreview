@@ -1,22 +1,13 @@
 <?php
 
+require_once __DIR__ . '/ServiceTrait.php';
+
 /**
  * Shared draft utilities for the restore and discard processors.
  */
 trait DraftTrait
 {
-    /**
-     * Returns the MagicPreview service, loading it if needed (the processor
-     * may be invoked through a third-party connector that hasn't loaded it).
-     *
-     * @return MagicPreview
-     */
-    private function getMagicPreviewService(): MagicPreview
-    {
-        $corePath = $this->modx->getOption('magicpreview.core_path', null,
-            $this->modx->getOption('core_path') . 'components/magicpreview/');
-        return $this->modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
-    }
+    use ServiceTrait;
 
     /**
      * Returns the draft for the current resource + user, or null if none exists.

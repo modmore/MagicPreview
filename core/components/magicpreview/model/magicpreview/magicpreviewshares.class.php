@@ -147,6 +147,33 @@ class MagicPreviewShares
     }
 
     /**
+     * The creator constraint to apply when the current user lists or manages
+     * share links: null for sudo/Administrator users (every link), otherwise
+     * the user's own id. Keeps the scoping rule in one place for all callers.
+     *
+     * @return int|null
+     */
+    public function scopeUserId(): ?int
+    {
+        return $this->currentUserSeesAllShares() ? null : (int) $this->modx->user->get('id');
+    }
+
+    /**
+     * The xPDO criteria group matching non-expired rows: never-expiring
+     * (expires_at = 0) or not yet past their expiry. The single definition
+     * of "active" for listing and counting.
+     *
+     * @return array
+     */
+    private static function notExpiredCriteria(): array
+    {
+        return [
+            'expires_at' => 0,
+            'OR:expires_at:>' => time(),
+        ];
+    }
+
+    /**
      * Returns the active (non-expired) share links for a resource, newest
      * first — limited to a single creator unless $userId is null (the
      * admin oversight view, which includes each creator's username).
@@ -162,10 +189,7 @@ class MagicPreviewShares
     {
         $where = [
             'resource_id' => $resourceId,
-            [
-                'expires_at' => 0,
-                'OR:expires_at:>' => time(),
-            ],
+            self::notExpiredCriteria(),
         ];
         if ($userId !== null) {
             $where['user_id'] = $userId;
@@ -184,7 +208,6 @@ class MagicPreviewShares
                 'user_id' => (int) $share->get('user_id'),
                 'createdon' => (int) $share->get('createdon'),
                 'expires_at' => (int) $share->get('expires_at'),
-                'last_viewed_at' => (int) $share->get('last_viewed_at'),
                 'views' => (int) $share->get('views'),
             ];
         }
@@ -246,10 +269,7 @@ class MagicPreviewShares
         return (int) $this->modx->getCount('mpShare', [
             'resource_id' => $resourceId,
             'user_id' => $userId,
-            [
-                'expires_at' => 0,
-                'OR:expires_at:>' => time(),
-            ],
+            self::notExpiredCriteria(),
         ]);
     }
 
@@ -278,7 +298,7 @@ class MagicPreviewShares
      * @param string $contextKey
      * @return string
      */
-    public function buildShareUrl(string $token, string $contextKey = 'web'): string
+    private function buildShareUrl(string $token, string $contextKey = 'web'): string
     {
         $siteUrl = '';
         $context = $this->modx->getContext($contextKey);

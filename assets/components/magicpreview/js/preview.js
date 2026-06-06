@@ -723,10 +723,8 @@
                             }
                             return;
                         }
-                        var base = MagicPreviewConfig.baseFrameUrl || '';
-                        var joiner = base.indexOf('?') === -1 ? '?' : '&';
                         if (win) {
-                            win.location = base + joiner + 'show_preview=' + hash;
+                            win.location = previewFrameUrl(hash);
                         }
                     }
                 },

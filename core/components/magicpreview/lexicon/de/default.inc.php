@@ -69,7 +69,6 @@ $_lang['magicpreview.system_default'] = 'Systemstandard';
 $_lang['magicpreview.share_title'] = 'Entwurf teilen';
 $_lang['magicpreview.share_label'] = 'Bezeichnung';
 $_lang['magicpreview.share_label_emptytext'] = 'z.B. Startseiten-Relaunch';
-$_lang['magicpreview.share_expiry'] = 'Link läuft ab';
 $_lang['magicpreview.share_expiry_default'] = 'Standard (Systemeinstellung)';
 $_lang['magicpreview.share_expiry_1day'] = '1 Tag';
 $_lang['magicpreview.share_expiry_1week'] = '1 Woche';

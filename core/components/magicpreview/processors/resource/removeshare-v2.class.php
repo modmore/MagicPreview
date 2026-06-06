@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/ServiceTrait.php';
+
 /**
  * Revokes (deletes) a share link, scoped to the resource it belongs to.
  * MODX 2.x version.
@@ -8,6 +10,8 @@
  */
 class MagicPreviewRemoveShareProcessorV2 extends modProcessor
 {
+    use ServiceTrait;
+
     public function process()
     {
         $resourceId = (int) $this->getProperty('id');
@@ -16,26 +20,13 @@ class MagicPreviewRemoveShareProcessorV2 extends modProcessor
             return $this->failure('Invalid resource or share ID.');
         }
 
-        // Share links govern the resource's public exposure, so managing
-        // them requires edit rights on the resource itself.
-        /** @var modResource|null $resource */
-        $resource = $this->modx->getObject('modResource', $resourceId);
-        if (!$resource || !$resource->checkPolicy('save')) {
+        if (!$this->canSaveResource($resourceId)) {
             return $this->failure('Access denied.');
         }
 
-        $corePath = $this->modx->getOption('magicpreview.core_path', null,
-            $this->modx->getOption('core_path') . 'components/magicpreview/');
-        /** @var MagicPreview $service */
-        $service = $this->modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
-
         // Editors may only revoke their own links; sudo/Administrator any.
-        $revoked = $service->shares()->revokeShare(
-            $shareId,
-            $resourceId,
-            $service->shares()->currentUserSeesAllShares() ? null : (int) $this->modx->user->get('id')
-        );
-        if (!$revoked) {
+        $shares = $this->getMagicPreviewService()->shares();
+        if (!$shares->revokeShare($shareId, $resourceId, $shares->scopeUserId())) {
             return $this->failure('Share link not found.');
         }
 

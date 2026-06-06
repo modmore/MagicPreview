@@ -62,27 +62,25 @@ if (!($service instanceof MagicPreview)) {
     mpShareAbort(503, 'Service unavailable.');
 }
 
+// Localised "gone" message, shared by every 410 path below.
+$goneMessage = $modx->lexicon('magicpreview.share_unavailable');
+
 $share = $service->shares()->getValidShare($token);
 if ($share === null) {
-    // Localised "gone" message, with an English fallback until the lexicon entry ships.
-    $message = $modx->lexicon('magicpreview.share_unavailable');
-    if (empty($message) || $message === 'magicpreview.share_unavailable') {
-        $message = 'This preview link has expired or is no longer available.';
-    }
-    mpShareAbort(410, $message);
+    mpShareAbort(410, $goneMessage);
 }
 
 // Render in the resource's own context (site_url, culture, context settings).
 if ($share['context_key'] !== $modx->context->get('key')) {
     if (!$modx->switchContext($share['context_key'])) {
-        mpShareAbort(410, 'This preview link is no longer available.');
+        mpShareAbort(410, $goneMessage);
     }
 }
 
 /** @var modResource|null $resource */
 $resource = $modx->getObject('modResource', (int) $share['resource_id']);
 if (!$resource) {
-    mpShareAbort(410, 'This preview link is no longer available.');
+    mpShareAbort(410, $goneMessage);
 }
 
 // Apply the draft to the in-memory resource only — nothing is saved, and

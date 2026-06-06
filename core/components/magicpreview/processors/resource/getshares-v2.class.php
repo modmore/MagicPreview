@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/ServiceTrait.php';
+
 /**
  * Lists the active share links for a resource. Metadata only: the raw token
  * is shown once at creation and cannot be reconstructed from the stored hash.
@@ -9,6 +11,8 @@
  */
 class MagicPreviewGetSharesProcessorV2 extends modProcessor
 {
+    use ServiceTrait;
+
     public function process()
     {
         $resourceId = (int) $this->getProperty('id');
@@ -16,29 +20,17 @@ class MagicPreviewGetSharesProcessorV2 extends modProcessor
             return $this->failure('Invalid resource ID.');
         }
 
-        // Share links govern the resource's public exposure, so managing
-        // them requires edit rights on the resource itself.
-        /** @var modResource|null $resource */
-        $resource = $this->modx->getObject('modResource', $resourceId);
-        if (!$resource || !$resource->checkPolicy('save')) {
+        if (!$this->canSaveResource($resourceId)) {
             return $this->failure('Access denied.');
         }
 
-        $corePath = $this->modx->getOption('magicpreview.core_path', null,
-            $this->modx->getOption('core_path') . 'components/magicpreview/');
-        /** @var MagicPreview $service */
-        $service = $this->modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
-
-        // Editors see only their own links; sudo/Administrator users see all.
-        $shares = $service->shares()->listSharesForResource(
-            $resourceId,
-            $service->shares()->currentUserSeesAllShares() ? null : (int) $this->modx->user->get('id')
-        );
+        $shares = $this->getMagicPreviewService()->shares();
+        $links = $shares->listSharesForResource($resourceId, $shares->scopeUserId());
 
         return $this->modx->toJSON([
             'success' => true,
-            'total' => count($shares),
-            'results' => $shares,
+            'total' => count($links),
+            'results' => $links,
         ]);
     }
 }

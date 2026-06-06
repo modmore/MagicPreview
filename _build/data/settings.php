@@ -50,6 +50,11 @@ return [
         'value' => '0',
         'xtype' => 'numberfield',
     ],
+    'share_link_ttl' => [
+        'area' => 'Sharing',
+        'value' => '604800',
+        'xtype' => 'numberfield',
+    ],
     'icon_save_draft' => [
         'area' => 'Icons',
         'value' => '',

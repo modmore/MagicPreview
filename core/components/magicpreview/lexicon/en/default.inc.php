@@ -70,7 +70,6 @@ $_lang['magicpreview.system_default'] = 'System Default';
 $_lang['magicpreview.share_title'] = 'Share draft';
 $_lang['magicpreview.share_label'] = 'Label';
 $_lang['magicpreview.share_label_emptytext'] = 'e.g. Homepage redesign';
-$_lang['magicpreview.share_expiry'] = 'Link expires';
 $_lang['magicpreview.share_expiry_default'] = 'Default (system setting)';
 $_lang['magicpreview.share_expiry_1day'] = '1 day';
 $_lang['magicpreview.share_expiry_1week'] = '1 week';

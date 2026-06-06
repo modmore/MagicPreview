@@ -191,6 +191,16 @@
 
     // -- Grid: active share links for the current resource -------------------
 
+    /**
+     * Grid renderer: a unix timestamp as 'Y-m-d H:i:s' (PHP-style tokens,
+     * matching the server's date() output), or '' when unset.
+     * @param {number} v
+     * @returns {string}
+     */
+    function renderTimestamp(v) {
+        return v > 0 ? Ext.util.Format.date(new Date(v * 1000), 'Y-m-d H:i:s') : '';
+    }
+
     MagicPreview.grid.Shares = function(config) {
         config = config || {};
 
@@ -207,14 +217,14 @@
                 dataIndex: 'createdon',
                 width: 130,
                 sortable: false,
-                renderer: function(v) { return v ? Ext.util.Format.date(new Date(v * 1000), 'Y-m-d H:i:s') : ''; }
+                renderer: renderTimestamp
             },
             {
                 header: _('magicpreview.share_col_expires'),
                 dataIndex: 'expires_at',
                 width: 130,
                 sortable: false,
-                renderer: function(v) { return v > 0 ? Ext.util.Format.date(new Date(v * 1000), 'Y-m-d H:i:s') : _('magicpreview.share_expiry_never'); }
+                renderer: function(v) { return v > 0 ? renderTimestamp(v) : _('magicpreview.share_expiry_never'); }
             },
             {
                 header: _('magicpreview.share_col_expires_in'),
@@ -263,7 +273,7 @@
                 action: 'resource/getshares',
                 id: MagicPreviewResource
             },
-            fields: ['id', 'label', 'user_id', 'username', 'createdon', 'expires_at', 'last_viewed_at', 'views'],
+            fields: ['id', 'label', 'user_id', 'username', 'createdon', 'expires_at', 'views'],
             paging: false,
             remoteSort: false,
             showActionsColumn: false,
