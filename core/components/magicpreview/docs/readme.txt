@@ -5,9 +5,9 @@ MagicPreview adds a _Magical_ Preview button to the MODX resource editor that le
 exactly how your page will look -- without saving. Edit your content, click Preview,
 and instantly see a live, fully rendered preview of your changes.
 
-It works with MODX 2.x and 3.x, supports custom resource types (Collections,
-Articles, etc.), and integrates with rich text editors and ContentBlocks
-automatically.
+It works with MODX 2.x and 3.x (PHP 7.4+), supports custom resource types
+(Collections, Articles, etc.), and integrates with rich text editors and
+ContentBlocks automatically.
 
 
 Preview Modes
@@ -51,7 +51,8 @@ Auto-Refresh
 When using the panel, MagicPreview can automatically refresh the preview at a
 configurable interval (default: every 5 seconds). The preview only reloads when your
 form data has actually changed, so it is efficient and unobtrusive. Set the interval
-to 0 to disable auto-refresh.
+to 0 to disable auto-refresh. An open preview also reloads when the resource is
+saved.
 
 
 Draft Save & Restore
@@ -62,12 +63,32 @@ Ctrl+Shift+S / Cmd+Shift+S) to save your current edits as a draft. Drafts are st
 per resource and per user, so your work is private and won't interfere with other
 editors.
 
-When you return to a resource that has a saved draft, a notification banner offers to
-restore or discard it. Restoring a draft reloads the page with all your previous
-edits filled in -- including template variables and extras data.
+Drafts are kept in the database, so they survive cache clears -- and saving the
+resource itself -- until you restore or discard them.
 
-Draft expiry is configurable; by default drafts are kept until the resource is saved
-or the draft is manually discarded.
+When you return to a resource that has a saved draft, a notification banner lets you
+view, share, restore or discard it. Restoring a draft reloads the page with all your
+previous edits filled in -- including template variables and extras data.
+
+Draft expiry is configurable; by default drafts are kept until restored or manually
+discarded.
+
+
+Share Draft Links
+-----------------
+
+Need feedback from someone without manager access? Drafts can be shared via public
+links, so a client or colleague can review work in progress right in their browser.
+A link always shows the latest saved draft, can be given a label and its own expiry,
+and can be revoked at any time. Links stop working once the draft is discarded.
+
+
+Controlling Where Preview Appears
+---------------------------------
+
+The Preview button can be limited to (or excluded from) resources using certain
+templates via a block list or allow list in the system settings. Individual
+resources can also force it on or off from their Settings tab.
 
 
 Drag-to-Resize
@@ -105,6 +126,8 @@ options via system settings:
   with any FontAwesome icon class.
 - Auto-refresh interval: Adjust or disable the automatic refresh timer.
 - Draft TTL: Control how long drafts are kept before expiring.
+- Share link lifetime: Set the default expiry for share links.
+- Template filter: Choose which templates show the Preview button.
 
 
 Third-Party Integration

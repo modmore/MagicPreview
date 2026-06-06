@@ -1,6 +1,6 @@
 # MagicPreview for MODX
 
-MagicPreview adds a **Preview** button to the MODX Revolution resource editor that renders a live preview of your unsaved changes — without saving the resource. Preview in a new browser window/tab or an inline side panel with responsive breakpoints, auto-refresh, and draft support.
+MagicPreview adds a **Preview** button to the MODX Revolution resource editor that renders a live preview of your unsaved changes — without saving the resource. Preview in a new browser window/tab or an inline side panel with responsive breakpoints, auto-refresh, drafts, and shareable draft links.
 
 Compatible with **MODX 2.x** and **MODX 3.x**.
 
@@ -9,8 +9,10 @@ Compatible with **MODX 2.x** and **MODX 3.x**.
 - **Preview without saving** — see your changes rendered on the actual front-end template, without persisting anything to the database
 - **New window/tab or inline panel** — choose between a new browser window or a side panel (overlay or on-page column)
 - **Responsive breakpoints** — preview at desktop, tablet, and mobile widths (configurable via system settings)
-- **Auto-refresh** — the panel automatically re-renders when form data changes (configurable interval)
-- **Draft system** — save a draft of unsaved form data that persists across sessions and can be restored later
+- **Auto-refresh** — the panel automatically re-renders when form data changes (configurable interval), and reloads after the resource is saved
+- **Draft system** — save a draft of unsaved form data per resource and user; drafts are stored in the database, so they survive cache clears (and resource saves) until restored or discarded
+- **Share draft links** — share a draft with people who don't have a manager login via public links, with per-link expiry and instant revocation
+- **Visibility control** — show or hide the Preview button by template (block/allow lists) or per resource
 - **Custom event** — `OnResourceMagicPreview` allows other extras (e.g. ContentBlocks) to hook into the preview process
 - **Customisable** — override the preview HTML template and CSS via system settings
 - **i18n** — English, German, and Danish translations included
@@ -34,14 +36,21 @@ All settings use the `magicpreview.` prefix and can be configured in the MODX ma
 | `custom_preview_tpl`    | _(empty)_    | Custom Smarty template file for preview page (relative to templates/) |
 | `custom_preview_css`    | _(empty)_    | Custom CSS file URL for preview page                                |
 | `draft_ttl`             | `0`          | Draft expiry in seconds (0 = no expiry)                             |
+| `share_link_ttl`        | `604800`     | Default share link lifetime in seconds (0 = never expires)          |
+| `template_filter_mode`  | `None`       | `None`, `Block Listed`, or `Allow Listed Only` — controls where the Preview button appears, by template |
+| `template_filter_ids`   | _(empty)_    | Comma-separated template IDs used by the template filter            |
 | `icon_save_draft`       | _(empty)_    | FontAwesome class for the Save Draft button icon                    |
 | `icon_view`             | _(empty)_    | FontAwesome class for the View button icon                          |
 
 ## Per-Resource Settings
 
-You can override `preview_mode` and `panel_layout` on individual resources. The override fields appear in the resource editor's **Settings** tab under a "Magic Preview" fieldset. Select "System Default" (the default) to inherit the system setting, or choose a specific value to override it for that resource.
+You can override `preview_mode` and `panel_layout` on individual resources, and force the Preview button on or off per resource with the **Use Magic Preview?** override (which wins over the template filter). The override fields appear in the resource editor's **Settings** tab under a "Magic Preview" fieldset. Select "System Default" (the default) to inherit the system setting, or choose a specific value to override it for that resource.
 
 Per-resource settings are stored in the resource's `properties` column under the `magicpreview` namespace.
+
+## Share Draft Links
+
+Drafts can be shared with people who don't have a manager login — clients reviewing work in progress, for example — via public links. Links always show the creator's latest saved draft, can be given a label and their own expiry (defaulting to `share_link_ttl`), and can be revoked at any time. They stop resolving once the draft is discarded.
 
 ## Panel State
 
@@ -51,7 +60,7 @@ The preview panel remembers whether it was open or closed (and its drag-resized 
 
 ### Requirements
 
-- PHP 7.0+
+- PHP 7.4+
 - MODX Revolution 2.6.5+ or 3.x
 - A local MODX installation for development and building
 
@@ -77,18 +86,19 @@ This outputs a `.transport.zip` file to `core/packages/` (or `_packages/` depend
 
 ```
 _bootstrap/                  Dev bootstrap script
-_build/                      Transport package builder
+_build/                      Transport package builder (incl. xPDO schema + generator)
 assets/components/magicpreview/
   connector.php              AJAX connector (auto-detects MODX 2/3)
+  share.php                  Public share-link endpoint (token-gated draft render)
   preview.css                Preview window page styles
   css/mgr.css                Manager panel + button styles
-  js/                        Client-side JS modules (window, panel, preview, combo)
+  js/                        Client-side JS modules (window, panel, share, preview, combo)
 core/components/magicpreview/
   controllers/               Manager controller for preview page
   elements/plugins/          Main plugin (4 system events)
   lexicon/                   i18n strings (en, de, da)
-  model/magicpreview/        Service class + VERSION constant
-  processors/resource/       Preview, draft, and restore processors (v2 + v3)
+  model/magicpreview/        Services (MagicPreview + drafts/shares) + xPDO model (mpDraft, mpShare)
+  processors/resource/       Preview, draft, and share processors (v2 + v3)
   templates/                 Smarty template for preview window
 ```
 
