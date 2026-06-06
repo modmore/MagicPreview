@@ -131,10 +131,10 @@ switch ($modx->event->name) {
             // Sudo/Administrator users see every share link on the resource
             // (with creator usernames); editors see only their own. Display
             // flag only — the getshares processor enforces the scoping.
-            $jsConfig['shareShowUser'] = $service->currentUserSeesAllShares();
+            $jsConfig['shareShowUser'] = $service->shares()->currentUserSeesAllShares();
 
             // Check for a saved draft for this resource + user
-            $draft = $service->getDraft($resource->get('id'), $modx->user->get('id'));
+            $draft = $service->drafts()->getDraft($resource->get('id'), $modx->user->get('id'));
             if ($draft !== null) {
                 $jsConfig['hasDraft'] = true;
                 $jsConfig['draftSavedAt'] = date('Y-m-d H:i:s', $draft['saved_at']);

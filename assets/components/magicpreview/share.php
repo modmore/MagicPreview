@@ -62,7 +62,7 @@ if (!($service instanceof MagicPreview)) {
     mpShareAbort(503, 'Service unavailable.');
 }
 
-$share = $service->getValidShare($token);
+$share = $service->shares()->getValidShare($token);
 if ($share === null) {
     // Localised "gone" message, with an English fallback until the lexicon entry ships.
     $message = $modx->lexicon('magicpreview.share_unavailable');

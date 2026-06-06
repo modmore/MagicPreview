@@ -25,7 +25,7 @@ trait DraftTrait
      */
     private function getDraft(): ?array
     {
-        return $this->getMagicPreviewService()->getDraft(
+        return $this->getMagicPreviewService()->drafts()->getDraft(
             (int) $this->getProperty('id'),
             $this->modx->user->get('id')
         );
@@ -38,7 +38,7 @@ trait DraftTrait
      */
     private function deleteDraft(): void
     {
-        $this->getMagicPreviewService()->deleteDraft(
+        $this->getMagicPreviewService()->drafts()->deleteDraft(
             (int) $this->getProperty('id'),
             $this->modx->user->get('id')
         );

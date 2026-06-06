@@ -30,10 +30,10 @@ class MagicPreviewRemoveShareProcessorV2 extends modProcessor
         $service = $this->modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
 
         // Editors may only revoke their own links; sudo/Administrator any.
-        $revoked = $service->revokeShare(
+        $revoked = $service->shares()->revokeShare(
             $shareId,
             $resourceId,
-            $service->currentUserSeesAllShares() ? null : (int) $this->modx->user->get('id')
+            $service->shares()->currentUserSeesAllShares() ? null : (int) $this->modx->user->get('id')
         );
         if (!$revoked) {
             return $this->failure('Share link not found.');

@@ -25,7 +25,7 @@ class MagicPreviewDiscardDraftProcessorV2 extends modProcessor
         // The user's live share links resolve against this draft, so they
         // stop working when it goes. Report them instead of discarding until
         // the client confirms with remove_shares set.
-        $liveShares = $service->countLiveShares($resourceId, $userId);
+        $liveShares = $service->shares()->countLiveShares($resourceId, $userId);
         if ($liveShares > 0 && !(bool) $this->getProperty('remove_shares', false)) {
             return $this->success('', [
                 'discarded' => false,
@@ -33,7 +33,7 @@ class MagicPreviewDiscardDraftProcessorV2 extends modProcessor
             ]);
         }
         if ($liveShares > 0) {
-            $service->removeLiveShares($resourceId, $userId);
+            $service->shares()->removeLiveShares($resourceId, $userId);
         }
 
         $this->deleteDraft();

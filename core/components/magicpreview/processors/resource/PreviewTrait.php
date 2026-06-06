@@ -51,7 +51,7 @@ trait PreviewTrait
         $createShare = (bool) $this->getProperty('create_share', false);
         if ($saveDraft || $createShare) {
             if ($saveDraft) {
-                $service->saveDraft(
+                $service->drafts()->saveDraft(
                     $this->object->get('id'),
                     $this->modx->user->get('id'),
                     $data,
@@ -67,9 +67,9 @@ trait PreviewTrait
                 // draft: the editor may not have restored it into the form,
                 // and the submitted state would clobber their work.
                 if (!$saveDraft
-                    && $service->getDraft((int) $this->object->get('id'), (int) $this->modx->user->get('id')) === null
+                    && $service->drafts()->getDraft((int) $this->object->get('id'), (int) $this->modx->user->get('id')) === null
                 ) {
-                    $service->saveDraft(
+                    $service->drafts()->saveDraft(
                         $this->object->get('id'),
                         $this->modx->user->get('id'),
                         $data,
@@ -81,7 +81,7 @@ trait PreviewTrait
                 $ttl = $this->getProperty('share_ttl');
                 $ttl = ($ttl === null || $ttl === '') ? null : (int) $ttl;
 
-                $this->shareResult = $service->createShare(
+                $this->shareResult = $service->shares()->createShare(
                     $this->object->get('id'),
                     $this->modx->user->get('id'),
                     $this->object->get('context_key'),

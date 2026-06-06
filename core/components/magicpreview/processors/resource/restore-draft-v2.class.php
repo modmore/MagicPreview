@@ -62,7 +62,7 @@ class MagicPreviewRestoreDraftProcessorV2 extends modProcessor
         // after the page redirects. Kept when the editor has live share
         // links resolving against it, so those links keep working; the
         // draft banner simply reappears after the reload.
-        if ($this->getMagicPreviewService()->countLiveShares($resourceId, (int) $this->modx->user->get('id')) === 0) {
+        if ($this->getMagicPreviewService()->shares()->countLiveShares($resourceId, (int) $this->modx->user->get('id')) === 0) {
             $this->deleteDraft();
         }
 

@@ -30,9 +30,9 @@ class MagicPreviewGetSharesProcessorV2 extends modProcessor
         $service = $this->modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
 
         // Editors see only their own links; sudo/Administrator users see all.
-        $shares = $service->listSharesForResource(
+        $shares = $service->shares()->listSharesForResource(
             $resourceId,
-            $service->currentUserSeesAllShares() ? null : (int) $this->modx->user->get('id')
+            $service->shares()->currentUserSeesAllShares() ? null : (int) $this->modx->user->get('id')
         );
 
         return $this->modx->toJSON([
