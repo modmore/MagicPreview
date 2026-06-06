@@ -104,6 +104,21 @@ header('Cache-Control: no-store, private');
 header('Referrer-Policy: no-referrer');
 header('X-Frame-Options: SAMEORIGIN');
 
+// Send the Content-Type ourselves and disable MODX's own header pass:
+// modResponse::outputContent() would otherwise re-emit the ContentType's
+// custom headers (which may include a Cache-Control directive overriding the
+// no-store above) and, for content_dispo resources, an explicit
+// "Cache-Control: public" — letting shared caches store the private draft.
+$mimeType = 'text/html';
+/** @var modContentType|null $resourceContentType */
+$resourceContentType = $resource->getOne('ContentType');
+if ($resourceContentType) {
+    $mimeType = (string) $resourceContentType->get('mime_type');
+}
+$charset = (string) $modx->getOption('modx_charset', null, 'UTF-8');
+header('Content-Type: ' . $mimeType . ($charset !== '' ? '; charset=' . $charset : ''));
+$modx->setOption('set_header', false);
+
 $modx->getRequest();
 $modx->getResponse();
 $modx->response->outputContent();
