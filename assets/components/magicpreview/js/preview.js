@@ -966,11 +966,18 @@
             }
         });
 
+        // Show the draft banner whenever a saved draft exists — even when the
+        // Preview button is hidden below: drafts and their live share links
+        // outlive a template-filter or per-resource visibility change, and the
+        // banner is the only UI to view, share, restore or discard them.
+        showDraftBanner();
+
         // If the Preview button is hidden for this resource (via the system
         // template filter or a per-resource override), skip button injection,
-        // tooltips, panel onpage init, draft banner, auto-preview, and
-        // keyboard shortcuts. The Settings-tab combos above remain active so
-        // editors can flip the override back on without leaving the page.
+        // tooltips, panel onpage init, auto-preview, and keyboard shortcuts.
+        // The Settings-tab combos and the draft banner above remain active so
+        // editors can flip the override back on — and keep managing existing
+        // drafts/share links — without leaving the page.
         if (hidden) {
             return;
         }
@@ -1071,9 +1078,6 @@
         if (config().previewMode === MODE_PANEL) {
             _panel.initOnpage();
         }
-
-        // Check for a saved draft and show restore/discard banner
-        showDraftBanner();
 
         // Auto-preview is triggered from the panel's 'afterrender' event,
         // wired up in the Ext.override(MODx.panel.Resource) block above.
