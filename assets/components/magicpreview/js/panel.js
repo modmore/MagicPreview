@@ -514,15 +514,15 @@
     var _originalGetViewSize = null;
 
     /**
-     * Overrides the ExtJS Viewport's size calculation so its border
-     * layout positions panels within a narrower area, leaving room
-     * for our preview panel on the right.
+     * Overrides the ExtJS Viewport's getViewSize() so the border layout
+     * recalculates within the available space, then calls doLayout() to
+     * cascade setSize()/onResize() through every child panel.
      *
-     * Ext.Viewport always measures document.body, and its getViewSize()
-     * returns window.innerWidth regardless of any CSS width constraints.
-     * We override that method on the Viewport's element so the border
-     * layout reads our reduced width, then call doLayout() to trigger
-     * a full recalculation.
+     * Width is reduced when the on-page preview panel is open (to leave
+     * room for it on the right). Height is reduced when the draft banner
+     * is visible (so the scroll container inside #modx-content is sized
+     * correctly and nothing is clipped behind the banner). Both reductions
+     * are applied together when both are active.
      */
     function relayoutModx() {
         var layout = Ext.getCmp('modx-layout');
@@ -531,18 +531,20 @@
         }
 
         var panelIsOpen = document.body.classList.contains('mmmp-panel-onpage-active');
+        var bannerEl = document.getElementById('mmmp-draft-banner');
+        var bannerH = bannerEl ? bannerEl.offsetHeight : 0;
+        var needsOverride = panelIsOpen || bannerH > 0;
+        var pw = panelIsOpen ? getPanelWidth() : 0;
 
-        if (panelIsOpen) {
+        if (needsOverride) {
             // Store the original on first override
             if (!_originalGetViewSize) {
                 _originalGetViewSize = layout.el.getViewSize.bind(layout.el);
             }
-
-            var pw = getPanelWidth();
             layout.el.getViewSize = function() {
                 return {
                     width: window.innerWidth - pw,
-                    height: window.innerHeight
+                    height: window.innerHeight - bannerH
                 };
             };
         } else if (_originalGetViewSize) {
@@ -553,15 +555,22 @@
 
         // Delay to allow the panel to render and be measurable
         setTimeout(function() {
-            // Re-read panel width now that it's in the DOM
-            if (panelIsOpen) {
-                var pw = getPanelWidth();
+            // Re-read both values now that the DOM has settled
+            var bannerElInner = document.getElementById('mmmp-draft-banner');
+            var bannerHInner = bannerElInner ? bannerElInner.offsetHeight : 0;
+            var panelIsOpenInner = document.body.classList.contains('mmmp-panel-onpage-active');
+            var pwInner = panelIsOpenInner ? getPanelWidth() : 0;
+            var needsOverrideInner = panelIsOpenInner || bannerHInner > 0;
+            if (needsOverrideInner) {
                 layout.el.getViewSize = function() {
                     return {
-                        width: window.innerWidth - pw,
-                        height: window.innerHeight
+                        width: window.innerWidth - pwInner,
+                        height: window.innerHeight - bannerHInner
                     };
                 };
+            } else if (_originalGetViewSize) {
+                delete layout.el.getViewSize;
+                _originalGetViewSize = null;
             }
             layout.doLayout();
         }, 50);
@@ -651,6 +660,13 @@
          * Set the last preview hash.
          * @param {string|null} hash
          */
-        setLastHash: function(hash) { lastHash = hash; }
+        setLastHash: function(hash) { lastHash = hash; },
+
+        /**
+         * Re-run the ExtJS Viewport layout override. Called by preview.js
+         * when the draft banner is shown or hidden so the height reduction
+         * is applied consistently regardless of panel state.
+         */
+        relayout: relayoutModx
     };
 })();

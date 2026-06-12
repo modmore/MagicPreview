@@ -593,6 +593,7 @@
         var finish = function() {
             if (banner) {
                 banner.remove();
+                MagicPreview._panel.relayout();
             }
             MODx.msg.status({
                 title: lexicon('draft_discarded'),
@@ -761,20 +762,15 @@
     }
 
     /**
-     * Shows a draft banner above the resource panel. Appended to the
-     * #modx-panel-resource-div container which sits directly above the
-     * ExtJS-rendered resource panel in the DOM. Offers View, Share,
-     * Restore and Discard for the saved draft; stays visible until the
-     * draft is restored or discarded.
+     * Shows a draft banner fixed at the top of the viewport. Appended to
+     * document.body so it sits entirely outside the ExtJS layout and does
+     * not affect the resource panel's height calculations. Offers View,
+     * Share, Restore and Discard for the saved draft; stays visible until
+     * the draft is restored or discarded.
      */
     function showDraftBanner() {
         var c = config();
         if (!c.hasDraft) {
-            return;
-        }
-
-        var container = document.getElementById('modx-panel-resource-div');
-        if (!container) {
             return;
         }
 
@@ -793,7 +789,8 @@
             + lexicon('draft_discard') + '</button>'
             + '</span>';
 
-        container.appendChild(banner);
+        document.body.appendChild(banner);
+        MagicPreview._panel.relayout();
 
         // Delegate click events from the banner's buttons
         banner.addEventListener('click', function(e) {
