@@ -421,6 +421,13 @@
             return;
         },
         /**
+         * MODx.Window binds Enter to submit(); we want it to create a share
+         * link instead.
+         */
+        submit: function() {
+            this.onCreate(this.buttons ? this.buttons[0] : null);
+        },
+        /**
          * Create-link handler: submits the resource form (via createShareLink)
          * and, on success, shows the one-time URL and refreshes the grid.
          * @param {Ext.Button} btn
@@ -503,6 +510,13 @@
         // Override so there's no focus
         focusFirstField: function() {
             return;
+        },
+        /**
+         * MODx.Window binds Enter to submit(); we want it to copy the link
+         * instead.
+         */
+        submit: function() {
+            this.onCopy();
         },
         /** Copy-link handler: copies the generated URL to the clipboard. */
         onCopy: function() {
