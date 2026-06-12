@@ -481,9 +481,17 @@
     // =========================================================================
 
     /**
+     * Gap (px) between the action buttons bar and the panel, keeping the
+     * panel's box shadow and the editor scrollbar visible.
+     * @type {number}
+     */
+    var ACTION_BAR_GAP = 10;
+
+    /**
      * Synchronises the fixed-position action buttons bar's right offset
      * with the panel's current width, so it doesn't extend behind the panel.
-     * Only applies in onpage mode when the panel is open.
+     * Only applies in onpage mode when the panel is open; otherwise the
+     * bar keeps its native positioning.
      */
     function syncActionButtonsOffset() {
         var actionBar = document.getElementById('modx-action-buttons');
@@ -491,8 +499,12 @@
             return;
         }
 
-        if (_cfg.panelLayout === LAYOUT_ONPAGE && document.body.classList.contains('mmmp-panel-onpage-active')) {
-            actionBar.style.right = getPanelWidth() + 'px';
+        var panelWidth = getPanelWidth();
+        if (_cfg.panelLayout === LAYOUT_ONPAGE
+            && document.body.classList.contains('mmmp-panel-onpage-active')
+            && panelWidth > 0
+        ) {
+            actionBar.style.right = (panelWidth + ACTION_BAR_GAP) + 'px';
         } else {
             actionBar.style.right = '';
         }
