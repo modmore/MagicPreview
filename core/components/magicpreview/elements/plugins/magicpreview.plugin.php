@@ -133,6 +133,15 @@ switch ($modx->event->name) {
             // flag only — the getshares processor enforces the scoping.
             $jsConfig['shareShowUser'] = $service->shares()->currentUserSeesAllShares();
 
+            // Resolved default share lifetime, shown in the share dialog's
+            // expiry dropdown. Mirrors createShare(): negative = misconfigured
+            // setting, fall back; 0 = never expires.
+            $shareDefaultTtl = (int) $modx->getOption('magicpreview.share_link_ttl', null, 604800);
+            if ($shareDefaultTtl < 0) {
+                $shareDefaultTtl = 604800;
+            }
+            $jsConfig['shareDefaultTtl'] = $shareDefaultTtl;
+
             // Check for a saved draft for this resource + user
             $draft = $service->drafts()->getDraft($resource->get('id'), $modx->user->get('id'));
             if ($draft !== null) {

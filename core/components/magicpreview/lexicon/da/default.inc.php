@@ -72,6 +72,7 @@ $_lang['magicpreview.share_title'] = 'Del kladde';
 $_lang['magicpreview.share_label'] = 'Etiket';
 $_lang['magicpreview.share_label_emptytext'] = 'f.eks. Forside-redesign';
 $_lang['magicpreview.share_expiry_default'] = 'Standard (systemindstilling)';
+$_lang['magicpreview.share_expiry_default_value'] = 'Standard ([[+duration]])';
 $_lang['magicpreview.share_expiry_1day'] = '1 dag';
 $_lang['magicpreview.share_expiry_1week'] = '1 uge';
 $_lang['magicpreview.share_expiry_30days'] = '30 dage';

@@ -149,25 +149,16 @@
     }
 
     /**
-     * Formats the time remaining until a unix timestamp in fuzzy, human
-     * readable units: minutes when under an hour, hours when under a day,
-     * otherwise days (plus hours when they matter).
-     * @param {number} expiresAt - Unix timestamp; 0 = never expires.
+     * Formats a duration in seconds in fuzzy, human readable units: minutes
+     * when under an hour, hours when under a day, otherwise days (plus hours
+     * when they matter).
+     * @param {number} seconds - Duration in seconds (> 0).
      * @returns {string}
      */
-    function fuzzyTimeLeft(expiresAt) {
-        if (!expiresAt) {
-            return _('magicpreview.share_expiry_never');
-        }
-
-        var diff = expiresAt - Math.floor(Date.now() / 1000);
-        if (diff <= 0) {
-            return _('magicpreview.share_expired');
-        }
-
-        var days = Math.floor(diff / 86400);
-        var hours = Math.floor((diff % 86400) / 3600);
-        var minutes = Math.floor((diff % 3600) / 60);
+    function formatDuration(seconds) {
+        var days = Math.floor(seconds / 86400);
+        var hours = Math.floor((seconds % 86400) / 3600);
+        var minutes = Math.floor((seconds % 3600) / 60);
 
         var unit = function(n, singular, plural) {
             if (n === 1) {
@@ -187,6 +178,42 @@
             return unit(hours, 'share_time_hour', 'share_time_hours');
         }
         return unit(Math.max(1, minutes), 'share_time_minute', 'share_time_minutes');
+    }
+
+    /**
+     * Formats the time remaining until a unix timestamp via formatDuration.
+     * @param {number} expiresAt - Unix timestamp; 0 = never expires.
+     * @returns {string}
+     */
+    function fuzzyTimeLeft(expiresAt) {
+        if (!expiresAt) {
+            return _('magicpreview.share_expiry_never');
+        }
+
+        var diff = expiresAt - Math.floor(Date.now() / 1000);
+        if (diff <= 0) {
+            return _('magicpreview.share_expired');
+        }
+        return formatDuration(diff);
+    }
+
+    /**
+     * Label for the expiry dropdown's "Default" option, including the
+     * resolved value of the share_link_ttl system setting (e.g.
+     * "Default (1 week)") so editors know it without manager access to
+     * system settings. Falls back to the plain label when the config
+     * doesn't carry the value.
+     * @returns {string}
+     */
+    function defaultTtlLabel() {
+        var ttl = parseInt(MagicPreviewConfig.shareDefaultTtl, 10);
+        if (isNaN(ttl) || ttl < 0) {
+            return _('magicpreview.share_expiry_default');
+        }
+        var duration = ttl === 0
+            ? _('magicpreview.share_expiry_never')
+            : formatDuration(ttl);
+        return _('magicpreview.share_expiry_default_value', { duration: duration });
     }
 
     // -- Grid: active share links for the current resource -------------------
@@ -380,7 +407,7 @@
                                 store: new Ext.data.SimpleStore({
                                     fields: ['v', 'd'],
                                     data: [
-                                        ['', _('magicpreview.share_expiry_default')],
+                                        ['', defaultTtlLabel()],
                                         ['86400', _('magicpreview.share_expiry_1day')],
                                         ['604800', _('magicpreview.share_expiry_1week')],
                                         ['2592000', _('magicpreview.share_expiry_30days')],
