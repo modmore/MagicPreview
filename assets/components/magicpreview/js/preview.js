@@ -906,6 +906,105 @@
     }
 
     // =========================================================================
+    // Click-to-field: scroll the manager form to the ContentBlocks field
+    // matching a postMessage from the preview iframe. ContentBlocks is not
+    // assumed to be installed — the function is a no-op when no matching
+    // element exists, falling back to scrolling to page top.
+    // =========================================================================
+
+    /**
+     * Scroll the manager resource form to the ContentBlocks field identified
+     * by field/index, activating the correct tab first if needed.
+     *
+     * @param {string} field - Numeric ContentBlocks field id.
+     * @param {number} [index=0] - 0-based index when the same field type
+     *                             appears more than once on the page.
+     */
+    function scrollToField(field, index) {
+        try {
+            var idx = typeof index === 'number' ? index : 0;
+            var el = null;
+
+            // data-field attribute — ContentBlocks manager <li data-field="5">
+            var byData = document.querySelectorAll('[data-field="' + CSS.escape(field) + '"]');
+            if (byData.length > idx) { el = byData[idx]; }
+
+            // Nothing matched — scroll to top so the user can orient themselves
+            if (!el) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            // Activate the tab containing the element (Document, TV, Settings…) if it
+            // isn't already active. ExtJS keeps inactive tab content in the DOM (hidden
+            // via CSS), so dom.contains() finds elements regardless of active tab.
+            var needsTabSwitch = false;
+            try {
+                var tabPanel = Ext.getCmp('modx-resource-tabs');
+                if (tabPanel && tabPanel.items && tabPanel.getActiveTab) {
+                    var activeTab = tabPanel.getActiveTab();
+                    tabPanel.items.each(function(tab) {
+                        try {
+                            var tabEl = tab.getEl && tab.getEl();
+                            if (tabEl && tabEl.dom && tabEl.dom.contains(el) && activeTab !== tab) {
+                                tabPanel.setActiveTab(tab);
+                                needsTabSwitch = true;
+                            }
+                        } catch (ex) {
+                            console.error('[MagicPreview] scrollToField error:', ex);
+                        }
+                    });
+                }
+            } catch (ex) {
+                console.error('[MagicPreview] scrollToField error:', ex);
+            }
+
+            var doScroll = function() {
+                try {
+                    // Scroll within the ExtJS center panel body
+                    var scrollContainer = document.querySelector('#modx-content > .x-panel-body');
+                    if (!scrollContainer) {
+                        // Fallback: walk up the DOM and use the first real scroll container
+                        var p = el.parentElement;
+                        while (p && p !== document.documentElement) {
+                            var st = window.getComputedStyle(p);
+                            var ov = st.overflowY;
+                            if ((ov === 'auto' || ov === 'scroll') && p.scrollHeight > p.clientHeight) {
+                                scrollContainer = p;
+                                break;
+                            }
+                            p = p.parentElement;
+                        }
+                    }
+                    if (scrollContainer) {
+                        var cRect = scrollContainer.getBoundingClientRect();
+                        var eRect = el.getBoundingClientRect();
+                        var desired = scrollContainer.scrollTop + (eRect.top - cRect.top) - (cRect.height - eRect.height) / 2;
+                        scrollContainer.scrollTo({ top: Math.max(0, desired), behavior: 'smooth' });
+                    }
+                    if (!el.getAttribute('tabindex') && !/^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(el.tagName)) {
+                        el.setAttribute('tabindex', '-1');
+                    }
+                    el.focus({ preventScroll: true });
+                    el.classList.add('mmmp-field-highlight');
+                    setTimeout(function() { el.classList.remove('mmmp-field-highlight'); }, 1200);
+                } catch (ex) {
+                    console.error('[MagicPreview] scrollToField error:', ex);
+                }
+            };
+
+            // Brief delay after a tab switch so the ExtJS transition completes
+            if (needsTabSwitch) {
+                setTimeout(doScroll, 150);
+            } else {
+                doScroll();
+            }
+        } catch (ex) {
+            console.error('[MagicPreview] scrollToField error:', ex);
+        }
+    }
+
+    // =========================================================================
     // ExtJS: Button injection
     // =========================================================================
 
@@ -1142,5 +1241,33 @@
                 return;
             }
         }, true);
+
+        // =====================================================================
+        // Click-to-field: postMessage listener
+        // Accepts messages from the preview iframe (panel mode) or from the
+        // preview popup relayed via preview.tpl (window mode).
+        // =====================================================================
+
+        // Pre-compute once — origin never changes during the page session.
+        var previewOrigin = '';
+        try {
+            previewOrigin = new URL(config().baseFrameUrl).origin;
+        } catch (ex) {
+            console.error('[MagicPreview] scrollToField error:', ex);
+        }
+
+        window.addEventListener('message', function(e) {
+            var data = e.data;
+            if (!data || typeof data !== 'object' || data.type !== 'magicpreview:scrollToField') {
+                return;
+            }
+            // Accept from the frontend's origin (panel mode) or manager's own
+            // origin (preview.tpl relay for window mode).
+            if (e.origin !== previewOrigin && e.origin !== window.location.origin) {
+                return;
+            }
+            if (typeof data.field !== 'string' || !data.field) { return; }
+            scrollToField(data.field, data.index);
+        }, false);
     });
 })();

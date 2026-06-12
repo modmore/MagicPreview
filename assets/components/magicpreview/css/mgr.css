@@ -562,3 +562,14 @@ a.mmmp-share-revoke:hover,
 a.mmmp-share-revoke:focus {
     color: #843534;
 }
+
+/* --------------------------------------------------------------------------
+   Click-to-field: brief highlight on the manager field scrolled to from the
+   preview. Transition fades the outline out after the initial flash.
+   -------------------------------------------------------------------------- */
+
+.mmmp-field-highlight {
+    outline: 2px solid hsl(207, 70%, 53%);
+    outline-offset: 3px;
+    transition: outline-color 1.2s ease-out;
+}

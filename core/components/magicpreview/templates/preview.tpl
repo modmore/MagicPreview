@@ -111,6 +111,24 @@
                 e.preventDefault();
                 window.close();
             });
+
+            // Window mode relay: the frontend iframe sends postMessage to window.top,
+            // which is this preview window. Forward it to the manager via window.opener.
+            // Only relay from the expected frontend origin (the iframe's src origin).
+            var relayOrigin = '';
+            try { relayOrigin = new URL(document.getElementById('mmmp-js-frame-inner').src).origin; } catch (ex) {}
+            window.addEventListener('message', function(e) {
+                var data = e.data;
+                if (!data || typeof data !== 'object' || data.type !== 'magicpreview:scrollToField') {
+                    return;
+                }
+                if (!relayOrigin || e.origin !== relayOrigin) {
+                    return;
+                }
+                if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage(data, window.location.origin);
+                }
+            }, false);
         })()
     </script>
 {else}

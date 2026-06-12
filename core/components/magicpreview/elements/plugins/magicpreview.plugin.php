@@ -264,6 +264,22 @@ switch ($modx->event->name) {
             // how an in-memory resource is primed for an overridden render.
             $service->applyPreviewData($modx->resource, $data);
         }
+
+        // Inject click-to-field support: delegated click listener that sends a
+        // postMessage to the manager when a data-magicpreview-field element is clicked.
+        // ContentBlocks is not required — this is a no-op when no attributes exist.
+        $modx->regClientStartupHTMLBlock('<script>
+document.addEventListener("click",function(e){
+    var el=e.target&&e.target.closest?e.target.closest("[data-magicpreview-field]"):null;
+    if(!el){return;}
+    window.top.postMessage({
+        type:"magicpreview:scrollToField",
+        field:el.getAttribute("data-magicpreview-field"),
+        index:parseInt(el.getAttribute("data-magicpreview-idx")||"0",10)
+    },"*");
+});
+</script>');
+
         break;
 
 }
