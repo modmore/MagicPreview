@@ -125,6 +125,13 @@ if ($vcPlugin) {
     ], ['pluginid','event'], false)) {
         echo "Error creating modPluginEvent.\n";
     }
+    if (!createObject('modPluginEvent', [
+        'pluginid' => $vcPlugin->get('id'),
+        'event' => 'ContentBlocks_AfterFieldRender',
+        'priority' => 0,
+    ], ['pluginid','event'], false)) {
+        echo "Error creating modPluginEvent.\n";
+    }
 }
 
 

@@ -16,11 +16,20 @@ trait PreviewTrait
 
     public function fireBeforeSaveEvent()
     {
+        $service = $this->getMagicPreviewService();
+
         // Invoke an event to allow other modules to prepare/modify the resource before preview.
-        $this->modx->invokeEvent('OnResourceMagicPreview', [
-            'resource' => $this->object,
-            'properties' => $this->getProperties(),
-        ]);
+        // The flag marks this render as a preview so listeners that fire during it (the
+        // plugin's ContentBlocks_AfterFieldRender handler) add jump-to-field markers.
+        $service->addFieldMarkers = true;
+        try {
+            $this->modx->invokeEvent('OnResourceMagicPreview', [
+                'resource' => $this->object,
+                'properties' => $this->getProperties(),
+            ]);
+        } finally {
+            $service->addFieldMarkers = false;
+        }
 
         $this->failedSuccessfully = true;
 
@@ -37,8 +46,6 @@ trait PreviewTrait
             }
         }
         $data = $this->object->toArray('', true);
-
-        $service = $this->getMagicPreviewService();
 
         // Cache the preview data under a deterministic content hash for the
         // ?show_preview= front-end render (see MagicPreview::cachePreviewData).

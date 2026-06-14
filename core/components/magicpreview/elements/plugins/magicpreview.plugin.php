@@ -282,6 +282,29 @@ document.addEventListener("click",function(e){
 
         break;
 
+    /**
+     * Fired by ContentBlocks (1.16+) once per field instance with its complete
+     * rendered output. Here we wrap the field in a div with inline display:contents 
+     * in an attempt to not interfere with the page layout in the preview.
+     * Wrapping is the only reliable way to target each field's output and remain valid HTML.
+     *
+     * @var mixed $html
+     * @var object $field cbField
+     * @var array $fieldData
+     */
+    case 'ContentBlocks_AfterFieldRender':
+        if (!$service->addFieldMarkers || !is_scalar($html) || !is_object($field) || !method_exists($field, 'get')) {
+            break;
+        }
+        $modx->event->output(
+            '<div style="display:contents"'
+            . ' data-magicpreview-field="' . (int)$field->get('id') . '"'
+            . ' data-magicpreview-idx="' . (int)($fieldData['field_type_idx'] ?? 0) . '">'
+            . $html
+            . '</div>'
+        );
+        break;
+
 }
 
 return true;
