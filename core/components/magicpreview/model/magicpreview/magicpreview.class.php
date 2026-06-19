@@ -15,7 +15,7 @@ class MagicPreview
     public array $config = [];
     public bool $debug = false;
 
-    const VERSION = '1.6.0-pl';
+    const VERSION = '1.7.0-pl';
 
     private ?MagicPreviewDrafts $drafts = null;
     private ?MagicPreviewShares $shares = null;

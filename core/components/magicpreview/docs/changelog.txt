@@ -1,3 +1,18 @@
+MagicPreview 1.7.0-pl
+---------------------
+Released on 2026-06-xx
+
+- Auto-reload preview on resource save
+- Collapse MODX 3 resource sidebar when on-page preview is visible.
+- Add view button to draft panel
+- Add share button to draft panel
+- Add token-protected endpoint for sharing drafts
+- Allow multiple shares of the same draft each with unique tokens
+- Add windows/grid/form for managing shares
+- Enable/disable previews on resources based on template id set by new system settings
+- Enable/disable previews based on new per resource settings
+- Layout spacing tweaks
+
 MagicPreview 1.6.0-pl
 ---------------------
 Released on 2026-03-28
