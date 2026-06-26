@@ -3,11 +3,12 @@
 /**
  * Frontend parser substitution used during preview page rendering.
  *
- * Overrides processTag() to intercept [[*fieldname]] resource field tags for a
- * known set of wrappable core fields. Instead of returning plain text, it wraps
+ * Overrides processTag() to intercept [[*fieldname]] resource field tags for
+ * known wrappable core fields and TVs. Instead of returning plain text, it wraps
  * the rendered value in STX/ETX control-character markers:
  *
  *   \x02MMMP:pagetitle\x02rendered value\x03MMMP\x03
+ *   \x02MMMP:tv42\x02rendered value\x03MMMP\x03
  *
  * These markers are safe to embed anywhere in HTML because control characters
  * (U+0002 / U+0003) never appear in valid HTML content. The OnWebPagePrerender
@@ -15,6 +16,9 @@
  * contexts are stripped (leaving just the value); markers in body content become
  * <span data-magicpreview-field="pagetitle" style="display:contents"> elements
  * that the frontend click handler can target.
+ *
+ * TV tags use "tv{id}" as the field identifier (e.g. "tv42") so the manager-side
+ * scrollToField() can locate the input via [name="tv42"].
  *
  * Installed on $modx->parser during OnLoadWebDocument (preview requests only).
  * Restoration is not needed — the request ends after the page is rendered.
@@ -25,10 +29,13 @@ if (class_exists('\MODX\Revolution\modParser', false)) {
     if (!class_exists('MagicPreviewCoreParser', false)) {
         class MagicPreviewCoreParser extends \MODX\Revolution\modParser
         {
-            /** @var string[] Core resource fields that are safe to wrap with click-to-field markers. */
+            /** @var string[] Core resource fields wrapped using their own name as the field identifier. */
             protected $wrappableFields = [
                 'pagetitle', 'longtitle', 'description', 'menutitle', 'introtext', 'content',
             ];
+
+            /** @var array<string, string|null> Cache of TV name → "tv{id}" (or null if not a TV). */
+            protected $tvIdCache = [];
 
             /**
              * @param array|string $tag
@@ -60,8 +67,15 @@ if (class_exists('\MODX\Revolution\modParser', false)) {
                 $fieldName = explode(':', $fieldName)[0];
                 $fieldName = trim($fieldName);
 
-                if (!in_array($fieldName, $this->wrappableFields, true)) {
-                    return parent::processTag($tag, $processUncacheable);
+                // Determine the marker field identifier: use the field name directly
+                // for known core fields, or look up "tv{id}" for TVs.
+                if (in_array($fieldName, $this->wrappableFields, true)) {
+                    $markerField = $fieldName;
+                } else {
+                    $markerField = $this->getTvFieldId($fieldName);
+                    if ($markerField === null) {
+                        return parent::processTag($tag, $processUncacheable);
+                    }
                 }
 
                 $output = parent::processTag($tag, $processUncacheable);
@@ -72,7 +86,23 @@ if (class_exists('\MODX\Revolution\modParser', false)) {
                     return $output;
                 }
 
-                return "\x02MMMP:{$fieldName}\x02{$output}\x03MMMP\x03";
+                return "\x02MMMP:{$markerField}\x02{$output}\x03MMMP\x03";
+            }
+
+            /**
+             * Returns "tv{id}" for a TV identified by name, or null if not a TV.
+             * Results are cached on the instance to avoid repeated DB queries.
+             *
+             * @param string $name
+             * @return string|null
+             */
+            private function getTvFieldId($name)
+            {
+                if (!array_key_exists($name, $this->tvIdCache)) {
+                    $tv = $this->modx->getObject('modTemplateVar', ['name' => $name]);
+                    $this->tvIdCache[$name] = $tv ? 'tv' . $tv->get('id') : null;
+                }
+                return $this->tvIdCache[$name];
             }
         }
     }
@@ -80,10 +110,13 @@ if (class_exists('\MODX\Revolution\modParser', false)) {
     // MODX 2 branch.
     class MagicPreviewCoreParser extends modParser
     {
-        /** @var string[] Core resource fields that are safe to wrap with click-to-field markers. */
+        /** @var string[] Core resource fields wrapped using their own name as the field identifier. */
         protected $wrappableFields = [
             'pagetitle', 'longtitle', 'description', 'menutitle', 'introtext', 'content',
         ];
+
+        /** @var array<string, string|null> Cache of TV name → "tv{id}" (or null if not a TV). */
+        protected $tvIdCache = [];
 
         /**
          * @param array|string $tag
@@ -112,8 +145,13 @@ if (class_exists('\MODX\Revolution\modParser', false)) {
             $fieldName = explode(':', $fieldName)[0];
             $fieldName = trim($fieldName);
 
-            if (!in_array($fieldName, $this->wrappableFields, true)) {
-                return parent::processTag($tag, $processUncacheable);
+            if (in_array($fieldName, $this->wrappableFields, true)) {
+                $markerField = $fieldName;
+            } else {
+                $markerField = $this->getTvFieldId($fieldName);
+                if ($markerField === null) {
+                    return parent::processTag($tag, $processUncacheable);
+                }
             }
 
             $output = parent::processTag($tag, $processUncacheable);
@@ -122,7 +160,20 @@ if (class_exists('\MODX\Revolution\modParser', false)) {
                 return $output;
             }
 
-            return "\x02MMMP:{$fieldName}\x02{$output}\x03MMMP\x03";
+            return "\x02MMMP:{$markerField}\x02{$output}\x03MMMP\x03";
+        }
+
+        /**
+         * @param string $name
+         * @return string|null
+         */
+        private function getTvFieldId($name)
+        {
+            if (!array_key_exists($name, $this->tvIdCache)) {
+                $tv = $this->modx->getObject('modTemplateVar', ['name' => $name]);
+                $this->tvIdCache[$name] = $tv ? 'tv' . $tv->get('id') : null;
+            }
+            return $this->tvIdCache[$name];
         }
     }
 }
