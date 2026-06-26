@@ -7,6 +7,7 @@ $e = [
     'OnDocFormSave',
     'OnLoadWebDocument',
     'OnManagerPageBeforeRender',
+    'OnWebPagePrerender',
     'ContentBlocks_AfterParse',
 ];
 

@@ -931,6 +931,26 @@
                 el = byData[idx];
             }
 
+            // ExtJS component — MODX core resource fields (pagetitle, longtitle, etc.)
+            if (!el) {
+                try {
+                    var cmp = Ext.getCmp('modx-resource-' + field);
+                    if (cmp && cmp.getEl && cmp.getEl()) {
+                        el = cmp.getEl().dom;
+                    }
+                } catch (ex) {
+                    console.error('[MagicPreview] scrollToField error:', ex);
+                }
+            }
+
+            // name attribute — plain inputs and TV fields
+            if (!el) {
+                var byName = document.querySelectorAll('[name="' + CSS.escape(field) + '"]');
+                if (byName.length > idx) {
+                    el = byName[idx];
+                }
+            }
+
             // Nothing matched — scroll to top so the user can orient themselves
             if (!el) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });

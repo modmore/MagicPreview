@@ -266,6 +266,16 @@ switch ($modx->event->name) {
             $service->applyPreviewData($modx->resource, $data);
         }
 
+        // Install the core-fields parser so [[*pagetitle]], [[*description]], etc.
+        // are wrapped with control-character markers during template rendering.
+        // OnWebPagePrerender resolves those markers into data-magicpreview-field spans.
+        // No restoration is needed — the request ends after the page is rendered.
+        $modx->getParser();
+        if (!class_exists('MagicPreviewCoreParser', false)) {
+            require_once $service->config['modelPath'] . 'magicpreview/MagicPreviewCoreParser.php';
+        }
+        $modx->parser = new MagicPreviewCoreParser($modx);
+
         // Inject click-to-field support: hover outline + delegated click listener
         // that sends a postMessage to the manager when a data-magicpreview-field
         // element is clicked. ContentBlocks is not required — no-op when no attributes
@@ -314,6 +324,53 @@ document.addEventListener("click",function(e){
             . ' data-magicpreview-idx="' . (int)$phs['field_type_idx'] . '">'
             . $tpl
             . '</div>'
+        );
+        break;
+
+    case 'OnWebPagePrerender':
+        if (!array_key_exists('show_preview', $_GET)) {
+            break;
+        }
+        // Resolve the STX/ETX markers injected by MagicPreviewCoreParser into
+        // click-to-field spans. Markers are stripped from unsafe HTML contexts
+        // (inside <head>, inside HTML attribute markup) and converted to spans
+        // everywhere else so they don't produce invalid HTML.
+        $output = &$modx->resource->_output;
+        if (strpos($output, "\x02") === false) {
+            break;
+        }
+
+        // Strip markers from inside <head>...</head> (covers <title>, <meta>, <link>).
+        $output = preg_replace_callback(
+            '/(<head[^>]*>)(.*?)(<\/head>)/si',
+            function ($m) {
+                return $m[1]
+                    . preg_replace("/\x02MMMP:[^\x02]*\x02(.*?)\x03MMMP\x03/s", '$1', $m[2])
+                    . $m[3];
+            },
+            $output
+        );
+
+        // Strip markers from inside HTML opening tags (attribute values such as
+        // <img alt="[[*description]]"> or <meta content="[[*pagetitle]]">).
+        $output = preg_replace_callback(
+            '/<[a-zA-Z][^>]*>/s',
+            function ($m) {
+                return preg_replace("/\x02MMMP:[^\x02]*\x02(.*?)\x03MMMP\x03/s", '$1', $m[0]);
+            },
+            $output
+        );
+
+        // Convert remaining markers (body text contexts) to click-to-field spans.
+        $output = preg_replace_callback(
+            "/\x02MMMP:([^\x02]*)\x02(.*?)\x03MMMP\x03/s",
+            function ($m) {
+                return '<span data-magicpreview-field="' . htmlspecialchars($m[1], ENT_QUOTES) . '"'
+                    . ' style="display:contents">'
+                    . $m[2]
+                    . '</span>';
+            },
+            $output
         );
         break;
 
