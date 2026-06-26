@@ -927,7 +927,9 @@
 
             // data-field attribute — ContentBlocks manager <li data-field="5">
             var byData = document.querySelectorAll('[data-field="' + CSS.escape(field) + '"]');
-            if (byData.length > idx) { el = byData[idx]; }
+            if (byData.length > idx) {
+                el = byData[idx];
+            }
 
             // Nothing matched — scroll to top so the user can orient themselves
             if (!el) {
@@ -1266,7 +1268,9 @@
             if (e.origin !== previewOrigin && e.origin !== window.location.origin) {
                 return;
             }
-            if (typeof data.field !== 'string' || !data.field) { return; }
+            if (typeof data.field !== 'string' || !data.field) {
+                return;
+            }
             scrollToField(data.field, data.index);
         }, false);
     });

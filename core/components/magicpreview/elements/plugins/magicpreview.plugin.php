@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var modX $modx
  */
@@ -265,42 +266,53 @@ switch ($modx->event->name) {
             $service->applyPreviewData($modx->resource, $data);
         }
 
-        // Inject click-to-field support: delegated click listener that sends a
-        // postMessage to the manager when a data-magicpreview-field element is clicked.
-        // ContentBlocks is not required — this is a no-op when no attributes exist.
-        $modx->regClientStartupHTMLBlock('<script>
+        // Inject click-to-field support: hover outline + delegated click listener
+        // that sends a postMessage to the manager when a data-magicpreview-field
+        // element is clicked. ContentBlocks is not required — no-op when no attributes
+        // are present. Template authors can also add the attributes manually.
+        $modx->regClientStartupHTMLBlock('<style>
+[data-magicpreview-field]{cursor:pointer;}
+[data-magicpreview-field]:hover{outline:2px dashed rgba(52,152,219,0.6);outline-offset:2px;}
+</style>
+<script>
 document.addEventListener("click",function(e){
     var el=e.target&&e.target.closest?e.target.closest("[data-magicpreview-field]"):null;
-    if(!el){return;}
-    window.top.postMessage({
-        type:"magicpreview:scrollToField",
-        field:el.getAttribute("data-magicpreview-field"),
-        index:parseInt(el.getAttribute("data-magicpreview-idx")||"0",10)
-    },"*");
+    if (!el) {
+        return;
+    }
+    window.top.postMessage({type:"magicpreview:scrollToField",field:el.getAttribute("data-magicpreview-field"),index:parseInt(el.getAttribute("data-magicpreview-idx")||"0",10)},window.location.origin);
 });
 </script>');
 
         break;
 
-    /**
-     * Fired by ContentBlocks (1.16+) once per field instance with its complete
-     * rendered output. Here we wrap the field in a div with inline display:contents 
-     * in an attempt to not interfere with the page layout in the preview.
-     * Wrapping is the only reliable way to target each field's output and remain valid HTML.
-     *
-     * @var mixed $html
-     * @var object $field cbField
-     * @var array $fieldData
-     */
-    case 'ContentBlocks_AfterFieldRender':
-        if (!$service->addFieldMarkers || !is_scalar($html) || !is_object($field) || !method_exists($field, 'get')) {
+    case 'ContentBlocks_AfterParse':
+        /**
+          * @var string $tpl Rendered field output (by reference — set via $modx->event->output())
+          * @var array $phs Field data: 'field' (id), 'field_type_idx' (0-based instance count), 'value', etc.
+          */
+        if (!$service->addFieldMarkers) {
+            break;
+        }
+        // $phs is the field data array passed by ContentBlocks to parse().
+        // MagicPreviewContentBlocksParser (installed in PreviewTrait) prevents MODX's default
+        // parseProperties() from collapsing array params with a 'value' key to a
+        // string, so $phs arrives here as the full associative array.
+        if (!is_array($phs) || !isset($phs['field_type_idx']) || !array_key_exists('field', $phs)) {
+            break;
+        }
+        // List input calls parse() once per item and once for the wrapper. Each item
+        // carries 'value' (item text) merged from $settings alongside 'items'
+        // (the full item list), so 'value' + 'items' together identify a sub-item
+        // call — skip those; wrap only the field-level (wrapper) parse.
+        if (array_key_exists('value', $phs) && array_key_exists('items', $phs)) {
             break;
         }
         $modx->event->output(
             '<div style="display:contents"'
-            . ' data-magicpreview-field="' . (int)$field->get('id') . '"'
-            . ' data-magicpreview-idx="' . (int)($fieldData['field_type_idx'] ?? 0) . '">'
-            . $html
+            . ' data-magicpreview-field="' . (int)$phs['field'] . '"'
+            . ' data-magicpreview-idx="' . (int)$phs['field_type_idx'] . '">'
+            . $tpl
             . '</div>'
         );
         break;
