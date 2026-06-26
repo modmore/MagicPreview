@@ -31,7 +31,7 @@ if (class_exists('\MODX\Revolution\modParser', false)) {
         {
             /** @var string[] Core resource fields wrapped using their own name as the field identifier. */
             protected $wrappableFields = [
-                'pagetitle', 'longtitle', 'description', 'menutitle', 'introtext', 'content',
+                'pagetitle', 'longtitle', 'description', 'menutitle', 'introtext',
             ];
 
             /** @var array<string, string|null> Cache of TV name → "tv{id}" (or null if not a TV). */
@@ -112,7 +112,7 @@ if (class_exists('\MODX\Revolution\modParser', false)) {
     {
         /** @var string[] Core resource fields wrapped using their own name as the field identifier. */
         protected $wrappableFields = [
-            'pagetitle', 'longtitle', 'description', 'menutitle', 'introtext', 'content',
+            'pagetitle', 'longtitle', 'description', 'menutitle', 'introtext',
         ];
 
         /** @var array<string, string|null> Cache of TV name → "tv{id}" (or null if not a TV). */
