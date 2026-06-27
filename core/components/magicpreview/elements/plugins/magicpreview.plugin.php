@@ -331,8 +331,9 @@ document.addEventListener("click",function(e){
             break;
         }
 
-        // Three passes: strip from <head>, strip from HTML opening-tag attribute values,
-        // then convert what remains in body text to click-to-field spans.
+        // Four passes: strip from <head>, strip from <script>/<style> bodies,
+        // strip from HTML opening-tag attribute values, then convert what
+        // remains in body text to click-to-field spans.
         $output = preg_replace_callback(
             '/(<head[^>]*>)(.*?)(<\/head>)/si',
             function ($m) {
@@ -343,8 +344,21 @@ document.addEventListener("click",function(e){
             $output
         );
 
+        // Strip from <script> and <style> bodies in the page body — a marker
+        // inside a JS string literal would otherwise become a <span> tag.
         $output = preg_replace_callback(
-            '/<[a-zA-Z][^>]*>/s',
+            '/<(script|style)[^>]*>.*?<\/\1>/si',
+            function ($m) {
+                return preg_replace("/\x02MMMP:[^\x02]*\x02(.*?)\x03MMMP\x03/s", '$1', $m[0]);
+            },
+            $output
+        );
+
+        // Strip from HTML opening tags. The regex handles quoted attribute values
+        // so a literal > inside an attribute (e.g. content="a > b") does not
+        // cause early termination and leave a marker tail in body-text position.
+        $output = preg_replace_callback(
+            '/<[a-zA-Z][^>"\']*(?:"[^"]*"|\'[^\']*\'|[^>])*>/s',
             function ($m) {
                 return preg_replace("/\x02MMMP:[^\x02]*\x02(.*?)\x03MMMP\x03/s", '$1', $m[0]);
             },
