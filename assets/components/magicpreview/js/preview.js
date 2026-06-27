@@ -1262,7 +1262,7 @@
         try {
             previewOrigin = new URL(config().baseFrameUrl).origin;
         } catch (ex) {
-            console.error('[MagicPreview] scrollToField error:', ex);
+            console.error('[MagicPreview] postMessage listener error:', ex);
         }
 
         window.addEventListener('message', function(e) {
