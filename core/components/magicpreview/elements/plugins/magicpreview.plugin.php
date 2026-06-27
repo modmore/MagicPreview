@@ -266,21 +266,15 @@ switch ($modx->event->name) {
             $service->applyPreviewData($modx->resource, $data);
         }
 
-        // Install the core-fields parser so [[*pagetitle]], [[*description]], etc.
-        // are wrapped with control-character markers during template rendering.
-        // OnWebPagePrerender resolves those markers into data-magicpreview-field spans.
-        // No restoration is needed — the request ends after the page is rendered.
-        $modx->getParser();
-        if (!class_exists('MagicPreviewCoreParser', false)) {
-            require_once $service->config['modelPath'] . 'magicpreview/MagicPreviewCoreParser.php';
-        }
-        $modx->parser = new MagicPreviewCoreParser($modx);
+        if ($modx->getOption('magicpreview.click_to_field', null, true)) {
+            // No restoration needed — the request ends after the page is rendered.
+            $modx->getParser();
+            if (!class_exists('MagicPreviewCoreParser', false)) {
+                require_once $service->config['modelPath'] . 'magicpreview/MagicPreviewCoreParser.php';
+            }
+            $modx->parser = new MagicPreviewCoreParser($modx);
 
-        // Inject click-to-field support: hover outline + delegated click listener
-        // that sends a postMessage to the manager when a data-magicpreview-field
-        // element is clicked. ContentBlocks is not required — no-op when no attributes
-        // are present. Template authors can also add the attributes manually.
-        $modx->regClientStartupHTMLBlock('<style>
+            $modx->regClientStartupHTMLBlock('<style>
 [data-magicpreview-field]{cursor:pointer;}
 [data-magicpreview-field]:hover{outline:2px dashed rgba(52,152,219,0.6);outline-offset:2px;}
 </style>
@@ -293,6 +287,7 @@ document.addEventListener("click",function(e){
     window.top.postMessage({type:"magicpreview:scrollToField",field:el.getAttribute("data-magicpreview-field"),index:parseInt(el.getAttribute("data-magicpreview-idx")||"0",10)},window.location.origin);
 });
 </script>');
+        }
 
         break;
 
@@ -331,16 +326,13 @@ document.addEventListener("click",function(e){
         if (!array_key_exists('show_preview', $_GET)) {
             break;
         }
-        // Resolve the STX/ETX markers injected by MagicPreviewCoreParser into
-        // click-to-field spans. Markers are stripped from unsafe HTML contexts
-        // (inside <head>, inside HTML attribute markup) and converted to spans
-        // everywhere else so they don't produce invalid HTML.
         $output = &$modx->resource->_output;
         if (strpos($output, "\x02") === false) {
             break;
         }
 
-        // Strip markers from inside <head>...</head> (covers <title>, <meta>, <link>).
+        // Three passes: strip from <head>, strip from HTML opening-tag attribute values,
+        // then convert what remains in body text to click-to-field spans.
         $output = preg_replace_callback(
             '/(<head[^>]*>)(.*?)(<\/head>)/si',
             function ($m) {
@@ -351,8 +343,6 @@ document.addEventListener("click",function(e){
             $output
         );
 
-        // Strip markers from inside HTML opening tags (attribute values such as
-        // <img alt="[[*description]]"> or <meta content="[[*pagetitle]]">).
         $output = preg_replace_callback(
             '/<[a-zA-Z][^>]*>/s',
             function ($m) {
@@ -361,7 +351,6 @@ document.addEventListener("click",function(e){
             $output
         );
 
-        // Convert remaining markers (body text contexts) to click-to-field spans.
         $output = preg_replace_callback(
             "/\x02MMMP:([^\x02]*)\x02(.*?)\x03MMMP\x03/s",
             function ($m) {

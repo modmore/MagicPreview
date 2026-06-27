@@ -18,14 +18,9 @@ trait PreviewTrait
     {
         $service = $this->getMagicPreviewService();
 
-        // Invoke an event to allow other modules to prepare/modify the resource before preview.
-        // The flag marks this render as a preview so listeners that fire during it (the
-        // plugin's ContentBlocks_AfterParse handler) add jump-to-field markers.
-        // Clear the element cache so every ContentBlocks_AfterParse plugin execution
-        // runs fresh rather than returning a cached (empty) event output.
-        // Install a safe parser that bypasses parseProperties() collapsing arrays-with-'value'
-        // to strings — ContentBlocks_AfterParse passes $phs as a plain associative array
-        // that may have a 'value' key, which the default parser would otherwise mangle.
+        // Bypasses parseProperties() collapsing arrays-with-'value' to strings —
+        // ContentBlocks_AfterParse passes $phs as a plain associative array that may
+        // have a 'value' key, which the default parser would otherwise mangle.
         // ContentBlocks' loadParser()/restoreParser() correctly preserves this instance.
         $this->modx->getParser();
         if (!class_exists('MagicPreviewContentBlocksParser', false)) {
@@ -33,9 +28,13 @@ trait PreviewTrait
         }
         $savedParser = $this->modx->parser;
         $this->modx->parser = new MagicPreviewContentBlocksParser($this->modx);
+        // Clear the element cache so every ContentBlocks_AfterParse execution runs fresh
+        // rather than returning a cached (empty) event output.
         $savedElementCache = $this->modx->elementCache;
         $this->modx->elementCache = [];
-        $service->addFieldMarkers = true;
+        if ($this->modx->getOption('magicpreview.click_to_field', null, true)) {
+            $service->addFieldMarkers = true;
+        }
         try {
             $this->modx->invokeEvent('OnResourceMagicPreview', [
                 'resource' => $this->object,
