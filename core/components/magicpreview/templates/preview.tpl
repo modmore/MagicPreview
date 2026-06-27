@@ -112,9 +112,7 @@
                 window.close();
             });
 
-            // Window mode relay: the frontend iframe sends postMessage to window.top,
-            // which is this preview window. Forward it to the manager via window.opener.
-            // Only relay from the expected frontend origin (the iframe's src origin).
+            // In window mode window.top is this popup, not the manager — relay to window.opener.
             var relayOrigin = '';
             try { relayOrigin = new URL(document.getElementById('mmmp-js-frame-inner').src).origin; } catch (ex) {}
             window.addEventListener('message', function(e) {

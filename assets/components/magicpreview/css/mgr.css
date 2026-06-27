@@ -564,8 +564,7 @@ a.mmmp-share-revoke:focus {
 }
 
 /* --------------------------------------------------------------------------
-   Click-to-field: brief highlight on the manager field scrolled to from the
-   preview. Transition fades the outline out after the initial flash.
+   Click-to-field: brief highlight on the manager field scrolled to from preview.
    -------------------------------------------------------------------------- */
 
 .mmmp-field-highlight {

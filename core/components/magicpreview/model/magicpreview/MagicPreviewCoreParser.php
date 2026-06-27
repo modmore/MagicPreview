@@ -45,7 +45,6 @@ if (class_exists('\MODX\Revolution\modParser', false)) {
             {
                 $innerTag = is_array($tag) ? (isset($tag[1]) ? (string)$tag[1] : '') : (string)$tag;
 
-                // Detect the tag token, accounting for the optional uncacheable ! prefix.
                 $tagName = trim($innerTag);
                 $tokenOffset = 0;
                 if (substr($tagName, 0, 1) === '!') {
@@ -57,8 +56,6 @@ if (class_exists('\MODX\Revolution\modParser', false)) {
                     return parent::processTag($tag, $processUncacheable);
                 }
 
-                // Extract the bare field name: strip token, optional # modifier,
-                // property string (after ?), and output modifiers (after :).
                 $fieldName = substr($tagName, $tokenOffset + 1);
                 if (substr($fieldName, 0, 1) === '#') {
                     $fieldName = substr($fieldName, 1);
@@ -67,8 +64,6 @@ if (class_exists('\MODX\Revolution\modParser', false)) {
                 $fieldName = explode(':', $fieldName)[0];
                 $fieldName = trim($fieldName);
 
-                // Determine the marker field identifier: use the field name directly
-                // for known core fields, or look up "tv{id}" for TVs.
                 if (in_array($fieldName, $this->wrappableFields, true)) {
                     $markerField = $fieldName;
                 } else {

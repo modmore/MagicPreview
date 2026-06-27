@@ -905,33 +905,27 @@
         });
     }
 
-    // =========================================================================
-    // Click-to-field: scroll the manager form to the ContentBlocks field
-    // matching a postMessage from the preview iframe. ContentBlocks is not
-    // assumed to be installed — the function is a no-op when no matching
-    // element exists, falling back to scrolling to page top.
-    // =========================================================================
-
     /**
-     * Scroll the manager resource form to the ContentBlocks field identified
-     * by field/index, activating the correct tab first if needed.
+     * Scroll the manager resource form to the field identified by field/index,
+     * activating the correct tab first if needed. Resolves via data-field
+     * attribute (ContentBlocks), ExtJS component id (core fields), then name
+     * attribute (TVs). Falls back to scrolling page top if nothing matches.
      *
-     * @param {string} field - Numeric ContentBlocks field id.
-     * @param {number} [index=0] - 0-based index when the same field type
-     *                             appears more than once on the page.
+     * @param {string} field - Field identifier: CB numeric id, core field name
+     *                         (e.g. "pagetitle"), or TV name (e.g. "tv42").
+     * @param {number} [index=0] - 0-based index when the same field appears
+     *                             more than once on the page.
      */
     function scrollToField(field, index) {
         try {
             var idx = typeof index === 'number' ? index : 0;
             var el = null;
 
-            // data-field attribute — ContentBlocks manager <li data-field="5">
             var byData = document.querySelectorAll('[data-field="' + CSS.escape(field) + '"]');
             if (byData.length > idx) {
                 el = byData[idx];
             }
 
-            // ExtJS component — MODX core resource fields (pagetitle, longtitle, etc.)
             if (!el) {
                 try {
                     var cmp = Ext.getCmp('modx-resource-' + field);
@@ -943,7 +937,6 @@
                 }
             }
 
-            // name attribute — plain inputs and TV fields
             if (!el) {
                 var byName = document.querySelectorAll('[name="' + CSS.escape(field) + '"]');
                 if (byName.length > idx) {
@@ -951,15 +944,13 @@
                 }
             }
 
-            // Nothing matched — scroll to top so the user can orient themselves
             if (!el) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 return;
             }
 
-            // Activate the tab containing the element (Document, TV, Settings…) if it
-            // isn't already active. ExtJS keeps inactive tab content in the DOM (hidden
-            // via CSS), so dom.contains() finds elements regardless of active tab.
+            // ExtJS keeps inactive tab content in the DOM (hidden via CSS), so
+            // dom.contains() finds elements regardless of which tab is active.
             var needsTabSwitch = false;
             try {
                 var tabPanel = Ext.getCmp('modx-resource-tabs');
@@ -983,10 +974,8 @@
 
             var doScroll = function() {
                 try {
-                    // Scroll within the ExtJS center panel body
                     var scrollContainer = document.querySelector('#modx-content > .x-panel-body');
                     if (!scrollContainer) {
-                        // Fallback: walk up the DOM and use the first real scroll container
                         var p = el.parentElement;
                         while (p && p !== document.documentElement) {
                             var st = window.getComputedStyle(p);
@@ -1266,8 +1255,6 @@
 
         // =====================================================================
         // Click-to-field: postMessage listener
-        // Accepts messages from the preview iframe (panel mode) or from the
-        // preview popup relayed via preview.tpl (window mode).
         // =====================================================================
 
         // Pre-compute once — origin never changes during the page session.
