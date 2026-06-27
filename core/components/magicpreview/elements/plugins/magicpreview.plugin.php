@@ -284,7 +284,7 @@ document.addEventListener("click",function(e){
     if (!el) {
         return;
     }
-    window.top.postMessage({type:"magicpreview:scrollToField",field:el.getAttribute("data-magicpreview-field"),index:parseInt(el.getAttribute("data-magicpreview-idx")||"0",10)},window.location.origin);
+    window.top.postMessage({type:"magicpreview:scrollToField",field:el.getAttribute("data-magicpreview-field"),index:parseInt(el.getAttribute("data-magicpreview-idx")||"0",10)},"*");
 });
 </script>');
         }
