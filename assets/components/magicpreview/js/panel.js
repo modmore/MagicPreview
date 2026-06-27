@@ -562,6 +562,11 @@
             var pwInner = panelIsOpenInner ? getPanelWidth() : 0;
             var needsOverrideInner = panelIsOpenInner || bannerHInner > 0;
             if (needsOverrideInner) {
+                // bannerH may have been 0 when the outer block ran (not yet painted),
+                // so _originalGetViewSize may not have been saved yet — save it now.
+                if (!_originalGetViewSize) {
+                    _originalGetViewSize = layout.el.getViewSize.bind(layout.el);
+                }
                 layout.el.getViewSize = function() {
                     return {
                         width: window.innerWidth - pwInner,
