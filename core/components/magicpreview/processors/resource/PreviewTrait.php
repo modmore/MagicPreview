@@ -24,7 +24,7 @@ trait PreviewTrait
         // ContentBlocks' loadParser()/restoreParser() correctly preserves this instance.
         $this->modx->getParser();
         if (!class_exists('MagicPreviewContentBlocksParser', false)) {
-            require_once __DIR__ . '/../../model/magicpreview/MagicPreviewContentBlocksParser.php';
+            require_once __DIR__ . '/../../model/magicpreview/MagicPreviewContentBlocksParser.class.php';
         }
         $savedParser = $this->modx->parser;
         $this->modx->parser = new MagicPreviewContentBlocksParser($this->modx);

@@ -16,40 +16,20 @@
  * through its own cbParser swap cycle.
  */
 
+require_once __DIR__ . '/MagicPreviewContentBlocksParserTrait.php';
+
 // MODX 3 branch — class defined only when \MODX\Revolution\modParser is available.
 if (class_exists('\MODX\Revolution\modParser', false)) {
     if (!class_exists('MagicPreviewContentBlocksParser', false)) {
         class MagicPreviewContentBlocksParser extends \MODX\Revolution\modParser
         {
-            /** @param mixed $propSource */
-            public function parseProperties($propSource)
-            {
-                if (is_array($propSource)) {
-                    $properties = [];
-                    foreach ($propSource as $propName => &$property) {
-                        $properties[$propName] = &$property;
-                    }
-                    return $properties;
-                }
-                return parent::parseProperties($propSource);
-            }
+            use MagicPreviewContentBlocksParserTrait;
         }
     }
 } elseif (!class_exists('MagicPreviewContentBlocksParser', false)) {
     // MODX 2 branch.
     class MagicPreviewContentBlocksParser extends modParser
     {
-        /** @param mixed $propSource */
-        public function parseProperties($propSource)
-        {
-            if (is_array($propSource)) {
-                $properties = [];
-                foreach ($propSource as $propName => &$property) {
-                    $properties[$propName] = &$property;
-                }
-                return $properties;
-            }
-            return parent::parseProperties($propSource);
-        }
+        use MagicPreviewContentBlocksParserTrait;
     }
 }

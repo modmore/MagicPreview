@@ -270,7 +270,7 @@ switch ($modx->event->name) {
             // No restoration needed — the request ends after the page is rendered.
             $modx->getParser();
             if (!class_exists('MagicPreviewCoreParser', false)) {
-                require_once $service->config['modelPath'] . 'magicpreview/MagicPreviewCoreParser.php';
+                require_once $service->config['modelPath'] . 'magicpreview/MagicPreviewCoreParser.class.php';
             }
             $modx->parser = new MagicPreviewCoreParser($modx);
 
