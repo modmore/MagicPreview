@@ -55,6 +55,11 @@ return [
         'value' => '604800',
         'xtype' => 'numberfield',
     ],
+    'click_to_field' => [
+        'area' => 'Preview',
+        'value' => true,
+        'xtype' => 'combo-boolean',
+    ],
     'icon_save_draft' => [
         'area' => 'Icons',
         'value' => '',

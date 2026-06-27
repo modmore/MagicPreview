@@ -3,11 +3,17 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   Draft banner: notification bar above the resource panel.
-   Appended to #modx-panel-resource-div via plain DOM.
+   Draft banner: fixed notification bar at the top of the viewport.
+   Appended to document.body so it sits outside the ExtJS layout and
+   does not affect resource-panel height calculations.
    -------------------------------------------------------------------------- */
 
 .mmmp-draft-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -82,6 +88,43 @@
 .mmmp-draft-banner__btn--discard:hover,
 .mmmp-draft-banner__btn--discard:focus {
     background: #E4E4E4;
+}
+
+/* In MODX 2 the manager header is ~55px tall; place the banner below it */
+body.magicpreview_modx2 .mmmp-draft-banner {
+    top: 55px;
+}
+
+/* Push the ExtJS layout panels below the banner.
+   CSS handles the top-position shift; relayoutModx() overrides getViewSize()
+   to return a reduced height so the border layout recalculates every inner
+   panel-body height — ensuring nothing is clipped at the bottom.
+   MODX 3 desktop: #modx-header = west icon bar; #modx-split-wrapper = center
+   (the nested border layout that contains the tree + #modx-content). */
+@media (min-width: 641px) {
+    body.magicpreview_modx3:has(.mmmp-draft-banner) #modx-header,
+    body.magicpreview_modx3:has(.mmmp-draft-banner) #modx-split-wrapper,
+    body.magicpreview_modx3:has(.mmmp-draft-banner) #modx-content {
+        top: 45px !important;
+        height: calc(100vh - 45px) !important;
+    }
+}
+
+/* MODX 2: north region stays at 0–55px; banner sits at top: 55px.
+   Shift the west and center panels below the banner (55 + 45 = 100px). */
+body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-leftbar,
+body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-content {
+    top: 100px !important;
+    height: calc(100vh - 100px) !important;
+}
+
+/* Push the preview panel below the banner */
+body:has(.mmmp-draft-banner) .mmmp-panel {
+    top: 45px;
+}
+
+body.magicpreview_modx2:has(.mmmp-draft-banner) .mmmp-panel {
+    top: 100px;
 }
 
 /* Push the fixed-position action buttons below the banner */
@@ -518,4 +561,14 @@ a.mmmp-share-revoke {
 a.mmmp-share-revoke:hover,
 a.mmmp-share-revoke:focus {
     color: #843534;
+}
+
+/* --------------------------------------------------------------------------
+   Click-to-field: brief highlight on the manager field scrolled to from preview.
+   -------------------------------------------------------------------------- */
+
+.mmmp-field-highlight {
+    outline: 2px solid hsl(207, 70%, 53%);
+    outline-offset: 3px;
+    transition: outline-color 1.2s ease-out;
 }

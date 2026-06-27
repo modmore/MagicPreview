@@ -7,6 +7,8 @@ $e = [
     'OnDocFormSave',
     'OnLoadWebDocument',
     'OnManagerPageBeforeRender',
+    'OnWebPagePrerender',
+    'ContentBlocks_AfterParse',
 ];
 
 foreach ($e as $ev) {

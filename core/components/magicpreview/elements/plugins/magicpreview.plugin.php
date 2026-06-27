@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var modX $modx
  */
@@ -264,6 +265,116 @@ switch ($modx->event->name) {
             // how an in-memory resource is primed for an overridden render.
             $service->applyPreviewData($modx->resource, $data);
         }
+
+        if ($modx->getOption('magicpreview.click_to_field', null, true)) {
+            // No restoration needed — the request ends after the page is rendered.
+            $modx->getParser();
+            if (!class_exists('MagicPreviewCoreParser', false)) {
+                require_once $service->config['modelPath'] . 'magicpreview/MagicPreviewCoreParser.class.php';
+            }
+            $modx->parser = new MagicPreviewCoreParser($modx);
+
+            $modx->regClientStartupHTMLBlock('<style>
+[data-magicpreview-field]{cursor:pointer;}
+[data-magicpreview-field]:hover{outline:2px dashed rgba(52,152,219,0.6);outline-offset:2px;}
+</style>
+<script>
+document.addEventListener("click",function(e){
+    var el=e.target&&e.target.closest?e.target.closest("[data-magicpreview-field]"):null;
+    if (!el) {
+        return;
+    }
+    window.top.postMessage({type:"magicpreview:scrollToField",field:el.getAttribute("data-magicpreview-field"),index:parseInt(el.getAttribute("data-magicpreview-idx")||"0",10)},"*");
+});
+</script>');
+        }
+
+        break;
+
+    case 'ContentBlocks_AfterParse':
+        /**
+          * @var string $tpl Rendered field output (by reference — set via $modx->event->output())
+          * @var array $phs Field data: 'field' (id), 'field_type_idx' (0-based instance count), 'value', etc.
+          */
+        if (!$service->addFieldMarkers) {
+            break;
+        }
+        // $phs is the field data array passed by ContentBlocks to parse().
+        // MagicPreviewContentBlocksParser (installed in PreviewTrait) prevents MODX's default
+        // parseProperties() from collapsing array params with a 'value' key to a
+        // string, so $phs arrives here as the full associative array.
+        if (!is_array($phs) || !isset($phs['field_type_idx']) || !array_key_exists('field', $phs)) {
+            break;
+        }
+        // List input calls parse() once per item and once for the wrapper. Each item
+        // carries 'value' (item text) merged from $settings alongside 'items'
+        // (the full item list), so 'value' + 'items' together identify a sub-item
+        // call — skip those; wrap only the field-level (wrapper) parse.
+        if (array_key_exists('value', $phs) && array_key_exists('items', $phs)) {
+            break;
+        }
+        $modx->event->output(
+            '<div style="display:contents"'
+            . ' data-magicpreview-field="' . (int)$phs['field'] . '"'
+            . ' data-magicpreview-idx="' . (int)$phs['field_type_idx'] . '">'
+            . $tpl
+            . '</div>'
+        );
+        break;
+
+    case 'OnWebPagePrerender':
+        if (!array_key_exists('show_preview', $_GET)) {
+            break;
+        }
+        $output = &$modx->resource->_output;
+        if (strpos($output, "\x02") === false) {
+            break;
+        }
+
+        // Four passes: strip from <head>, strip from <script>/<style> bodies,
+        // strip from HTML opening-tag attribute values, then convert what
+        // remains in body text to click-to-field spans.
+        $output = preg_replace_callback(
+            '/(<head[^>]*>)(.*?)(<\/head>)/si',
+            function ($m) {
+                return $m[1]
+                    . preg_replace("/\x02MMMP:[^\x02]*\x02(.*?)\x03MMMP\x03/s", '$1', $m[2])
+                    . $m[3];
+            },
+            $output
+        );
+
+        // Strip from <script> and <style> bodies in the page body — a marker
+        // inside a JS string literal would otherwise become a <span> tag.
+        $output = preg_replace_callback(
+            '/<(script|style)[^>]*>.*?<\/\1>/si',
+            function ($m) {
+                return preg_replace("/\x02MMMP:[^\x02]*\x02(.*?)\x03MMMP\x03/s", '$1', $m[0]);
+            },
+            $output
+        );
+
+        // Strip from HTML opening tags. The regex handles quoted attribute values
+        // so a literal > inside an attribute (e.g. content="a > b") does not
+        // cause early termination and leave a marker tail in body-text position.
+        $output = preg_replace_callback(
+            '/<[a-zA-Z][^>"\']*(?:"[^"]*"|\'[^\']*\'|[^>])*>/s',
+            function ($m) {
+                return preg_replace("/\x02MMMP:[^\x02]*\x02(.*?)\x03MMMP\x03/s", '$1', $m[0]);
+            },
+            $output
+        );
+
+        $output = preg_replace_callback(
+            "/\x02MMMP:([^\x02]*)\x02(.*?)\x03MMMP\x03/s",
+            function ($m) {
+                return '<span data-magicpreview-field="' . htmlspecialchars($m[1], ENT_QUOTES) . '"'
+                    . ' style="display:contents">'
+                    . $m[2]
+                    . '</span>';
+            },
+            $output
+        );
         break;
 
 }

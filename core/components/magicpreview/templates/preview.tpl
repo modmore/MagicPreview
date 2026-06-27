@@ -111,6 +111,26 @@
                 e.preventDefault();
                 window.close();
             });
+
+            // In window mode window.top is this popup, not the manager — relay to window.opener.
+            // relayOrigin is read lazily inside the handler: at page load the inner iframe
+            // src is '' (refreshFrame sets it to '' until a real hash arrives), so computing
+            // it eagerly would always fail and permanently block the relay.
+            window.addEventListener('message', function(e) {
+                var data = e.data;
+                if (!data || typeof data !== 'object' || data.type !== 'magicpreview:scrollToField') {
+                    return;
+                }
+                var innerFrame = document.getElementById('mmmp-js-frame-inner');
+                var frameOrigin = '';
+                try { frameOrigin = new URL(innerFrame ? innerFrame.src : '').origin; } catch (ex) {}
+                if (!frameOrigin || e.origin !== frameOrigin) {
+                    return;
+                }
+                if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage(data, window.location.origin);
+                }
+            }, false);
         })()
     </script>
 {else}

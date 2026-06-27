@@ -593,6 +593,7 @@
         var finish = function() {
             if (banner) {
                 banner.remove();
+                MagicPreview._panel.relayout();
             }
             MODx.msg.status({
                 title: lexicon('draft_discarded'),
@@ -761,20 +762,15 @@
     }
 
     /**
-     * Shows a draft banner above the resource panel. Appended to the
-     * #modx-panel-resource-div container which sits directly above the
-     * ExtJS-rendered resource panel in the DOM. Offers View, Share,
-     * Restore and Discard for the saved draft; stays visible until the
-     * draft is restored or discarded.
+     * Shows a draft banner fixed at the top of the viewport. Appended to
+     * document.body so it sits entirely outside the ExtJS layout and does
+     * not affect the resource panel's height calculations. Offers View,
+     * Share, Restore and Discard for the saved draft; stays visible until
+     * the draft is restored or discarded.
      */
     function showDraftBanner() {
         var c = config();
         if (!c.hasDraft) {
-            return;
-        }
-
-        var container = document.getElementById('modx-panel-resource-div');
-        if (!container) {
             return;
         }
 
@@ -793,7 +789,8 @@
             + lexicon('draft_discard') + '</button>'
             + '</span>';
 
-        container.appendChild(banner);
+        document.body.appendChild(banner);
+        MagicPreview._panel.relayout();
 
         // Delegate click events from the banner's buttons
         banner.addEventListener('click', function(e) {
@@ -906,6 +903,116 @@
                 savePanelState(true, width);
             }
         });
+    }
+
+    /**
+     * Scroll the manager resource form to the field identified by field/index,
+     * activating the correct tab first if needed. Resolves via data-field
+     * attribute (ContentBlocks), ExtJS component id (core fields), then name
+     * attribute (TVs). Falls back to scrolling page top if nothing matches.
+     *
+     * @param {string} field - Field identifier: CB numeric id, core field name
+     *                         (e.g. "pagetitle"), or TV name (e.g. "tv42").
+     * @param {number} [index=0] - 0-based index when the same field appears
+     *                             more than once on the page.
+     */
+    function scrollToField(field, index) {
+        try {
+            var idx = typeof index === 'number' ? index : 0;
+            var el = null;
+
+            var byData = document.querySelectorAll('[data-field="' + CSS.escape(field) + '"]');
+            if (byData.length > idx) {
+                el = byData[idx];
+            }
+
+            if (!el) {
+                try {
+                    var cmp = Ext.getCmp('modx-resource-' + field);
+                    if (cmp && cmp.getEl && cmp.getEl()) {
+                        el = cmp.getEl().dom;
+                    }
+                } catch (ex) {
+                    console.error('[MagicPreview] scrollToField error:', ex);
+                }
+            }
+
+            if (!el) {
+                var byName = document.querySelectorAll('[name="' + CSS.escape(field) + '"]');
+                if (byName.length > idx) {
+                    el = byName[idx];
+                }
+            }
+
+            if (!el) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            // ExtJS keeps inactive tab content in the DOM (hidden via CSS), so
+            // dom.contains() finds elements regardless of which tab is active.
+            var needsTabSwitch = false;
+            try {
+                var tabPanel = Ext.getCmp('modx-resource-tabs');
+                if (tabPanel && tabPanel.items && tabPanel.getActiveTab) {
+                    var activeTab = tabPanel.getActiveTab();
+                    tabPanel.items.each(function(tab) {
+                        try {
+                            var tabEl = tab.getEl && tab.getEl();
+                            if (tabEl && tabEl.dom && tabEl.dom.contains(el) && activeTab !== tab) {
+                                tabPanel.setActiveTab(tab);
+                                needsTabSwitch = true;
+                            }
+                        } catch (ex) {
+                            console.error('[MagicPreview] scrollToField error:', ex);
+                        }
+                    });
+                }
+            } catch (ex) {
+                console.error('[MagicPreview] scrollToField error:', ex);
+            }
+
+            var doScroll = function() {
+                try {
+                    var scrollContainer = document.querySelector('#modx-content > .x-panel-body');
+                    if (!scrollContainer) {
+                        var p = el.parentElement;
+                        while (p && p !== document.documentElement) {
+                            var st = window.getComputedStyle(p);
+                            var ov = st.overflowY;
+                            if ((ov === 'auto' || ov === 'scroll') && p.scrollHeight > p.clientHeight) {
+                                scrollContainer = p;
+                                break;
+                            }
+                            p = p.parentElement;
+                        }
+                    }
+                    if (scrollContainer) {
+                        var cRect = scrollContainer.getBoundingClientRect();
+                        var eRect = el.getBoundingClientRect();
+                        var desired = scrollContainer.scrollTop + (eRect.top - cRect.top) - (cRect.height - eRect.height) / 2;
+                        scrollContainer.scrollTo({ top: Math.max(0, desired), behavior: 'smooth' });
+                    }
+                    if (!el.getAttribute('tabindex') && !/^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(el.tagName)) {
+                        el.setAttribute('tabindex', '-1');
+                    }
+                    el.focus({ preventScroll: true });
+                    el.classList.add('mmmp-field-highlight');
+                    setTimeout(function() { el.classList.remove('mmmp-field-highlight'); }, 1200);
+                } catch (ex) {
+                    console.error('[MagicPreview] scrollToField error:', ex);
+                }
+            };
+
+            // Brief delay after a tab switch so the ExtJS transition completes
+            if (needsTabSwitch) {
+                setTimeout(doScroll, 150);
+            } else {
+                doScroll();
+            }
+        } catch (ex) {
+            console.error('[MagicPreview] scrollToField error:', ex);
+        }
     }
 
     // =========================================================================
@@ -1145,5 +1252,33 @@
                 return;
             }
         }, true);
+
+        // =====================================================================
+        // Click-to-field: postMessage listener
+        // =====================================================================
+
+        // Pre-compute once — origin never changes during the page session.
+        var previewOrigin = '';
+        try {
+            previewOrigin = new URL(config().baseFrameUrl).origin;
+        } catch (ex) {
+            console.error('[MagicPreview] postMessage listener error:', ex);
+        }
+
+        window.addEventListener('message', function(e) {
+            var data = e.data;
+            if (!data || typeof data !== 'object' || data.type !== 'magicpreview:scrollToField') {
+                return;
+            }
+            // Accept from the frontend's origin (panel mode) or manager's own
+            // origin (preview.tpl relay for window mode).
+            if (e.origin !== previewOrigin && e.origin !== window.location.origin) {
+                return;
+            }
+            if (typeof data.field !== 'string' || !data.field) {
+                return;
+            }
+            scrollToField(data.field, data.index);
+        }, false);
     });
 })();

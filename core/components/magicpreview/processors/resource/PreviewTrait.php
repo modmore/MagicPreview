@@ -16,11 +16,35 @@ trait PreviewTrait
 
     public function fireBeforeSaveEvent()
     {
-        // Invoke an event to allow other modules to prepare/modify the resource before preview.
-        $this->modx->invokeEvent('OnResourceMagicPreview', [
-            'resource' => $this->object,
-            'properties' => $this->getProperties(),
-        ]);
+        $service = $this->getMagicPreviewService();
+
+        // Bypasses parseProperties() collapsing arrays-with-'value' to strings —
+        // ContentBlocks_AfterParse passes $phs as a plain associative array that may
+        // have a 'value' key, which the default parser would otherwise mangle.
+        // ContentBlocks' loadParser()/restoreParser() correctly preserves this instance.
+        $this->modx->getParser();
+        if (!class_exists('MagicPreviewContentBlocksParser', false)) {
+            require_once __DIR__ . '/../../model/magicpreview/MagicPreviewContentBlocksParser.class.php';
+        }
+        $savedParser = $this->modx->parser;
+        $this->modx->parser = new MagicPreviewContentBlocksParser($this->modx);
+        // Clear the element cache so every ContentBlocks_AfterParse execution runs fresh
+        // rather than returning a cached (empty) event output.
+        $savedElementCache = $this->modx->elementCache;
+        $this->modx->elementCache = [];
+        if ($this->modx->getOption('magicpreview.click_to_field', null, true)) {
+            $service->addFieldMarkers = true;
+        }
+        try {
+            $this->modx->invokeEvent('OnResourceMagicPreview', [
+                'resource' => $this->object,
+                'properties' => $this->getProperties(),
+            ]);
+        } finally {
+            $service->addFieldMarkers = false;
+            $this->modx->elementCache = $savedElementCache;
+            $this->modx->parser = $savedParser;
+        }
 
         $this->failedSuccessfully = true;
 
@@ -37,8 +61,6 @@ trait PreviewTrait
             }
         }
         $data = $this->object->toArray('', true);
-
-        $service = $this->getMagicPreviewService();
 
         // Cache the preview data under a deterministic content hash for the
         // ?show_preview= front-end render (see MagicPreview::cachePreviewData).

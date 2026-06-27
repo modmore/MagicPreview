@@ -14,6 +14,13 @@ class MagicPreview
     public ?modX $modx = null;
     public array $config = [];
     public bool $debug = false;
+    /**
+     * @var bool True only while the preview processor fires OnResourceMagicPreview
+     * (see PreviewTrait::fireBeforeSaveEvent). Checked by the plugin's
+     * ContentBlocks_AfterParse handler so jump-to-field markers are added
+     * during preview renders only, never on normal saves or content rebuilds.
+     */
+    public bool $addFieldMarkers = false;
 
     const VERSION = '1.7.0-pl';
 

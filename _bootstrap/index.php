@@ -125,6 +125,20 @@ if ($vcPlugin) {
     ], ['pluginid','event'], false)) {
         echo "Error creating modPluginEvent.\n";
     }
+    if (!createObject('modPluginEvent', [
+        'pluginid' => $vcPlugin->get('id'),
+        'event' => 'OnWebPagePrerender',
+        'priority' => 0,
+    ], ['pluginid','event'], false)) {
+        echo "Error creating modPluginEvent.\n";
+    }
+    if (!createObject('modPluginEvent', [
+        'pluginid' => $vcPlugin->get('id'),
+        'event' => 'ContentBlocks_AfterParse',
+        'priority' => 0,
+    ], ['pluginid','event'], false)) {
+        echo "Error creating modPluginEvent.\n";
+    }
 }
 
 
