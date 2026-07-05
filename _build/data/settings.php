@@ -57,7 +57,7 @@ return [
     ],
     'click_to_field' => [
         'area' => 'Preview',
-        'value' => true,
+        'value' => false,
         'xtype' => 'combo-boolean',
     ],
     'icon_save_draft' => [

@@ -32,7 +32,7 @@ trait PreviewTrait
         // rather than returning a cached (empty) event output.
         $savedElementCache = $this->modx->elementCache;
         $this->modx->elementCache = [];
-        if ($this->modx->getOption('magicpreview.click_to_field', null, true)) {
+        if ($this->modx->getOption('magicpreview.click_to_field', null, false)) {
             $service->addFieldMarkers = true;
         }
         try {

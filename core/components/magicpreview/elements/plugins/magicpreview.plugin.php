@@ -266,7 +266,7 @@ switch ($modx->event->name) {
             $service->applyPreviewData($modx->resource, $data);
         }
 
-        if ($modx->getOption('magicpreview.click_to_field', null, true)) {
+        if ($modx->getOption('magicpreview.click_to_field', null, false)) {
             // No restoration needed — the request ends after the page is rendered.
             $modx->getParser();
             if (!class_exists('MagicPreviewCoreParser', false)) {
