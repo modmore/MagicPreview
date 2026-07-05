@@ -90,17 +90,11 @@
     background: #E4E4E4;
 }
 
-/* In MODX 2 the manager header is ~55px tall; place the banner below it */
-body.magicpreview_modx2 .mmmp-draft-banner {
-    top: 55px;
-}
-
 /* Push the ExtJS layout panels below the banner.
    CSS handles the top-position shift; relayoutModx() overrides getViewSize()
    to return a reduced height so the border layout recalculates every inner
    panel-body height — ensuring nothing is clipped at the bottom.
-   MODX 3 desktop: #modx-header = west icon bar; #modx-split-wrapper = center
-   (the nested border layout that contains the tree + #modx-content). */
+   MODX 3: #modx-header = west icon bar; #modx-split-wrapper = center split. */
 @media (min-width: 641px) {
     body.magicpreview_modx3:has(.mmmp-draft-banner) #modx-header,
     body.magicpreview_modx3:has(.mmmp-draft-banner) #modx-split-wrapper,
@@ -110,8 +104,13 @@ body.magicpreview_modx2 .mmmp-draft-banner {
     }
 }
 
-/* MODX 2: north region stays at 0–55px; banner sits at top: 55px.
-   Shift the west and center panels below the banner (55 + 45 = 100px). */
+/* MODX 2: the banner sits below the horizontal nav bar (top: 55px). Push the
+   west and center panels down below both nav (55px) and banner (45px = 100px).
+   The nav bar itself is reset to full width after doLayout() in relayoutModx(). */
+body.magicpreview_modx2 .mmmp-draft-banner {
+    top: 55px;
+}
+
 body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-leftbar,
 body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-content {
     top: 100px !important;
@@ -123,6 +122,12 @@ body:has(.mmmp-draft-banner) .mmmp-panel {
     top: 45px;
 }
 
+/* MODX 2 without banner: keep the panel below the ~55px horizontal nav bar. */
+body.magicpreview_modx2 .mmmp-panel {
+    top: 55px;
+}
+
+/* MODX 2 with banner: banner (45px) + nav (55px) = 100px. */
 body.magicpreview_modx2:has(.mmmp-draft-banner) .mmmp-panel {
     top: 100px;
 }

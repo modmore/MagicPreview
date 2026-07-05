@@ -578,6 +578,20 @@
                 _originalGetViewSize = null;
             }
             layout.doLayout();
+
+            // MODX 2: the north nav bar must always span the full viewport width.
+            // doLayout() narrows it when getViewSize() returns a reduced width
+            // (panel open), so reset it explicitly after every layout pass.
+            if (needsOverrideInner && document.body.classList.contains('magicpreview_modx2')) {
+                try {
+                    if (layout.layout && layout.layout.north && layout.layout.north.panel) {
+                        var northEl = layout.layout.north.panel.el;
+                        if (northEl) {
+                            northEl.setWidth(window.innerWidth);
+                        }
+                    }
+                } catch (ex) {}
+            }
         }, 50);
     }
 
