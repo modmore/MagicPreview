@@ -83,8 +83,23 @@ A link always shows the latest saved draft, can be given a label and its own exp
 and can be revoked at any time. Links stop working once the draft is discarded.
 
 
+Click to Field (Experimental)
+-----------------------------
+
+When the click_to_field setting is enabled, clicking any field in the preview
+scrolls the resource form to the corresponding field and briefly highlights it.
+
+Works best with ContentBlocks, which automatically wraps each field's rendered
+output so MagicPreview can map the click back to the right field in the manager.
+A best-effort attempt is also made to wrap core resource fields (pagetitle,
+longtitle, description, menutitle, introtext) and TVs directly via the parser,
+though this may not cover all template output combinations.
+
+Disabled by default.
+
+
 Controlling Where Preview Appears
----------------------------------
+----------------------------------
 
 The Preview button can be limited to (or excluded from) resources using certain
 templates via a block list or allow list in the system settings. Individual
@@ -125,6 +140,7 @@ options via system settings:
 - Configurable button icons: Replace the default Save Draft and View button icons
   with any FontAwesome icon class.
 - Auto-refresh interval: Adjust or disable the automatic refresh timer.
+- Click to field: Enable the experimental click-to-field feature (disabled by default).
 - Draft TTL: Control how long drafts are kept before expiring.
 - Share link lifetime: Set the default expiry for share links.
 - Template filter: Choose which templates show the Preview button.

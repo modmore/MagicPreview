@@ -12,6 +12,7 @@ Compatible with **MODX 2.x** and **MODX 3.x**.
 - **Auto-refresh** — the panel automatically re-renders when form data changes (configurable interval), and reloads after the resource is saved
 - **Draft system** — save a draft of unsaved form data per resource and user; drafts are stored in the database, so they survive cache clears (and resource saves) until restored or discarded
 - **Share draft links** — share a draft with people who don't have a manager login via public links, with per-link expiry and instant revocation
+- **Click to field** _(experimental)_ — clicking a field in the preview scrolls the resource form to that field and highlights it; works best with ContentBlocks, with best-effort support for core resource fields and TVs
 - **Visibility control** — show or hide the Preview button by template (block/allow lists) or per resource
 - **Custom event** — `OnResourceMagicPreview` allows other extras (e.g. ContentBlocks) to hook into the preview process
 - **Customisable** — override the preview HTML template and CSS via system settings
@@ -37,6 +38,7 @@ All settings use the `magicpreview.` prefix and can be configured in the MODX ma
 | `custom_preview_css`    | _(empty)_    | Custom CSS file URL for preview page                                |
 | `draft_ttl`             | `0`          | Draft expiry in seconds (0 = no expiry)                             |
 | `share_link_ttl`        | `604800`     | Default share link lifetime in seconds (0 = never expires)          |
+| `click_to_field`        | `No`         | _(Experimental)_ Clicking a field in the preview scrolls the resource form to that field; works best with ContentBlocks |
 | `template_filter_mode`  | `None`       | `None`, `Block Listed`, or `Allow Listed Only` — controls where the Preview button appears, by template |
 | `template_filter_ids`   | _(empty)_    | Comma-separated template IDs used by the template filter            |
 | `icon_save_draft`       | _(empty)_    | FontAwesome class for the Save Draft button icon                    |

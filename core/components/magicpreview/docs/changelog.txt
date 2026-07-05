@@ -1,6 +1,6 @@
 MagicPreview 1.7.0-pl
 ---------------------
-Released on 2026-06-xx
+Released on 2026-07-xx
 
 - Auto-reload preview on resource save
 - Collapse MODX 3 resource sidebar when on-page preview is visible.
@@ -12,6 +12,7 @@ Released on 2026-06-xx
 - Enable/disable previews on resources based on template id set by new system settings
 - Enable/disable previews based on new per resource settings
 - Layout spacing tweaks
+- Add click-to-field (experimental): clicking a field in the preview scrolls the resource form to that field. Supports core resource fields, TVs and ContentBlocks.
 
 MagicPreview 1.6.0-pl
 ---------------------
