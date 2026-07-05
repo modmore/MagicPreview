@@ -48,9 +48,12 @@ trait MagicPreviewCoreParserTrait
 
         $output = parent::processTag($tag, $processUncacheable);
 
-        // Only wrap if the parent returned a processed string value, not the
-        // original tag back (which starts with [[ when unresolved).
-        if (!is_string($output) || $output === '' || substr($output, 0, 2) === '[[') {
+        // Only wrap if the parent returned a plain processed string value.
+        // Skip if the output is empty, unresolved (starts with [[), or already
+        // contains a marker from a nested tag (e.g. [[*longtitle:ne=`[[*pagetitle]]`]]
+        // when longtitle is empty — wrapping the inner marker again produces
+        // double-nested markers that OnWebPagePrerender's regex cannot fully strip).
+        if (!is_string($output) || $output === '' || substr($output, 0, 2) === '[[' || strpos($output, "\x02") !== false) {
             return $output;
         }
 
