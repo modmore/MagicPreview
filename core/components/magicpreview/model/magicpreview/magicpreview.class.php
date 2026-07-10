@@ -22,7 +22,7 @@ class MagicPreview
      */
     public bool $addFieldMarkers = false;
 
-    const VERSION = '1.7.0-pl';
+    const VERSION = '1.7.1-pl';
 
     private ?MagicPreviewDrafts $drafts = null;
     private ?MagicPreviewShares $shares = null;

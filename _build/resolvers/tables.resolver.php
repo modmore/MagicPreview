@@ -9,14 +9,14 @@
  * links) are left in place so nothing is lost if the extra is reinstalled.
  *
  * @var modX|\MODX\Revolution\modX $modx
- * @var xPDOTransport|\xPDO\Transport\xPDOTransport $object
+ * @var xPDOTransport|\xPDO\Transport\xPDOTransport $transport
  * @var array $options
  */
-if ($object->xpdo) {
+if ($transport->xpdo) {
     switch ($options[xPDOTransport::PACKAGE_ACTION]) {
         case xPDOTransport::ACTION_INSTALL:
         case xPDOTransport::ACTION_UPGRADE:
-            $modx = $object->xpdo;
+            $modx = $transport->xpdo;
 
             $modelPath = $modx->getOption(
                 'magicpreview.core_path',

@@ -1,3 +1,9 @@
+MagicPreview 1.7.1-pl
+---------------------
+Released on 2026-07-10
+
+- Fix drafts and shares database tables not being created by the package installer (broken in 1.7.0 — upgrading creates the missing tables)
+
 MagicPreview 1.7.0-pl
 ---------------------
 Released on 2026-07-10
