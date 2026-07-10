@@ -1,6 +1,6 @@
 MagicPreview 1.7.0-pl
 ---------------------
-Released on 2026-07-xx
+Released on 2026-07-10
 
 - Auto-reload preview on resource save
 - Collapse MODX 3 resource sidebar when on-page preview is visible.
