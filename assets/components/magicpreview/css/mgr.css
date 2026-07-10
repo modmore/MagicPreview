@@ -104,8 +104,8 @@
     }
 }
 
-/* MODX 2: the banner sits below the horizontal nav bar (top: 55px). Push the
-   west and center panels down below both nav (55px) and banner (45px = 100px).
+/* MODX 2: the banner sits below the horizontal nav bar (55px).
+   Push the west and center panels down below both nav (55px) and banner (45px = 100px).
    The nav bar itself is reset to full width after doLayout() in relayoutModx(). */
 body.magicpreview_modx2 .mmmp-draft-banner {
     top: 55px;
@@ -122,19 +122,19 @@ body:has(.mmmp-draft-banner) .mmmp-panel {
     top: 45px;
 }
 
-/* MODX 2 without banner: keep the panel below the ~55px horizontal nav bar. */
+/* MODX 2 without banner: keep the panel below the 55px horizontal nav bar. */
 body.magicpreview_modx2 .mmmp-panel {
     top: 55px;
 }
 
-/* MODX 2 with banner: banner (45px) + nav (55px) = 100px. */
+/* MODX 2 with banner: nav (55px) + banner (45px) = 100px. */
 body.magicpreview_modx2:has(.mmmp-draft-banner) .mmmp-panel {
     top: 100px;
 }
 
 /* Push the fixed-position action buttons below the banner */
 body:has(.mmmp-draft-banner) #modx-action-buttons {
-    top: 48px;
+    top: 49px;
 }
 
 body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-action-buttons {
@@ -258,6 +258,13 @@ body.magicpreview_modx2:has(.mmmp-draft-banner) #modx-action-buttons {
     transform: none;
     pointer-events: auto;
     box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+/* MODX 2: the north panel sits above our position:fixed panel in ExtJS's
+   stacking order, covering the visible nav-bar bottom to our panel's top.
+   An explicit z-index here lets the panel clear the north panel wrapper. */
+body.magicpreview_modx2 .mmmp-panel--onpage.mmmp-panel--open {
+    z-index: 50;
 }
 
 /* --------------------------------------------------------------------------
