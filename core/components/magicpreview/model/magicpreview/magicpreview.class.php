@@ -22,7 +22,17 @@ class MagicPreview
      */
     public bool $addFieldMarkers = false;
 
-    const VERSION = '1.7.1-pl';
+    /**
+     * ContentBlocks field instances whose template placed the click-to-field
+     * attributes itself, keyed "<fieldId>:<fieldTypeIdx>". Written by the
+     * ContentBlocks_BeforeParse handler and read by ContentBlocks_AfterParse so
+     * an opted-in field does not also receive the automatic wrapper.
+     *
+     * @var array<string, bool>
+     */
+    public array $cbOptedIn = [];
+
+    const VERSION = '1.8.0-pl';
 
     private ?MagicPreviewDrafts $drafts = null;
     private ?MagicPreviewShares $shares = null;
@@ -86,6 +96,39 @@ class MagicPreview
             $this->shares = new MagicPreviewShares($this);
         }
         return $this->shares;
+    }
+
+    /**
+     * True only when click-to-field markup should be emitted during a front-end
+     * preview render: the setting is on, this request is a preview, and the
+     * visitor holds a manager session.
+     *
+     * Conditions 2 and 3 are what keep attributes off live pages and off public
+     * share links - assets/components/magicpreview/share.php renders without
+     * show_preview and without a manager session.
+     *
+     * NOT usable in the manager processor request (PreviewTrait) or in the
+     * ContentBlocks parse events, where neither show_preview nor a web render
+     * exists; those paths test the raw magicpreview.click_to_field setting and
+     * the $addFieldMarkers flag respectively.
+     *
+     * @return bool
+     */
+    public function isClickToFieldActive(): bool
+    {
+        if (!$this->modx->getOption('magicpreview.click_to_field', null, false)) {
+            return false;
+        }
+        if (!array_key_exists('show_preview', $_GET)) {
+            return false;
+        }
+        if (!$this->modx->user) {
+            return false;
+        }
+        if (!$this->modx->user->hasSessionContext('mgr')) {
+            return false;
+        }
+        return true;
     }
 
     /**

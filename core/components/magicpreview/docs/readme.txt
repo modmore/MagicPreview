@@ -161,3 +161,39 @@ Support & Documentation
 -----------------------
 
 Full documentation is available at: https://www.modmore.com/extras/magicpreview/
+
+Click to Field
+--------------
+
+With the magicpreview.click_to_field system setting enabled, clicking part of the
+preview scrolls the resource form to the matching field.
+
+MagicPreview does not guess where your fields are rendered - you mark them.
+
+Core resource fields and TVs, with the mpField snippet:
+
+    <h1 [[mpField? &name=`pagetitle`]]>[[*pagetitle]]</h1>
+    <div [[mpField? &name=`mytv`]]>[[*mytv]]</div>
+
+With pdoTools/Fenom, any of these work:
+
+    <h1 {'pagetitle' | mpField}>{$_modx->resource.pagetitle}</h1>
+    <h1 {'mpField' | snippet: ['name' => 'pagetitle']}>...</h1>
+
+ContentBlocks fields are wrapped automatically and need no changes. To place the
+attributes on your own element instead, use the placeholder - the wrapper is then
+skipped for that field:
+
+    <h2 [[+mpClickToFieldAttributes]]>[[+value]]</h2>
+    <h2 {$mpClickToFieldAttributes}>{$value}</h2>
+
+ContentBlocks field templates using @CHUNK are a special case: parse() passes the
+field data to the chunk as properties, so write the attributes directly:
+
+    <h2 data-magicpreview-field="[[+field]]" data-magicpreview-idx="[[+field_type_idx]]">
+
+The snippet and placeholder produce nothing outside a manager preview, so they are
+safe to leave in live templates and do not appear on public share links. Outside a
+preview the ContentBlocks placeholder is removed as the field is parsed, so it is
+not stored in the resource content either. The @CHUNK form above is the exception:
+its attributes are written by hand and are always present in the saved content.

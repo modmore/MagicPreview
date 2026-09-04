@@ -95,6 +95,15 @@ if (!createObject('modPlugin', [
 ], 'name', true)) {
     echo "Error creating MagicPreview Plugin.\n";
 }
+
+if (!createObject('modSnippet', [
+    'name' => 'mpField',
+    'description' => 'Returns click-to-field data attributes for a resource field or TV.',
+    'static' => true,
+    'static_file' => $componentPath.'/core/components/magicpreview/elements/snippets/mpfield.snippet.php',
+], 'name', true)) {
+    echo "Error creating mpField snippet.\n";
+}
 $vcPlugin = $modx->getObject('modPlugin', ['name' => 'MagicPreview']);
 if ($vcPlugin) {
     if (!createObject('modPluginEvent', [
@@ -127,7 +136,7 @@ if ($vcPlugin) {
     }
     if (!createObject('modPluginEvent', [
         'pluginid' => $vcPlugin->get('id'),
-        'event' => 'OnWebPagePrerender',
+        'event' => 'ContentBlocks_BeforeParse',
         'priority' => 0,
     ], ['pluginid','event'], false)) {
         echo "Error creating modPluginEvent.\n";
@@ -138,6 +147,24 @@ if ($vcPlugin) {
         'priority' => 0,
     ], ['pluginid','event'], false)) {
         echo "Error creating modPluginEvent.\n";
+    }
+
+    // Drop event registrations older versions created that are no longer
+    // handled. Mirrors _build/resolvers/staleevents.resolver.php, which does
+    // the same on package upgrade -- keep the two lists in step.
+    $staleEvents = [
+        'OnWebPagePrerender',
+        'OnWebPageComplete',
+    ];
+    foreach ($staleEvents as $staleEvent) {
+        $stalePluginEvent = $modx->getObject('modPluginEvent', [
+            'pluginid' => $vcPlugin->get('id'),
+            'event' => $staleEvent,
+        ]);
+        if ($stalePluginEvent) {
+            $stalePluginEvent->remove();
+            echo "Removed stale modPluginEvent {$staleEvent}.\n";
+        }
     }
 }
 
