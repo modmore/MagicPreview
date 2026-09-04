@@ -14,6 +14,8 @@ if (!defined('MAGICPREVIEW_MODE_PANEL')) {
     define('MAGICPREVIEW_FILTER_ALLOW', 'Allow Listed Only');
     define('MAGICPREVIEW_RESOURCE_ENABLED', 'Yes');
     define('MAGICPREVIEW_RESOURCE_DISABLED', 'No');
+    define('MAGICPREVIEW_CB_PLACEHOLDER_MODX', '[[+mpClickToFieldAttributes]]');
+    define('MAGICPREVIEW_CB_PLACEHOLDER_FENOM', '{$mpClickToFieldAttributes}');
 }
 
 $path = $modx->getOption('magicpreview.core_path', null, $modx->getOption('core_path') . 'components/magicpreview/');
@@ -266,17 +268,15 @@ switch ($modx->event->name) {
             $service->applyPreviewData($modx->resource, $data);
         }
 
-        if ($modx->getOption('magicpreview.click_to_field', null, false)) {
-            // No restoration needed — the request ends after the page is rendered.
-            $modx->getParser();
-            if (!class_exists('MagicPreviewCoreParser', false)) {
-                require_once $service->config['modelPath'] . 'magicpreview/MagicPreviewCoreParser.class.php';
-            }
-            $modx->parser = new MagicPreviewCoreParser($modx);
-
+        if ($service->isClickToFieldActive()) {
             $modx->regClientStartupHTMLBlock('<style>
 [data-magicpreview-field]{cursor:pointer;}
 [data-magicpreview-field]:hover{outline:2px dashed rgba(52,152,219,0.6);outline-offset:2px;}
+/* The ContentBlocks wrapper is display:contents, so it generates no box and the
+   rule above has nothing to paint on. Outline its children instead, and only for
+   the innermost wrapper under the cursor so nested layouts match what a click
+   actually targets (the handler uses closest()). */
+.mmmp-cb-field:hover:not(:has(.mmmp-cb-field:hover))>*{outline:2px dashed rgba(52,152,219,0.6);outline-offset:2px;}
 </style>
 <script>
 document.addEventListener("click",function(e){
@@ -289,6 +289,49 @@ document.addEventListener("click",function(e){
 </script>');
         }
 
+        break;
+
+    case 'ContentBlocks_BeforeParse':
+        /**
+         * @var string $tpl Field template, before ContentBlocks parses it
+         * @var array $phs Field data: 'field' (id), 'field_type_idx', settings
+         *
+         * Resolves the click-to-field placeholder so the template author can put
+         * the attributes on their own element instead of receiving the automatic
+         * wrapper. Fires for every ContentBlocks template style that reaches
+         * parse(), including @PDO_FILE, which returns before
+         * ContentBlocks_AfterParse and therefore never gets a wrapper.
+         *
+         * The placeholder is resolved on every parse, not only during a preview:
+         * ContentBlocks writes generateHtml() output straight into the resource
+         * content column, so on a normal save an unresolved placeholder would be
+         * stored there verbatim. It never renders (MODX drops unresolved tags on
+         * the final parse pass, and Fenom renders an undefined variable empty),
+         * but anything reading content directly would see it. Outside a preview
+         * it therefore resolves to an empty string.
+         */
+        if (!is_string($tpl)
+            || (strpos($tpl, MAGICPREVIEW_CB_PLACEHOLDER_MODX) === false
+                && strpos($tpl, MAGICPREVIEW_CB_PLACEHOLDER_FENOM) === false)) {
+            // Template did not opt in; the automatic wrapper still applies.
+            break;
+        }
+        $mpAttrs = '';
+        // addFieldMarkers, NOT isClickToFieldActive(): the marking window opens
+        // during the manager preview-generation request, where there is no
+        // show_preview query parameter. PreviewTrait sets this flag for exactly
+        // that window. Anywhere else the placeholder is simply stripped.
+        if ($service->addFieldMarkers
+            && is_array($phs) && array_key_exists('field', $phs) && isset($phs['field_type_idx'])) {
+            $mpAttrs = 'data-magicpreview-field="' . (int)$phs['field'] . '"'
+                . ' data-magicpreview-idx="' . (int)$phs['field_type_idx'] . '"';
+            $service->cbOptedIn[$phs['field'] . ':' . $phs['field_type_idx']] = true;
+        }
+        $modx->event->output(str_replace(
+            [MAGICPREVIEW_CB_PLACEHOLDER_MODX, MAGICPREVIEW_CB_PLACEHOLDER_FENOM],
+            $mpAttrs,
+            $tpl
+        ));
         break;
 
     case 'ContentBlocks_AfterParse':
@@ -313,67 +356,17 @@ document.addEventListener("click",function(e){
         if (array_key_exists('value', $phs) && array_key_exists('items', $phs)) {
             break;
         }
+        // The template placed the attributes itself via the placeholder, so do
+        // not also wrap it — see ContentBlocks_BeforeParse.
+        if (!empty($service->cbOptedIn[$phs['field'] . ':' . $phs['field_type_idx']])) {
+            break;
+        }
         $modx->event->output(
-            '<div style="display:contents"'
+            '<div class="mmmp-cb-field" style="display:contents"'
             . ' data-magicpreview-field="' . (int)$phs['field'] . '"'
             . ' data-magicpreview-idx="' . (int)$phs['field_type_idx'] . '">'
             . $tpl
             . '</div>'
-        );
-        break;
-
-    case 'OnWebPagePrerender':
-        if (!array_key_exists('show_preview', $_GET)) {
-            break;
-        }
-        $output = &$modx->resource->_output;
-        if (strpos($output, "\x02") === false) {
-            break;
-        }
-
-        // Four passes: strip from <head>, strip from <script>/<style> bodies,
-        // strip from HTML opening-tag attribute values, then convert what
-        // remains in body text to click-to-field spans.
-        $output = preg_replace_callback(
-            '/(<head[^>]*>)(.*?)(<\/head>)/si',
-            function ($m) {
-                return $m[1]
-                    . preg_replace("/\x02MMMP:[^\x02]*\x02(.*?)\x03MMMP\x03/s", '$1', $m[2])
-                    . $m[3];
-            },
-            $output
-        );
-
-        // Strip from <script> and <style> bodies in the page body — a marker
-        // inside a JS string literal would otherwise become a <span> tag.
-        $output = preg_replace_callback(
-            '/<(script|style)[^>]*>.*?<\/\1>/si',
-            function ($m) {
-                return preg_replace("/\x02MMMP:[^\x02]*\x02(.*?)\x03MMMP\x03/s", '$1', $m[0]);
-            },
-            $output
-        );
-
-        // Strip from HTML opening tags. The regex handles quoted attribute values
-        // so a literal > inside an attribute (e.g. content="a > b") does not
-        // cause early termination and leave a marker tail in body-text position.
-        $output = preg_replace_callback(
-            '/<[a-zA-Z][^>"\']*(?:"[^"]*"|\'[^\']*\'|[^>])*>/s',
-            function ($m) {
-                return preg_replace("/\x02MMMP:[^\x02]*\x02(.*?)\x03MMMP\x03/s", '$1', $m[0]);
-            },
-            $output
-        );
-
-        $output = preg_replace_callback(
-            "/\x02MMMP:([^\x02]*)\x02(.*?)\x03MMMP\x03/s",
-            function ($m) {
-                return '<span data-magicpreview-field="' . htmlspecialchars($m[1], ENT_QUOTES) . '"'
-                    . ' style="display:contents">'
-                    . $m[2]
-                    . '</span>';
-            },
-            $output
         );
         break;
 

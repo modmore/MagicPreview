@@ -23,7 +23,7 @@ if (!defined('MOREPROVIDER_BUILD')) {
     /* define version */
     define('PKG_NAME','MagicPreview');
     define('PKG_NAME_LOWER',strtolower(PKG_NAME));
-    define('PKG_VERSION','1.7.1');
+    define('PKG_VERSION','1.8.0');
     define('PKG_RELEASE','pl');
 
     /* load modx */
@@ -89,6 +89,10 @@ $builder->package->put(
                 'type' => 'php',
                 'source' => $sources['resolvers'] . 'customevents.resolver.php',
             ],
+            [
+                'type' => 'php',
+                'source' => $sources['resolvers'] . 'staleevents.resolver.php',
+            ],
         ]
     ]
 );
@@ -141,6 +145,21 @@ foreach ($plugins as $plugin) {
 }
 $modx->log(modX::LOG_LEVEL_INFO,'Packaged in '.count($plugins).' plugins.'); flush();
 unset($plugins,$plugin,$attributes);
+
+/* add snippets */
+$snippets = include $sources['data'] . 'transport.snippets.php';
+if (!is_array($snippets)) { $modx->log(modX::LOG_LEVEL_FATAL,'Adding snippets failed.'); }
+$attributes= [
+    xPDOTransport::UNIQUE_KEY => 'name',
+    xPDOTransport::PRESERVE_KEYS => false,
+    xPDOTransport::UPDATE_OBJECT => true,
+];
+foreach ($snippets as $snippet) {
+    $vehicle = $builder->createVehicle($snippet, $attributes);
+    $builder->putVehicle($vehicle);
+}
+$modx->log(modX::LOG_LEVEL_INFO,'Packaged in '.count($snippets).' snippets.'); flush();
+unset($snippets,$snippet,$attributes);
 
 
 /* now pack in the license file, readme and setup options */
