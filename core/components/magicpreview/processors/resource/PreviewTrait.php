@@ -18,32 +18,22 @@ trait PreviewTrait
     {
         $service = $this->getMagicPreviewService();
 
-        // Bypasses parseProperties() collapsing arrays-with-'value' to strings —
-        // ContentBlocks_AfterParse passes $phs as a plain associative array that may
-        // have a 'value' key, which the default parser would otherwise mangle.
-        // ContentBlocks' loadParser()/restoreParser() correctly preserves this instance.
-        $this->modx->getParser();
-        if (!class_exists('MagicPreviewContentBlocksParser', false)) {
-            require_once __DIR__ . '/../../model/magicpreview/MagicPreviewContentBlocksParser.class.php';
-        }
-        $savedParser = $this->modx->parser;
-        $this->modx->parser = new MagicPreviewContentBlocksParser($this->modx);
-        // Clear the element cache so every ContentBlocks_AfterParse execution runs fresh
+        // No click-to-field markers are generated here, deliberately: this
+        // snapshot is also stored as the draft that public share links render.
+        // ContentBlocks HTML is regenerated with markers at display time instead —
+        // see MagicPreview::markContentBlocks(), called from OnLoadWebDocument.
+        //
+        // Clear the element cache so every ContentBlocks parse event runs fresh
         // rather than returning a cached (empty) event output.
         $savedElementCache = $this->modx->elementCache;
         $this->modx->elementCache = [];
-        if ($this->modx->getOption('magicpreview.click_to_field', null, false)) {
-            $service->addFieldMarkers = true;
-        }
         try {
             $this->modx->invokeEvent('OnResourceMagicPreview', [
                 'resource' => $this->object,
                 'properties' => $this->getProperties(),
             ]);
         } finally {
-            $service->addFieldMarkers = false;
             $this->modx->elementCache = $savedElementCache;
-            $this->modx->parser = $savedParser;
         }
 
         $this->failedSuccessfully = true;

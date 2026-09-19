@@ -1,17 +1,20 @@
 <?php
 
 /**
- * Temporary parser substitution used during preview generation.
+ * Temporary parser substitution used while ContentBlocks HTML is regenerated
+ * with click-to-field markers.
  *
  * MODX's default parseProperties() collapses any array event param that has a
  * 'value' key down to just that string — it's designed for element property sets
  * where each property is stored as {value: '...', type: '...', ...}. That same
- * logic mangles ContentBlocks_AfterParse's $phs, which is a plain associative
+ * logic mangles the ContentBlocks parse events' $phs, which is a plain associative
  * array that may include a 'value' key (textarea, code, richtext field values).
  *
- * Installed temporarily on $modx->parser inside PreviewTrait::fireBeforeSaveEvent()
- * so that event params received by the ContentBlocks_AfterParse plugin handler
- * remain as their original arrays rather than being collapsed to strings.
+ * Installed temporarily on $modx->parser inside MagicPreview::markContentBlocks(),
+ * during a front-end preview render, so that event params received by the
+ * ContentBlocks_BeforeParse / _AfterParse plugin handlers remain as their original
+ * arrays rather than being collapsed to strings. It is removed again before MODX
+ * parses the page, so the site's own parser always renders the page itself.
  * ContentBlocks' loadParser()/restoreParser() correctly preserves this instance
  * through its own cbParser swap cycle.
  */

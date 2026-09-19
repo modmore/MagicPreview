@@ -23,6 +23,9 @@
     var MODE_WINDOW = 'New Window';
     /** @type {string} Setting value for overlay panel layout */
     var LAYOUT_OVERLAY = 'Overlay';
+    // Query parameter that asks the front end for click-to-field markers.
+    // Must match MagicPreview::CLICK_TO_FIELD_PARAM.
+    var CLICK_TO_FIELD_PARAM = 'mp_click_to_field';
 
     /** @type {string} State manager key for panel open/width state */
     var STATE_KEY = 'mmmp-panel';
@@ -143,11 +146,18 @@
 
     /**
      * @param {string} hash
+     * @param {boolean} [clickToField] Ask the front end for click-to-field
+     *   markers. Only the panel does: it is the one preview embedded in the
+     *   editor, so the only place a click can scroll the form.
      * @returns {string}
      */
-    function previewFrameUrl(hash) {
+    function previewFrameUrl(hash, clickToField) {
         var c = config();
-        return c.baseFrameUrl + c.frameJoiner + 'show_preview=' + hash;
+        var url = c.baseFrameUrl + c.frameJoiner + 'show_preview=' + hash;
+        if (clickToField) {
+            url += '&' + CLICK_TO_FIELD_PARAM + '=1';
+        }
+        return url;
     }
 
     // =========================================================================
@@ -177,7 +187,7 @@
                 _panel.showLoading();
             } else {
                 _panel.setLastHash(hash);
-                _panel.showPreview(previewFrameUrl(hash));
+                _panel.showPreview(previewFrameUrl(hash, true));
             }
         } else {
             _window.open(c.previewUrl, MagicPreviewResource);
@@ -1270,9 +1280,8 @@
             if (!data || typeof data !== 'object' || data.type !== 'magicpreview:scrollToField') {
                 return;
             }
-            // Accept from the frontend's origin (panel mode) or manager's own
-            // origin (preview.tpl relay for window mode).
-            if (e.origin !== previewOrigin && e.origin !== window.location.origin) {
+            // Only the panel's iframe sends these, from the front end's origin.
+            if (e.origin !== previewOrigin) {
                 return;
             }
             if (typeof data.field !== 'string' || !data.field) {

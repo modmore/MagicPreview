@@ -12,7 +12,7 @@ Compatible with **MODX 2.x** and **MODX 3.x**.
 - **Auto-refresh** — the panel automatically re-renders when form data changes (configurable interval), and reloads after the resource is saved
 - **Draft system** — save a draft of unsaved form data per resource and user; drafts are stored in the database, so they survive cache clears (and resource saves) until restored or discarded
 - **Share draft links** — share a draft with people who don't have a manager login via public links, with per-link expiry and instant revocation
-- **Click to field** _(experimental)_ — clicking a field in the preview scrolls the resource form to that field and highlights it; works best with ContentBlocks, with best-effort support for core resource fields and TVs
+- **Click to field** _(experimental)_ — clicking a field in the preview panel scrolls the resource form to that field and highlights it; ContentBlocks fields are marked automatically, core resource fields and TVs with the `mpField` snippet in your template
 - **Visibility control** — show or hide the Preview button by template (block/allow lists) or per resource
 - **Custom event** — `OnResourceMagicPreview` allows other extras (e.g. ContentBlocks) to hook into the preview process
 - **Customisable** — override the preview HTML template and CSS via system settings
@@ -38,7 +38,7 @@ All settings use the `magicpreview.` prefix and can be configured in the MODX ma
 | `custom_preview_css`    | _(empty)_    | Custom CSS file URL for preview page                                |
 | `draft_ttl`             | `0`          | Draft expiry in seconds (0 = no expiry)                             |
 | `share_link_ttl`        | `604800`     | Default share link lifetime in seconds (0 = never expires)          |
-| `click_to_field`        | `No`         | _(Experimental)_ Clicking a field in the preview scrolls the resource form to that field; works best with ContentBlocks |
+| `click_to_field`        | `No`         | _(Experimental)_ Clicking a field in the preview panel scrolls the resource form to that field; mark core fields and TVs with `mpField` |
 | `template_filter_mode`  | `None`       | `None`, `Block Listed`, or `Allow Listed Only` — controls where the Preview button appears, by template |
 | `template_filter_ids`   | _(empty)_    | Comma-separated template IDs used by the template filter            |
 | `icon_save_draft`       | _(empty)_    | FontAwesome class for the Save Draft button icon                    |
@@ -53,6 +53,44 @@ Per-resource settings are stored in the resource's `properties` column under the
 ## Share Draft Links
 
 Drafts can be shared with people who don't have a manager login — clients reviewing work in progress, for example — via public links. Links always show the creator's latest saved draft, can be given a label and their own expiry (defaulting to `share_link_ttl`), and can be revoked at any time. They stop resolving once the draft is discarded.
+
+## Click to Field
+
+With the `click_to_field` setting enabled, clicking part of the preview panel scrolls the resource form to the matching field. Previews opened in a new window, including a draft's View link, show the page without click targets.
+
+You can now mark which fields should use this feature.
+
+Core resource fields and TVs are marked with the `mpField` snippet, placed inside the element that renders the field:
+
+```html
+<h1 [[!mpField? &name=`pagetitle`]]>[[*pagetitle]]</h1>
+<div [[!mpField? &name=`mytv`]]>[[*mytv]]</div>
+```
+
+Call it uncached (with the `!`). An uncached call is evaluated on every page render, so an extra that caches rendered output — `getCache`, for example — can never store the attributes in its cache. With pdoTools/Fenom there is no uncached form, so avoid caching the output of a chunk that calls `mpField`.
+
+With pdoTools/Fenom, any of these work:
+
+```html
+<h1 {'pagetitle' | mpField}>{$_modx->resource.pagetitle}</h1>
+<h1 {'mpField' | snippet: ['name' => 'pagetitle']}>...</h1>
+```
+
+ContentBlocks fields are wrapped automatically in a preview and need no changes. To place the attributes on your own element instead, put the `[[+mpClickToFieldAttributes]]` placeholder inside its opening tag — the wrapper is then skipped for that field:
+
+```html
+<h2 [[+mpClickToFieldAttributes]]>[[+value]]</h2>
+```
+
+This works in templates typed into the field's Template setting, and in `@FILE` and `@PDO_FILE` templates. A `@PDO_FILE` template written in Fenom uses the same MODX-style tag, which pdoTools processes alongside the Fenom syntax:
+
+```html
+<{$level} [[+mpClickToFieldAttributes]] class="headline">{$value}</{$level}>
+```
+
+`@PDO_FILE` fields are never wrapped automatically, so the placeholder is the only way to make them clickable. Fields using `@CHUNK` templates cannot be marked yet.
+
+The snippet and placeholder produce nothing outside the preview panel, so they are safe to leave in live templates and do not appear on public share links. Outside a preview the ContentBlocks placeholder resolves to nothing as the field is parsed, so it is not stored in the resource content either. If in doubt, load the live page and search its source for `data-magicpreview`: there should be no matches.
 
 ## Panel State
 
