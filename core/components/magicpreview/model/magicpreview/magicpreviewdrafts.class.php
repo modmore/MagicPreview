@@ -37,7 +37,7 @@ class MagicPreviewDrafts
     }
 
     /**
-     * Saves (upserts) a user's draft of a resource. One draft per (resource, user).
+     * Saves a user's draft of a resource. One draft per (resource, user).
      *
      * The expiry is derived from the magicpreview.draft_ttl setting relative to
      * the save time (0 = never expires), matching the old cache TTL behaviour.
@@ -147,6 +147,33 @@ class MagicPreviewDrafts
         $data = json_decode($draft->get('data'), true);
         if (!is_array($data) || empty($data)) {
             return null;
+        }
+
+        // Drafts saved by 1.7.x with click_to_field on hold click-to-field
+        // markup, and share links render drafts publicly. Every reader passes
+        // through here, so clean such a draft once and store the result: the
+        // cleaned content never matches the check again. saved_at is left alone.
+        $cleaned = $this->magicpreview->removeClickToFieldMarkup($data, (int) $resourceId);
+        if ($cleaned !== $data) {
+            $data = $cleaned;
+            $encoded = json_encode($data);
+            if (is_string($encoded)) {
+                // Only if nobody saved the draft meanwhile: regenerating the
+                // content takes a moment, and a draft saved in that time wins.
+                /** @var mpDraft|null $current */
+                $current = $this->modx->getObject('mpDraft', (int) $draft->get('id'));
+                if ($current && (int) $current->get('updatedon') === (int) $draft->get('updatedon')) {
+                    $current->set('data', $encoded);
+                    $current->set('updatedon', time());
+                    if (!$current->save()) {
+                        // Harmless - the next read cleans it again - but not expected.
+                        $this->modx->log(
+                            modX::LOG_LEVEL_ERROR,
+                            'Could not store the cleaned draft of resource ' . $resourceId . ' for user ' . $userId
+                        );
+                    }
+                }
+            }
         }
 
         return [

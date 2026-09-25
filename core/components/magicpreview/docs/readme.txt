@@ -86,14 +86,11 @@ and can be revoked at any time. Links stop working once the draft is discarded.
 Click to Field (Experimental)
 -----------------------------
 
-When the click_to_field setting is enabled, clicking any field in the preview
+When the click_to_field setting is enabled, clicking a field in the preview panel
 scrolls the resource form to the corresponding field and briefly highlights it.
 
-Works best with ContentBlocks, which automatically wraps each field's rendered
-output so MagicPreview can map the click back to the right field in the manager.
-A best-effort attempt is also made to wrap core resource fields (pagetitle,
-longtitle, description, menutitle, introtext) and TVs directly via the parser,
-though this may not cover all template output combinations.
+ContentBlocks fields are marked automatically. Core resource fields and TVs are
+marked in your template with the mpField snippet - see "Click to Field" below.
 
 Disabled by default.
 
@@ -155,6 +152,52 @@ is used by extras like VersionX to preview version history without saving.
 
 A public JavaScript API is also available for extras that need to open, close, or
 interact with the preview programmatically.
+
+
+Click to Field
+--------------
+
+With the magicpreview.click_to_field system setting enabled, clicking part of the
+preview panel scrolls the resource form to the matching field. Previews opened in a
+new window, including a draft's View link, show the page without click targets.
+
+You can now mark which fields should use this feature.
+
+Core resource fields and TVs, with the mpField snippet:
+
+    <h1 [[!mpField? &name=`pagetitle`]]>[[*pagetitle]]</h1>
+    <div [[!mpField? &name=`mytv`]]>[[*mytv]]</div>
+
+Call it uncached (with the !). An uncached call is evaluated on every page render,
+so an extra that caches rendered output - getCache, for example - can never store
+the attributes in its cache. With pdoTools/Fenom there is no uncached form, so
+avoid caching the output of a chunk that calls mpField.
+
+With pdoTools/Fenom, any of these work:
+
+    <h1 {'pagetitle' | mpField}>{$_modx->resource.pagetitle}</h1>
+    <h1 {'mpField' | snippet: ['name' => 'pagetitle']}>...</h1>
+
+ContentBlocks fields are wrapped automatically in a preview and need no changes. To
+place the attributes on your own element instead, put the placeholder inside its
+opening tag - the wrapper is then skipped for that field:
+
+    <h2 [[+mpClickToFieldAttributes]]>[[+value]]</h2>
+
+This works in templates typed into the field's Template setting, and in @FILE and
+@PDO_FILE templates. A @PDO_FILE template written in Fenom uses the same MODX-style tag, which
+pdoTools processes alongside the Fenom syntax:
+
+    <{$level} [[+mpClickToFieldAttributes]] class="headline">{$value}</{$level}>
+
+@PDO_FILE fields are never wrapped automatically, so the placeholder is the only way
+to make them clickable. Fields using @CHUNK templates cannot be marked yet.
+
+The snippet and placeholder produce nothing outside the preview panel, so they are
+safe to leave in live templates and do not appear on public share links. Outside a
+preview the ContentBlocks placeholder resolves to nothing as the field is parsed, so
+it is not stored in the resource content either. If in doubt, load the live page and
+search its source for data-magicpreview: there should be no matches.
 
 
 Support & Documentation

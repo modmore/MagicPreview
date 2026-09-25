@@ -251,32 +251,43 @@ switch ($modx->event->name) {
             $modx->log(modX::LOG_LEVEL_WARN, 'User without mgr session tried to access preview for resource ' . $modx->resource->get('id'));
             return;
         }
+        // Nothing rendered in a manager's preview request may reach the live resource cache
+        $modx->resource->set('cacheable', false);
         $key = (string)$_GET['show_preview'];
         $data = $modx->cacheManager->get($modx->resource->get('id') . '/' . $key, [
             xPDO::OPT_CACHE_KEY => 'magicpreview'
         ]);
 
-        if (is_array($data)) {
-            $corePath = $modx->getOption('magicpreview.core_path', null,
-                $modx->getOption('core_path') . 'components/magicpreview/');
-            /** @var MagicPreview $service */
-            $service = $modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
-            // Same recipe as the public share endpoint — one definition of
-            // how an in-memory resource is primed for an overridden render.
-            $service->applyPreviewData($modx->resource, $data);
+        if (!is_array($data)) {
+            // Unknown or expired hash, or a page forwarded to from the preview:
+            // this is the live resource, so it gets no click-to-field markup.
+            return;
         }
 
-        if ($modx->getOption('magicpreview.click_to_field', null, false)) {
-            // No restoration needed — the request ends after the page is rendered.
-            $modx->getParser();
-            if (!class_exists('MagicPreviewCoreParser', false)) {
-                require_once $service->config['modelPath'] . 'magicpreview/MagicPreviewCoreParser.class.php';
+        $corePath = $modx->getOption('magicpreview.core_path', null,
+            $modx->getOption('core_path') . 'components/magicpreview/');
+        /** @var MagicPreview $service */
+        $service = $modx->getService('magicpreview', 'MagicPreview', $corePath . 'model/magicpreview/');
+        // Same recipe as the public share endpoint — one definition of
+        // how an in-memory resource is primed for an overridden render.
+        $service->applyManagerPreview($modx->resource, $data);
+
+        if ($service->isClickToFieldActive()) {
+            // The snapshot holds unmarked ContentBlocks HTML, because it doubles
+            // as the draft that public share links render. Regenerate it with the
+            // markers here, in the one request that displays them.
+            if (!empty($data['contentblocks'])) {
+                $service->markContentBlocks($modx->resource, (string)$data['contentblocks']);
             }
-            $modx->parser = new MagicPreviewCoreParser($modx);
 
             $modx->regClientStartupHTMLBlock('<style>
 [data-magicpreview-field]{cursor:pointer;}
 [data-magicpreview-field]:hover{outline:2px dashed rgba(52,152,219,0.6);outline-offset:2px;}
+/* The ContentBlocks wrapper is display:contents, so it generates no box and the
+   rule above has nothing to paint on. Outline its children instead, and only for
+   the innermost wrapper under the cursor so nested layouts match what a click
+   actually targets (the handler uses closest()). */
+.mmmp-cb-field:hover:not(:has(.mmmp-cb-field:hover))>*{outline:2px dashed rgba(52,152,219,0.6);outline-offset:2px;}
 </style>
 <script>
 document.addEventListener("click",function(e){
@@ -291,6 +302,57 @@ document.addEventListener("click",function(e){
 
         break;
 
+    case 'ContentBlocks_BeforeParse':
+        /**
+         * @var string $tpl Field template, before ContentBlocks parses it
+         * @var array $phs Field data: 'field' (id), 'field_type_idx', settings
+         *
+         * Resolves [[+mpClickToFieldAttributes]] so the template author can put the
+         * click-to-field attributes on their own element instead of receiving the
+         * automatic wrapper. Two routes, because $tpl is the raw Template setting:
+         *
+         * - Inline templates: $tpl is the markup itself, so the placeholder is
+         *   replaced here directly.
+         * - @FILE and @PDO_FILE templates: $tpl is only the reference string —
+         *   ContentBlocks loads the file later in this same parse() call — so the
+         *   value is also published as a MODX placeholder for the file to resolve.
+         *   pdoTools processes MODX tags inside Fenom templates too, so this is the
+         *   route for Fenom field templates.
+         *
+         * While markers are added the value also carries a number unique to this
+         * parse (MagicPreview::startCbParse()), removed again before the HTML is
+         * used. ContentBlocks_AfterParse skips its wrapper when its parse's output
+         * carries that number, whichever route put it there. (@PDO_FILE never
+         * reaches AfterParse, so is never wrapped.)
+         *
+         * @CHUNK templates are not reached: ContentBlocks defers the chunk to the
+         * page render, long after this value has moved on.
+         *
+         * This runs on every parse, not only during a preview: ContentBlocks writes
+         * generateHtml() output straight into the resource content column, so
+         * outside the marking window the placeholder resolves to an empty string
+         * rather than being stored verbatim.
+         */
+        $mpAttrs = '';
+        // addFieldMarkers, NOT isClickToFieldActive(): the flag spans exactly the
+        // regeneration MagicPreview::markContentBlocks() performs for a front-end
+        // preview render, whereas isClickToFieldActive() holds for that whole
+        // request. Every other parse — normal saves, content rebuilds, the stored
+        // preview snapshot — resolves the placeholder to nothing.
+        if ($service->addFieldMarkers
+            && is_array($phs) && array_key_exists('field', $phs) && isset($phs['field_type_idx'])) {
+            $mpAttrs = $service->startCbParse((int)$phs['field'], (int)$phs['field_type_idx']);
+        }
+        $modx->setPlaceholder(MagicPreview::CB_PLACEHOLDER_KEY, $mpAttrs);
+        $cbPlaceholder = '[[+' . MagicPreview::CB_PLACEHOLDER_KEY . ']]';
+        if (!is_string($tpl) || strpos($tpl, $cbPlaceholder) === false) {
+            // Not an inline template using the placeholder; a file template may
+            // still resolve the value published above.
+            break;
+        }
+        $modx->event->output(str_replace($cbPlaceholder, $mpAttrs, $tpl));
+        break;
+
     case 'ContentBlocks_AfterParse':
         /**
           * @var string $tpl Rendered field output (by reference — set via $modx->event->output())
@@ -300,7 +362,7 @@ document.addEventListener("click",function(e){
             break;
         }
         // $phs is the field data array passed by ContentBlocks to parse().
-        // MagicPreviewContentBlocksParser (installed in PreviewTrait) prevents MODX's default
+        // MagicPreviewContentBlocksParser (installed by MagicPreview::markContentBlocks()) prevents MODX's default
         // parseProperties() from collapsing array params with a 'value' key to a
         // string, so $phs arrives here as the full associative array.
         if (!is_array($phs) || !isset($phs['field_type_idx']) || !array_key_exists('field', $phs)) {
@@ -313,67 +375,16 @@ document.addEventListener("click",function(e){
         if (array_key_exists('value', $phs) && array_key_exists('items', $phs)) {
             break;
         }
+        // This parse's template placed the attributes itself via the placeholder
+        // (inline or @FILE), so do not also wrap it — see ContentBlocks_BeforeParse.
+        if (is_string($tpl) && $service->cbParsePlacedAttributes($tpl)) {
+            break;
+        }
         $modx->event->output(
-            '<div style="display:contents"'
-            . ' data-magicpreview-field="' . (int)$phs['field'] . '"'
-            . ' data-magicpreview-idx="' . (int)$phs['field_type_idx'] . '">'
+            '<div class="mmmp-cb-field" style="display:contents" '
+            . MagicPreview::cbFieldAttributes((int)$phs['field'], (int)$phs['field_type_idx']) . '>'
             . $tpl
             . '</div>'
-        );
-        break;
-
-    case 'OnWebPagePrerender':
-        if (!array_key_exists('show_preview', $_GET)) {
-            break;
-        }
-        $output = &$modx->resource->_output;
-        if (strpos($output, "\x02") === false) {
-            break;
-        }
-
-        // Four passes: strip from <head>, strip from <script>/<style> bodies,
-        // strip from HTML opening-tag attribute values, then convert what
-        // remains in body text to click-to-field spans.
-        $output = preg_replace_callback(
-            '/(<head[^>]*>)(.*?)(<\/head>)/si',
-            function ($m) {
-                return $m[1]
-                    . preg_replace("/\x02MMMP:[^\x02]*\x02(.*?)\x03MMMP\x03/s", '$1', $m[2])
-                    . $m[3];
-            },
-            $output
-        );
-
-        // Strip from <script> and <style> bodies in the page body — a marker
-        // inside a JS string literal would otherwise become a <span> tag.
-        $output = preg_replace_callback(
-            '/<(script|style)[^>]*>.*?<\/\1>/si',
-            function ($m) {
-                return preg_replace("/\x02MMMP:[^\x02]*\x02(.*?)\x03MMMP\x03/s", '$1', $m[0]);
-            },
-            $output
-        );
-
-        // Strip from HTML opening tags. The regex handles quoted attribute values
-        // so a literal > inside an attribute (e.g. content="a > b") does not
-        // cause early termination and leave a marker tail in body-text position.
-        $output = preg_replace_callback(
-            '/<[a-zA-Z][^>"\']*(?:"[^"]*"|\'[^\']*\'|[^>])*>/s',
-            function ($m) {
-                return preg_replace("/\x02MMMP:[^\x02]*\x02(.*?)\x03MMMP\x03/s", '$1', $m[0]);
-            },
-            $output
-        );
-
-        $output = preg_replace_callback(
-            "/\x02MMMP:([^\x02]*)\x02(.*?)\x03MMMP\x03/s",
-            function ($m) {
-                return '<span data-magicpreview-field="' . htmlspecialchars($m[1], ENT_QUOTES) . '"'
-                    . ' style="display:contents">'
-                    . $m[2]
-                    . '</span>';
-            },
-            $output
         );
         break;
 
