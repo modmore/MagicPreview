@@ -22,7 +22,7 @@ class MagicPreview
      */
     public bool $addFieldMarkers = false;
 
-    const VERSION = '1.7.1-pl';
+    const VERSION = '1.8.0-pl';
 
     /**
      * Query parameter the preview panel adds to its iframe URL to ask for
