@@ -165,8 +165,8 @@ You can now mark which fields should use this feature.
 
 Core resource fields and TVs, with the mpField snippet:
 
-    <h1 [[!mpField? &name=`pagetitle`]]>[[*pagetitle]]</h1>
-    <div [[!mpField? &name=`mytv`]]>[[*mytv]]</div>
+    <h1 [[!mpField? &name=`pagetitle`]] class="title">[[*pagetitle]]</h1>
+    <div [[!mpField? &name=`mytv`]] class="mytv">[[*mytv]]</div>
 
 Call it uncached (with the !). An uncached call is evaluated on every page render,
 so an extra that caches rendered output - getCache, for example - can never store
@@ -181,7 +181,7 @@ ContentBlocks fields are wrapped automatically in a preview and need no changes.
 place the attributes on your own element instead, put the placeholder inside its
 opening tag - the wrapper is then skipped for that field:
 
-    <h2 [[+mpClickToFieldAttributes]]>[[+value]]</h2>
+    <h2 [[+mpClickToFieldAttributes]] class="heading">[[+value]]</h2>
 
 This works in templates typed into the field's Template setting, and in @FILE and
 @PDO_FILE templates. A @PDO_FILE template written in Fenom uses the same MODX-style tag, which

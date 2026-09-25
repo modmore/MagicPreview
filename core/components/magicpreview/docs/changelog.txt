@@ -3,7 +3,7 @@ MagicPreview 1.8.0-pl
 Released on 2026-09-25
 
 - Fix click_to_field breaking Fenom (and any other custom parser) output in previews. MagicPreview no longer replaces the MODX parser during a preview render. (#55)
-- BREAKING: core resource fields and TVs are no longer marked clickable automatically. Mark them in your template with the new mpField snippet, e.g. <h1 [[!mpField? &name=`pagetitle`]]>[[*pagetitle]]</h1>
+- BREAKING: core resource fields and TVs are no longer marked clickable automatically. Mark them in your template with the new mpField snippet; see the readme for examples.
 - Add mpField snippet, usable as a MODX tag or a Fenom modifier ({'pagetitle'|mpField})
 - Add [[+mpClickToFieldAttributes]] placeholder for ContentBlocks field templates, so the attributes can go on your own element instead of an added wrapper. Works in inline, @FILE and @PDO_FILE templates, including Fenom ones, and gives @PDO_FILE fields a click target for the first time.
 - Click to field now applies only to the preview panel. Previews in a new window, and a draft's View link, show the page without click targets.
