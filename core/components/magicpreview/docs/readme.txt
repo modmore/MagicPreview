@@ -170,8 +170,7 @@ Core resource fields and TVs, with the mpField snippet:
 
 Call it uncached (with the !). An uncached call is evaluated on every page render,
 so an extra that caches rendered output - getCache, for example - can never store
-the attributes in its cache. With pdoTools/Fenom there is no uncached form, so
-avoid caching the output of a chunk that calls mpField.
+the attributes in its cache.
 
 With pdoTools/Fenom, any of these work:
 

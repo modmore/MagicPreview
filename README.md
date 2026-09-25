@@ -67,7 +67,7 @@ Core resource fields and TVs are marked with the `mpField` snippet, placed insid
 <div [[!mpField? &name=`mytv`]]>[[*mytv]]</div>
 ```
 
-Call it uncached (with the `!`). An uncached call is evaluated on every page render, so an extra that caches rendered output — `getCache`, for example — can never store the attributes in its cache. With pdoTools/Fenom there is no uncached form, so avoid caching the output of a chunk that calls `mpField`.
+Call it uncached (with the `!`). An uncached call is evaluated on every page render, so an extra that caches rendered output — `getCache`, for example — can never store the attributes in its cache.
 
 With pdoTools/Fenom, any of these work:
 
